@@ -6,6 +6,7 @@ export type MessagesState = {
   pending: PendingMessage[]
   nextCursor: string | null
   error: string | null
+  loadMoreError: string | null
 }
 
 export const initialMessagesState: MessagesState = {
@@ -14,6 +15,7 @@ export const initialMessagesState: MessagesState = {
   pending: [],
   nextCursor: null,
   error: null,
+  loadMoreError: null,
 }
 
 export type MessagesAction =
@@ -31,7 +33,7 @@ export type MessagesAction =
       messages: Message[]
       nextCursor: string | null
     }
-  | { type: 'FETCH_MORE_ERROR' }
+  | { type: 'FETCH_MORE_ERROR'; error: string }
   | { type: 'OPTIMISTIC_ADD'; message: PendingMessage }
   | { type: 'OPTIMISTIC_CONFIRM'; clientMessageId: string; message: Message }
   | { type: 'OPTIMISTIC_ROLLBACK'; clientMessageId: string }
@@ -57,6 +59,7 @@ export function messageReducer(
         pending: state.pending,
         nextCursor: action.nextCursor,
         error: null,
+        loadMoreError: null,
       }
 
     case 'FETCH_ERROR':
@@ -70,6 +73,7 @@ export function messageReducer(
       return {
         ...state,
         status: 'loading-more',
+        loadMoreError: null,
       }
 
     case 'FETCH_MORE_SUCCESS':
@@ -78,12 +82,14 @@ export function messageReducer(
         status: 'success',
         messages: [...action.messages, ...state.messages],
         nextCursor: action.nextCursor,
+        loadMoreError: null,
       }
 
     case 'FETCH_MORE_ERROR':
       return {
         ...state,
         status: 'success',
+        loadMoreError: action.error,
       }
 
     case 'OPTIMISTIC_ADD':

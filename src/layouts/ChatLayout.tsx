@@ -1,31 +1,31 @@
-import { useState } from 'react'
-import { DevToggle } from '../components/DevToggle.tsx'
-import { ConversationList } from '../features/conversations/ConversationList.tsx'
-import { MessageThreadContainer } from '../features/messages/MessageThread.container.tsx'
-import { useAuth } from '../hooks/useAuth.ts'
-import { useConversations } from '../hooks/useConversations.ts'
-import { useDevSettings } from '../hooks/useDevSettings.ts'
+import { useState } from "react";
+import { DevToggle } from "../components/DevToggle.tsx";
+import { ConversationList } from "../features/conversations/ConversationList.tsx";
+import { MessageThreadContainer } from "../features/messages/MessageThread.container.tsx";
+import { useAuth } from "../hooks/useAuth.ts";
+import { useConversations } from "../hooks/useConversations.ts";
+import { useDevSettings } from "../hooks/useDevSettings.ts";
 
 export function ChatLayout(): React.ReactElement {
-  const { currentUser, logout } = useAuth()
-  const { simulateSendFailure, setSimulateSendFailure } = useDevSettings()
+  const { currentUser, logout } = useAuth();
+  const { simulateSendFailure, setSimulateSendFailure } = useDevSettings();
   const [userSelectedConversationId, setUserSelectedConversationId] = useState<
     string | null
-  >(null)
-  const { conversationsState, reloadConversations } = useConversations()
+  >(null);
+  const { conversationsState, reloadConversations } = useConversations();
 
   const conversations =
-    conversationsState.status === 'success'
+    conversationsState.status === "success"
       ? conversationsState.conversations
-      : []
+      : [];
 
   const defaultConversationId =
-    conversationsState.status === 'success'
+    conversationsState.status === "success"
       ? (conversationsState.conversations[0]?.id ?? null)
-      : null
+      : null;
 
   const selectedConversationId =
-    userSelectedConversationId ?? defaultConversationId
+    userSelectedConversationId ?? defaultConversationId;
 
   return (
     <div className="chat-layout">
@@ -57,10 +57,10 @@ export function ChatLayout(): React.ReactElement {
           <MessageThreadContainer
             selectedConversationId={selectedConversationId}
             conversations={conversations}
-            onMessageSendSuccess={reloadConversations}
+            onMessageSendSuccess={() => reloadConversations({ quiet: true })}
           />
         </main>
       </div>
     </div>
-  )
+  );
 }
