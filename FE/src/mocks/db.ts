@@ -1,8 +1,50 @@
 import type { ApiErrorPayload } from "../types/api.ts";
 import type { ConversationPreview, Message, User } from "../types/domain.ts";
-import { MOCK_USERS } from "./mockUsers.ts";
+
+type StoredUser = {
+  id: string;
+  email: string;
+  password: string;
+  displayName: string;
+  avatarUrl?: string;
+};
+
+const SHARED_DEMO_PASSWORD = "password123";
+
+function buildSeedUsers(): StoredUser[] {
+  return [
+    {
+      id: "user-alice",
+      email: "alice@example.com",
+      password: SHARED_DEMO_PASSWORD,
+      displayName: "Alice",
+    },
+    {
+      id: "user-bob",
+      email: "bob@example.com",
+      password: SHARED_DEMO_PASSWORD,
+      displayName: "Bob",
+    },
+    {
+      id: "user-carol",
+      email: "carol@example.com",
+      password: SHARED_DEMO_PASSWORD,
+      displayName: "Carol",
+    },
+  ];
+}
+
+export function toPublicUser(user: StoredUser): User {
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
+  };
+}
+
 export type MockDb = {
-  users: User[];
+  users: StoredUser[];
   conversations: ConversationPreview[];
   messages: Map<string, Message[]>;
   tokens: Map<string, string>;
@@ -33,7 +75,7 @@ function buildSeedMessages(
 }
 
 export function createMockDb(): MockDb {
-  const users: User[] = MOCK_USERS;
+  const users = buildSeedUsers();
 
   const conv1Messages = buildSeedMessages(
     "conv-alice-bob",
@@ -123,6 +165,44 @@ export function issueToken(userId: string): string {
 export function resolveUserId(token: string | null): string | null {
   if (!token) return null;
   return db.tokens.get(token) ?? null;
+}
+
+export function findUserById(userId: string): StoredUser | null {
+  return db.users.find((user) => user.id === userId) ?? null;
+}
+
+export function verifyCredentials(
+  email: string,
+  password: string,
+): StoredUser | null {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = db.users.find((candidate) => candidate.email === normalizedEmail);
+  if (!user || user.password !== password) return null;
+  return user;
+}
+
+export type CreateUserResult =
+  | { user: StoredUser }
+  | { error: "EMAIL_ALREADY_REGISTERED" };
+
+export function createUser(input: {
+  email: string;
+  password: string;
+  name: string;
+}): CreateUserResult {
+  const normalizedEmail = input.email.trim().toLowerCase();
+  if (db.users.some((candidate) => candidate.email === normalizedEmail)) {
+    return { error: "EMAIL_ALREADY_REGISTERED" };
+  }
+
+  const user: StoredUser = {
+    id: `user-${crypto.randomUUID()}`,
+    email: normalizedEmail,
+    password: input.password,
+    displayName: input.name.trim(),
+  };
+  db.users.push(user);
+  return { user };
 }
 
 export function getUserConversations(userId: string): ConversationPreview[] {
