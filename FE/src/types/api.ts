@@ -1,16 +1,32 @@
 import type { ConversationPreview, Message, User } from './domain.ts'
 
-export type LoginRequest = {
-  userId: string
+export type SignupRequest = {
+  email: string
+  password: string
+  name: string
 }
 
-export type LoginResponse = {
+export type LoginRequest = {
+  email: string
+  password: string
+}
+
+export type AuthResponse = {
   token: string
   user: User
 }
 
 export type ConversationsResponse = {
   conversations: ConversationPreview[]
+}
+
+export type CreateConversationRequest = {
+  participantEmails: string[]
+  title?: string
+}
+
+export type CreateConversationResponse = {
+  conversation: ConversationPreview
 }
 
 export type MessagesResponse = {

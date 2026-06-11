@@ -1,14 +1,26 @@
 import { endpoints } from './endpoints.ts'
+import {
+  isRecord,
+  parseAuthResponse,
+  parseConversationsResponse,
+  parseCreateConversationResponse,
+  parseMessagesResponse,
+  parseSendMessageResponse,
+  parseUserResponse,
+} from './parseApiResponse.ts'
 import type {
-  ApiErrorBody,
   ApiErrorPayload,
+  AuthResponse,
   ConversationsResponse,
+  CreateConversationRequest,
+  CreateConversationResponse,
   LoginRequest,
-  LoginResponse,
   MessagesResponse,
   SendMessageRequest,
   SendMessageResponse,
+  SignupRequest,
 } from '../types/api.ts'
+import type { User } from '../types/domain.ts'
 
 export class ApiError extends Error {
   readonly status: number
@@ -46,15 +58,39 @@ class ApiClient {
     this.unauthorizedHandler = handler
   }
 
-  async login(request: LoginRequest): Promise<LoginResponse> {
-    return this.request<LoginResponse>(endpoints.login, {
+  async signup(request: SignupRequest): Promise<AuthResponse> {
+    return this.request(endpoints.signup, parseAuthResponse, {
       method: 'POST',
       body: request,
     })
   }
 
+  async login(request: LoginRequest): Promise<AuthResponse> {
+    return this.request(endpoints.login, parseAuthResponse, {
+      method: 'POST',
+      body: request,
+    })
+  }
+
+  async getCurrentUser(): Promise<User> {
+    return this.request(endpoints.currentUser, parseUserResponse)
+  }
+
   async getConversations(): Promise<ConversationsResponse> {
-    return this.request<ConversationsResponse>(endpoints.conversations)
+    return this.request(endpoints.conversations, parseConversationsResponse)
+  }
+
+  async createConversation(
+    request: CreateConversationRequest,
+  ): Promise<CreateConversationResponse> {
+    return this.request(
+      endpoints.conversations,
+      parseCreateConversationResponse,
+      {
+        method: 'POST',
+        body: request,
+      },
+    )
   }
 
   async getMessages(
@@ -71,7 +107,7 @@ class ApiClient {
     if (params?.limit !== undefined) {
       url.searchParams.set('limit', String(params.limit))
     }
-    return this.request<MessagesResponse>(url.pathname + url.search)
+    return this.request(url.pathname + url.search, parseMessagesResponse)
   }
 
   async sendMessage(
@@ -79,8 +115,9 @@ class ApiClient {
     request: SendMessageRequest,
     options?: { simulateSendFailure?: boolean },
   ): Promise<SendMessageResponse> {
-    return this.request<SendMessageResponse>(
+    return this.request(
       endpoints.conversationMessages(conversationId),
+      parseSendMessageResponse,
       {
         method: 'POST',
         body: request,
@@ -90,14 +127,8 @@ class ApiClient {
   }
 
   private parseErrorPayload(response: Response, body: unknown): ApiErrorPayload {
-    if (
-      typeof body === 'object' &&
-      body !== null &&
-      'error' in body &&
-      typeof (body as ApiErrorBody).error === 'object' &&
-      (body as ApiErrorBody).error !== null
-    ) {
-      const { code, message, details } = (body as ApiErrorBody).error
+    if (isRecord(body) && isRecord(body.error)) {
+      const { code, message, details } = body.error
       if (typeof code === 'string' && typeof message === 'string') {
         return { code, message, details }
       }
@@ -110,6 +141,7 @@ class ApiClient {
 
   private async request<T>(
     path: string,
+    parseResponse: (rawBody: unknown) => T,
     options: RequestOptions = {},
   ): Promise<T> {
     const headers: Record<string, string> = {
@@ -152,11 +184,7 @@ class ApiClient {
       throw new ApiError(response.status, errorPayload)
     }
 
-    if (response.status === 204) {
-      return undefined as T
-    }
-
-    return (await response.json()) as T
+    return parseResponse(await response.json())
   }
 }
 
