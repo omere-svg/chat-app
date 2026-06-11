@@ -4,7 +4,7 @@ import globals from 'globals'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'eslint.config.js'],
+    ignores: ['dist/**', 'node_modules/**', 'eslint.config.js', 'vitest.config.ts'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -17,7 +17,6 @@ export default tseslint.config(
       },
     },
     rules: {
-      // TypeScript as protection, not decoration: no silent escape hatches.
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-function-return-type': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
@@ -26,8 +25,6 @@ export default tseslint.config(
     },
   },
   {
-    // Tests assert against dynamic JSON response bodies, where the type-aware
-    // "unsafe" rules add noise without value.
     files: ['**/*.test.ts', 'src/test/**/*.ts'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
