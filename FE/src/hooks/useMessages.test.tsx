@@ -14,7 +14,10 @@ describe("useMessages", () => {
   });
 
   it("rolls back optimistic message when send fails", async () => {
-    const { token } = await apiClient.login({ userId: "user-alice" });
+    const { token } = await apiClient.login({
+      email: "alice@example.com",
+      password: "password123",
+    });
     apiClient.setToken(token);
 
     const onSendError = vi.fn();
@@ -41,7 +44,10 @@ describe("useMessages", () => {
   });
 
   it("confirms optimistic message when send succeeds", async () => {
-    const { token } = await apiClient.login({ userId: "user-alice" });
+    const { token } = await apiClient.login({
+      email: "alice@example.com",
+      password: "password123",
+    });
     apiClient.setToken(token);
 
     const onSendError = vi.fn();
@@ -77,7 +83,10 @@ describe("useMessages", () => {
   });
 
   it("loads older messages when pagination is available", async () => {
-    const { token } = await apiClient.login({ userId: "user-alice" });
+    const { token } = await apiClient.login({
+      email: "alice@example.com",
+      password: "password123",
+    });
     apiClient.setToken(token);
 
     const { result } = renderHook(() =>

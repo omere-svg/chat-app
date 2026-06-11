@@ -7,7 +7,6 @@
   min-height: 100svh;
 }
 
-/* Auth */
 .auth-screen {
   max-width: 420px;
   margin: 4rem auto;
@@ -32,32 +31,52 @@
   margin: 0;
 }
 
-.user-picker {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.auth-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-.user-picker__item {
-  width: 100%;
-  text-align: left;
-  padding: 0.75rem 1rem;
+.auth-field__label {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.auth-field__input {
+  font: inherit;
+  padding: 0.6rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
   color: var(--text-h);
-  cursor: pointer;
 }
 
-.user-picker__item--selected {
+.auth-field__input:focus-visible {
+  outline: none;
   border-color: var(--accent);
-  background: var(--accent-bg);
 }
 
-/* Buttons */
+.auth-screen__switch {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.auth-screen__switch-btn {
+  font: inherit;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-screen__switch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn {
   font: inherit;
   padding: 0.5rem 1rem;
@@ -88,7 +107,6 @@
   border-color: var(--border);
 }
 
-/* Chat layout */
 .chat-layout {
   display: flex;
   flex-direction: column;
@@ -131,6 +149,41 @@
   border-bottom: 1px solid var(--border);
 }
 
+.new-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.new-conversation__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.new-conversation__input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.new-conversation__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.new-conversation__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
 .chat-layout__main {
   flex: 1;
   min-width: 0;
@@ -147,7 +200,6 @@
   color: var(--text);
 }
 
-/* Conversation list */
 .conversation-list {
   overflow-y: auto;
   flex: 1;
@@ -198,7 +250,6 @@
   gap: 0.5rem;
 }
 
-/* Message thread */
 .message-thread {
   display: flex;
   flex-direction: column;
@@ -298,7 +349,6 @@
   color: var(--text-h);
 }
 
-/* Shared UI */
 .skeleton {
   background: linear-gradient(
     90deg,

@@ -1,5 +1,6 @@
 export type User = {
   id: string
+  email?: string
   displayName: string
   avatarUrl?: string
 }
@@ -20,7 +21,6 @@ export type ConversationPreview = {
   updatedAt: string
 }
 
-/** Optimistic message in flight; presence in `pending` means it is sending. */
 export type PendingMessage = Message & {
   clientMessageId: string
 }
