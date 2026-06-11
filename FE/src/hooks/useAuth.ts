@@ -5,7 +5,9 @@ import type { User } from '../types/domain.ts'
 type AuthContextValue = {
   currentUser: User | null
   isAuthenticated: boolean
-  loginAsUser: (userId: string) => Promise<void>
+  isRestoringSession: boolean
+  login: (email: string, password: string) => Promise<void>
+  signup: (email: string, password: string, name: string) => Promise<void>
   logout: () => void
 }
 
