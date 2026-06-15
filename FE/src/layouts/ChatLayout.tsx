@@ -39,10 +39,12 @@ export function ChatLayout(): React.ReactElement {
         <span className="chat-layout__user">
           Signed in as {currentUser?.displayName}
         </span>
-        <DevToggle
-          simulateSendFailure={simulateSendFailure}
-          onSimulateSendFailureChange={setSimulateSendFailure}
-        />
+        {import.meta.env.DEV && (
+          <DevToggle
+            simulateSendFailure={simulateSendFailure}
+            onSimulateSendFailureChange={setSimulateSendFailure}
+          />
+        )}
         <button type="button" className="btn btn--ghost" onClick={logout}>
           Log out
         </button>

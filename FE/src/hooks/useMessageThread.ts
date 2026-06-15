@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Dispatch, RefObject } from "react";
 import { MESSAGE_PAGE_LIMIT } from "../api/constants.ts";
 import { apiClient, ApiError } from "../api/apiClient.ts";
@@ -86,7 +86,10 @@ export function useMessageThread(conversationId: string | null): {
     void loadInitialMessages(conversationId, () => false);
   }
 
-  const threadMessages = mergeThreadMessages(state.messages, state.pending);
+  const threadMessages = useMemo(
+    () => mergeThreadMessages(state.messages, state.pending),
+    [state.messages, state.pending],
+  );
   const threadState = deriveThreadViewState(
     conversationId,
     state,

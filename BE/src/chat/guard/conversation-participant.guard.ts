@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import type { CanActivate, ExecutionContext } from '@nestjs/common'
 import type { Request } from 'express'
 import { ERROR_CODES } from '../../shared/errors/error-codes.constant.js'
-import { ConversationsService } from '../conversations.service.js'
+import { ConversationsService } from '../../conversations/conversations.service.js'
 import type { PublicUser } from '../../users/user-public-view.js'
 
 interface ParticipantGuardRequest extends Request {
@@ -32,7 +32,10 @@ export class ConversationParticipantGuard implements CanActivate {
       })
     }
 
-    await this.conversationsService.assertParticipantConversation(conversationId, currentUser.id)
+    await this.conversationsService.getParticipantConversationOrThrow({
+      conversationId,
+      userId: currentUser.id,
+    })
     return true
   }
 }

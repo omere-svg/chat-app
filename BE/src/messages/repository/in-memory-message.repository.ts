@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import type { OnModuleInit } from '@nestjs/common'
 import { paginateByCursor } from '../../shared/pagination/cursor-pagination.js'
-import { CHAT_SEED } from '../conversations.seed.js'
+import { CHAT_SEED } from '../../shared/seed/chat-seed.js'
 import { compareMessagesByCreatedAtAscending } from '../message-ordering.js'
 import type { CursorPageResult } from '../../shared/pagination/cursor-pagination.js'
 import type { MessageRepository } from './message-repository.port.js'

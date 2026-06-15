@@ -1,3 +1,6 @@
+// Demo seed data for the MSW mock backend. Keep in sync with the BE seed at
+// BE/src/shared/seed/chat-seed.ts (same ids, formulas, and message bodies) —
+// the two are separate runtimes and cannot share a module.
 import type { ApiErrorPayload } from "../types/api.ts";
 import type { ConversationPreview, Message, User } from "../types/domain.ts";
 

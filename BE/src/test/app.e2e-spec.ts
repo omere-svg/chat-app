@@ -124,6 +124,73 @@ describe('Chat API (e2e)', () => {
       expect(response.body.error.code).toBe('CONVERSATION_NOT_FOUND')
     })
   })
+
+  describe('creating conversations', () => {
+    it('creates a conversation with an existing participant (201)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'ivan@example.com', 'Ivan')
+
+      const response = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ participantEmails: ['bob@example.com'] })
+
+      expect(response.status).toBe(201)
+      expect(typeof response.body.conversation.id).toBe('string')
+      expect(response.body.conversation.participantIds).toContain('user-bob')
+      expect(response.body.conversation.title).toContain('Bob')
+    })
+
+    it('rejects an unknown participant email with 400', async () => {
+      const token = await signUpAndGetToken(httpServer, 'judy@example.com', 'Judy')
+
+      const response = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ participantEmails: ['nobody@example.com'] })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('USER_NOT_FOUND')
+      expect(response.body.error.details.unknownEmails).toEqual(['nobody@example.com'])
+    })
+
+    it('rejects a duplicate participant set with 409', async () => {
+      const token = await signUpAndGetToken(httpServer, 'mallory@example.com', 'Mallory')
+
+      const firstResponse = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ participantEmails: ['carol@example.com'] })
+      expect(firstResponse.status).toBe(201)
+
+      const duplicateResponse = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ participantEmails: ['carol@example.com'] })
+
+      expect(duplicateResponse.status).toBe(409)
+      expect(duplicateResponse.body.error.code).toBe('CONVERSATION_CONFLICT')
+    })
+  })
+
+  describe('simulated send failure (dev hook)', () => {
+    it('returns 500 when the header is set in a non-production environment', async () => {
+      const token = await signUpAndGetToken(httpServer, 'niaj@example.com', 'Niaj')
+      const createResponse = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ participantEmails: ['bob@example.com'] })
+      const conversationId = createResponse.body.conversation.id
+
+      const response = await request(httpServer)
+        .post(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+        .set('x-simulate-failure', '1')
+        .send({ body: 'hello' })
+
+      expect(response.status).toBe(500)
+      expect(response.body.error.code).toBe('SIMULATED_SEND_FAILURE')
+    })
+  })
 })
 
 async function signUpAndGetToken(

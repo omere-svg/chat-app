@@ -6,10 +6,13 @@ type DevSettingsContextValue = {
   setSimulateSendFailure: (enabled: boolean) => void
 }
 
+// Production builds do not mount DevSettingsProvider, so fall back to an inert
+// value rather than throwing.
+const INERT_DEV_SETTINGS: DevSettingsContextValue = {
+  simulateSendFailure: false,
+  setSimulateSendFailure: () => undefined,
+}
+
 export function useDevSettings(): DevSettingsContextValue {
-  const context = useContext(DevSettingsContext)
-  if (!context) {
-    throw new Error('useDevSettings must be used within DevSettingsProvider')
-  }
-  return context
+  return useContext(DevSettingsContext) ?? INERT_DEV_SETTINGS
 }

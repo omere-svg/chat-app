@@ -55,6 +55,17 @@ export class InMemoryUserRepository implements UserRepository, OnModuleInit {
     return Promise.resolve(null)
   }
 
+  findByEmails(normalizedEmails: readonly string[]): Promise<UserRecord[]> {
+    const wanted = new Set(normalizedEmails)
+    const matches: UserRecord[] = []
+    for (const userRecord of this.usersById.values()) {
+      if (wanted.has(userRecord.email)) {
+        matches.push({ ...userRecord })
+      }
+    }
+    return Promise.resolve(matches)
+  }
+
   insert(userRecord: UserRecord): Promise<UserRecord> {
     const storedUser: UserRecord = { ...userRecord }
     this.usersById.set(storedUser.id, storedUser)

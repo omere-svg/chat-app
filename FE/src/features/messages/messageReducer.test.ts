@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   initialMessagesState,
+  mergeThreadMessages,
   messageReducer,
 } from './messageReducer.ts'
 import type { Message, PendingMessage } from '../../types/domain.ts'
@@ -90,5 +91,38 @@ describe('messageReducer', () => {
     })
     expect(loaded.pending).toHaveLength(1)
     expect(loaded.messages).toHaveLength(1)
+  })
+
+  it('orders confirmed messages with equal createdAt by id', () => {
+    const sameTime = '2026-01-01T12:00:00.000Z'
+    const existing: Message = { ...baseMessage, id: 'msg-b', createdAt: sameTime }
+    const loaded = messageReducer(initialMessagesState, {
+      type: 'FETCH_SUCCESS',
+      messages: [existing],
+      nextCursor: null,
+    })
+    const withPending = messageReducer(loaded, {
+      type: 'OPTIMISTIC_ADD',
+      message: { ...pendingMessage, id: 'client-x', clientMessageId: 'client-x' },
+    })
+    const confirmed = messageReducer(withPending, {
+      type: 'OPTIMISTIC_CONFIRM',
+      clientMessageId: 'client-x',
+      message: { ...baseMessage, id: 'msg-a', createdAt: sameTime },
+    })
+
+    expect(confirmed.messages.map((message) => message.id)).toEqual(['msg-a', 'msg-b'])
+  })
+})
+
+describe('mergeThreadMessages', () => {
+  it('orders messages with equal createdAt by id', () => {
+    const sameTime = '2026-01-01T12:00:00.000Z'
+    const messageB: Message = { ...baseMessage, id: 'msg-b', createdAt: sameTime }
+    const messageA: Message = { ...baseMessage, id: 'msg-a', createdAt: sameTime }
+
+    const merged = mergeThreadMessages([messageB, messageA], [])
+
+    expect(merged.map((message) => message.id)).toEqual(['msg-a', 'msg-b'])
   })
 })

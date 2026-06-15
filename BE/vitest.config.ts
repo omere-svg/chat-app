@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'node',
-    include: ['src/test/**/*.e2e-spec.ts'],
+    include: ['src/test/**/*.e2e-spec.ts', 'src/test/**/*.spec.ts'],
     env: {
       PORT: '4010',
       FRONTEND_ORIGIN: 'http://localhost:5173',

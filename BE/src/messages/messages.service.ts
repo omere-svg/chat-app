@@ -14,6 +14,12 @@ export interface MessagePageResponse {
   nextCursor: string | null
 }
 
+export interface CreateMessageInput {
+  senderId: string
+  conversationId: string
+  sendMessageDto: SendMessageDto
+}
+
 @Injectable()
 export class MessagesService {
   constructor(
@@ -37,11 +43,17 @@ export class MessagesService {
     return { messages: result.page.items, nextCursor: result.page.nextCursor }
   }
 
-  async createMessage(
-    senderId: string,
-    conversationId: string,
-    sendMessageDto: SendMessageDto,
-  ): Promise<MessageRecord> {
+  findLatestByConversationIds(
+    conversationIds: readonly string[],
+  ): Promise<ReadonlyMap<string, MessageRecord>> {
+    return this.messageRepository.findLatestByConversationIds(conversationIds)
+  }
+
+  async createMessage({
+    senderId,
+    conversationId,
+    sendMessageDto,
+  }: CreateMessageInput): Promise<MessageRecord> {
     if (sendMessageDto.clientMessageId !== undefined) {
       const alreadySentMessage = await this.messageRepository.findByClientMessageId(
         conversationId,

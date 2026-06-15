@@ -1,7 +1,7 @@
 import { Type, plainToInstance } from 'class-transformer'
-import { IsInt, IsString, IsUrl, Max, Min, MinLength, validateSync } from 'class-validator'
+import { IsIn, IsInt, IsOptional, IsString, IsUrl, Max, Min, MinLength, validateSync } from 'class-validator'
 import type { ValidationError } from 'class-validator'
-import type { AppEnvironment } from './environment.types.js'
+import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
 
 const MIN_JWT_SECRET_LENGTH = 32
 const MIN_TCP_PORT = 1
@@ -9,7 +9,15 @@ const MAX_TCP_PORT = 65_535
 const MIN_JWT_EXPIRY_SECONDS = 60
 const MAX_JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30
 
+const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
+const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
+
 class EnvironmentVariablesSchema implements AppEnvironment {
+  // Optional at runtime (defaulted below); `!` satisfies the AppEnvironment shape.
+  @IsOptional()
+  @IsIn(NODE_ENVIRONMENTS)
+  NODE_ENV!: NodeEnvironment
+
   @Type(() => Number)
   @IsInt()
   @Min(MIN_TCP_PORT)
@@ -57,6 +65,7 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
   }
 
   return {
+    NODE_ENV: candidateEnvironment.NODE_ENV ?? DEFAULT_NODE_ENV,
     PORT: candidateEnvironment.PORT,
     FRONTEND_ORIGIN: candidateEnvironment.FRONTEND_ORIGIN,
     JWT_SECRET: candidateEnvironment.JWT_SECRET,

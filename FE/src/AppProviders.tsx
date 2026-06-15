@@ -5,14 +5,20 @@ import { DevSettingsProvider } from './context/DevSettingsContext.tsx'
 import { ToastProvider } from './context/ToastContext.tsx'
 
 export function AppProviders(): React.ReactElement {
+  const appTree = (
+    <ToastProvider>
+      <App />
+      <ToastHost />
+    </ToastProvider>
+  )
+
   return (
     <AuthProvider>
-      <DevSettingsProvider>
-        <ToastProvider>
-          <App />
-          <ToastHost />
-        </ToastProvider>
-      </DevSettingsProvider>
+      {import.meta.env.DEV ? (
+        <DevSettingsProvider>{appTree}</DevSettingsProvider>
+      ) : (
+        appTree
+      )}
     </AuthProvider>
   )
 }

@@ -1,5 +1,5 @@
-import type { ConversationRecord } from './conversation.entity.js'
-import type { MessageRecord } from './message.entity.js'
+import type { ConversationRecord } from '../conversations/conversation.entity.js'
+import type { MessageRecord } from '../messages/message.entity.js'
 
 export interface ConversationPreview {
   id: string

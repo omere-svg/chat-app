@@ -1,5 +1,25 @@
 import type { Message, PendingMessage } from '../../types/domain.ts'
 
+// Order by createdAt, then by id as a stable tiebreaker so messages created in
+// the same millisecond keep a deterministic order (the BE mirrors this rule).
+function compareByCreatedAtThenId(
+  messageA: Message | PendingMessage,
+  messageB: Message | PendingMessage,
+): number {
+  const timeDelta =
+    new Date(messageA.createdAt).getTime() - new Date(messageB.createdAt).getTime()
+  if (timeDelta !== 0) {
+    return timeDelta
+  }
+  if (messageA.id < messageB.id) {
+    return -1
+  }
+  if (messageA.id > messageB.id) {
+    return 1
+  }
+  return 0
+}
+
 export type MessagesState = {
   status: 'idle' | 'loading' | 'loading-more' | 'success' | 'error'
   messages: Message[]
@@ -110,9 +130,7 @@ export function messageReducer(
         ...state,
         pending: pendingMessages,
         messages: [...confirmedMessages, action.message].sort(
-          (messageA, messageB) =>
-            new Date(messageA.createdAt).getTime() -
-            new Date(messageB.createdAt).getTime(),
+          compareByCreatedAtThenId,
         ),
       }
     }
@@ -132,9 +150,5 @@ export function mergeThreadMessages(
   messages: Message[],
   pendingMessages: PendingMessage[],
 ): Array<Message | PendingMessage> {
-  return [...messages, ...pendingMessages].sort(
-    (messageA, messageB) =>
-      new Date(messageA.createdAt).getTime() -
-      new Date(messageB.createdAt).getTime(),
-  )
+  return [...messages, ...pendingMessages].sort(compareByCreatedAtThenId)
 }

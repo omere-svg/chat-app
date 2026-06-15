@@ -152,7 +152,8 @@ class ApiClient {
       headers.Authorization = `Bearer ${this.token}`
     }
 
-    if (options.simulateSendFailure) {
+    // Dev-only hook: never send the simulate-failure header in a production build.
+    if (import.meta.env.DEV && options.simulateSendFailure) {
       headers['X-Simulate-Failure'] = '1'
     }
 

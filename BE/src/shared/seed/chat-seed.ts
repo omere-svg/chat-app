@@ -1,6 +1,9 @@
-import { compareMessagesByCreatedAtAscending } from './message-ordering.js'
-import type { ConversationRecord } from './conversation.entity.js'
-import type { MessageRecord } from './message.entity.js'
+// Demo seed data shared by the in-memory conversation/message repositories.
+// Keep in sync with the FE mock seed at FE/src/mocks/db.ts (same ids, formulas,
+// and message bodies) — the two are separate runtimes and cannot share a module.
+import { compareMessagesByCreatedAtAscending } from '../../messages/message-ordering.js'
+import type { ConversationRecord } from '../../conversations/conversation.entity.js'
+import type { MessageRecord } from '../../messages/message.entity.js'
 
 interface SeedConversationSpec {
   id: string

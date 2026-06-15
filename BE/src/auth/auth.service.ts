@@ -32,7 +32,10 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthenticationResult> {
-    const userRecord = await this.usersService.verifyCredentials(loginDto.email, loginDto.password)
+    const userRecord = await this.usersService.verifyCredentials({
+      email: loginDto.email,
+      password: loginDto.password,
+    })
 
     if (userRecord === null) {
       throw new UnauthorizedException({

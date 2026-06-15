@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import type { OnModuleInit } from '@nestjs/common'
-import { CHAT_SEED } from '../conversations.seed.js'
+import { CHAT_SEED } from '../../shared/seed/chat-seed.js'
 import type { ConversationRepository } from './conversation-repository.port.js'
 import type { ConversationRecord } from '../conversation.entity.js'
 
