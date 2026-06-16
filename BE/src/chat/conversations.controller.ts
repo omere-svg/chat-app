@@ -1,7 +1,8 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common'
 import { CurrentUser } from '../auth/decorator/current-user.decorator.js'
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard.js'
-import { ChatOrchestrator } from './chat.orchestrator.js'
+import { ListConversationsOrchestrator } from './use-cases/list-conversations.orchestrator.js'
+import { CreateConversationOrchestrator } from './use-cases/create-conversation.orchestrator.js'
 import { CreateConversationDto } from '../conversations/dto/create-conversation.dto.js'
 import type { ConversationPreview } from './conversation-preview-view.js'
 import type { PublicUser } from '../users/user-public-view.js'
@@ -17,13 +18,16 @@ interface ConversationCreatedResponse {
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)
 export class ConversationsController {
-  constructor(private readonly chatOrchestrator: ChatOrchestrator) {}
+  constructor(
+    private readonly listConversationsOrchestrator: ListConversationsOrchestrator,
+    private readonly createConversationOrchestrator: CreateConversationOrchestrator,
+  ) {}
 
   @Get()
   async listConversations(
     @CurrentUser() currentUser: PublicUser,
   ): Promise<ConversationListResponse> {
-    const conversations = await this.chatOrchestrator.listConversationsForUser(currentUser.id)
+    const conversations = await this.listConversationsOrchestrator.listForUser(currentUser.id)
     return { conversations }
   }
 
@@ -33,7 +37,7 @@ export class ConversationsController {
     @CurrentUser() currentUser: PublicUser,
     @Body() createConversationDto: CreateConversationDto,
   ): Promise<ConversationCreatedResponse> {
-    const conversation = await this.chatOrchestrator.createConversation(
+    const conversation = await this.createConversationOrchestrator.create(
       currentUser.id,
       createConversationDto,
     )
