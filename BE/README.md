@@ -1,19 +1,26 @@
-# Backend — Chat MVP REST API (Week 3)
+# Backend — Chat MVP REST API (Week 5)
 
-Express + TypeScript REST API that powers the Frontend Chat MVP. Storage is
-in-memory (no database yet). The API contract is documented in
-[`../API_CONTRACT.md`](../API_CONTRACT.md), which is the shared source of truth.
+NestJS + TypeScript REST API that powers the Frontend Chat MVP, backed by
+MongoDB (via `@nestjs/mongoose`). Data survives server restarts. The API contract
+is documented in [`../API_CONTRACT.md`](../API_CONTRACT.md), which is the shared
+source of truth.
 
 ## Requirements
 
 - Node.js (tested on v26)
 - npm
+- MongoDB — use the bundled `docker compose` service, or a MongoDB Atlas cluster.
 
 ## Setup
 
 ```bash
+# from the repo root: start a local MongoDB (data persists in a named volume)
+docker compose up -d
+
 cd BE
 npm install
+cp .env.example .env   # then review the values
+npm run dev
 ```
 
 Configuration is read from environment variables (see [`.env.example`](./.env.example)):
@@ -22,86 +29,93 @@ Configuration is read from environment variables (see [`.env.example`](./.env.ex
 |----------|---------|---------|
 | `PORT` | `4000` | Port the API listens on |
 | `FRONTEND_ORIGIN` | `http://localhost:5173` | Origin allowed by CORS (the FE dev server) |
+| `JWT_SECRET` | — | Secret used to sign/verify JWT access tokens (≥ 32 chars) |
+| `JWT_EXPIRES_IN` | `3600` | Access-token lifetime in seconds |
+| `MONGO_URI` | `mongodb://localhost:27017/chat` | MongoDB connection string |
 
-Both have sensible defaults, so the server runs with no env file. Override them
-inline when needed, e.g. `PORT=5000 npm run dev`.
+The environment is validated on boot (`config/environment.schema.ts`); the server
+fails fast with a clear message if anything is missing or malformed.
 
 ## Scripts
 
 ```bash
-npm run dev        # start with reload (tsx watch)
+npm run dev        # start with reload (nest start --watch)
 npm run build      # compile TypeScript to dist/
 npm start          # run the compiled server (after build)
 npm run typecheck  # tsc --noEmit
 npm run lint       # ESLint (type-checked rules)
-npm test           # Vitest (unit + endpoint tests)
+npm test           # Vitest — unit specs + e2e against an in-process MongoDB
 npm run test:watch # Vitest in watch mode
 ```
+
+Tests need no running database: the e2e suite spins up
+[`mongodb-memory-server`](https://github.com/typegoose/mongodb-memory-server) and
+exercises the real Mongo DAOs.
 
 ## Architecture
 
 Requests flow strictly through layers; no layer skips ahead:
 
 ```
-route → middleware (auth/validation) → controller → service → data store
+controller → orchestrator (use case) → domain service → repository (DAO) → MongoDB
 ```
 
-- Controllers only translate HTTP ↔ typed input and never touch the store.
-- Services own all business logic and are the only callers of the store.
-- The store is the single owner of in-memory state.
+- **Controllers** translate HTTP ↔ typed input and return DTOs — never raw
+  Mongoose documents.
+- **Orchestrators** (`chat/use-cases/*`) coordinate multiple domain services for a
+  single endpoint. They hold no business rules.
+- **Domain services** own their aggregate's business logic and depend on a
+  repository *port* (an interface), never on Mongoose directly.
+- **Repositories (DAOs)** are the only code that touches Mongoose. They map
+  documents to plain domain records, so `_id`/`__v` never escape this layer.
 
 ```
 src/
-  server.ts                 # entry point: load env, start listening
-  app.ts                    # builds the Express app (no listen) — testable
-  config/env.ts             # Zod-validated environment, fail-fast
-  domain/types.ts           # User, Message, Conversation, ConversationPreview
-  data/
-    store.ts                # in-memory Maps — single data owner (+ resetStore)
-    seed.ts                 # seeded users + conversations + messages
+  main.ts                          # bootstrap: env, CORS, global pipes/filter
+  app.module.ts                    # wires ConfigModule + MongooseModule + features
+  config/                          # validated environment (fail-fast)
+  database/
+    demo-data.seeder.ts            # env-gated demo seeding (skipped in production)
   shared/
-    ApiError.ts             # typed error + status/code factories
-    errorCodes.ts           # all error codes (one source of truth)
-    validation.ts           # parseRequest: Zod → typed input or 400
-    ordering.ts             # message ordering helper
-  middleware/
-    requestLogger.ts        # logs method + path + status + duration
-    authenticate.ts         # Bearer token → req.userId, else 401
-    notFoundHandler.ts      # unmatched route → 404
-    errorHandler.ts         # the only place that builds the error body
-  modules/
-    auth/                   # POST /auth/login
-    conversations/          # GET + POST /conversations
-    messages/               # GET + POST /conversations/:id/messages (+ pagination)
-  types/express.d.ts        # adds req.userId
+    errors/                        # structured error filter + error codes
+    pagination/cursor-page.ts      # cursor page result types
+    seed/chat-seed.ts              # demo users + conversations + messages
+  users/
+    user.schema.ts                 # Mongoose schema + unique email index
+    repository/                    # UserRepository port + MongoUserRepository
+    users.service.ts
+  conversations/
+    conversation.schema.ts         # schema + (participantIds, lastMessageAt) index
+    repository/                    # ConversationRepository port + Mongo impl
+    conversations.service.ts
+  messages/
+    message.schema.ts              # schema + (conversationId, createdAt) index
+    repository/                    # MessageRepository port + Mongo impl
+    messages.service.ts
+  auth/                            # signup/login, JWT strategy + guard
+  chat/                            # controllers, orchestrators, guards, mappers
 ```
 
-## Endpoints
+### Schema & indexes
 
-Base path `/api`. All routes except login require `Authorization: Bearer <token>`.
+| Collection | Key fields | Index | Query it backs |
+|------------|------------|-------|----------------|
+| `users` | `_id, email, displayName, passwordHash, createdAt` | `email` (unique) | login / signup / participant lookup |
+| `conversations` | `_id, title, participantIds, lastMessageAt, lastMessage, createdAt` | `(participantIds, lastMessageAt desc)` | "list my conversations by last activity" |
+| `messages` | `_id, conversationId, senderId, body, createdAt, clientMessageId?` | `(conversationId, createdAt desc, _id desc)` | message history + cursor pagination |
+| `messages` | — | `(conversationId, clientMessageId)` unique partial | send idempotency |
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/auth/login` | Mock login: `{ userId }` → `{ token, user }` |
-| `GET` | `/api/conversations` | List the user's conversations, newest activity first |
-| `POST` | `/api/conversations` | Create a conversation (`409` on duplicate participants) |
-| `GET` | `/api/conversations/:id/messages?cursor=&limit=` | Paginated message history |
-| `POST` | `/api/conversations/:id/messages` | Send a message (idempotent via `clientMessageId`) |
-
-Errors use a consistent shape:
-
-```json
-{ "error": { "code": "ERROR_CODE", "message": "Human-readable message", "details": {} } }
-```
-
-See [`../API_CONTRACT.md`](../API_CONTRACT.md) for full request/response details
-and status codes.
+`conversations.lastMessage` is an **embedded snapshot** of the newest message, so
+the conversation list resolves in a single indexed query with no per-conversation
+message reads. Sending a message persists the message, then advances the parent
+conversation's `lastMessageAt`/`lastMessage` with a monotonic, single-document
+update.
 
 ## Notes
 
-- **In-memory only.** State resets every time the server restarts; the store is
-  reseeded with users Alice, Bob, and Carol plus three conversations.
-- **Auth is a mock.** `POST /auth/login` issues an opaque token bound to a user
-  id; there is no password yet (that arrives Week 4).
+- **IDs are application-assigned strings** (`user-…`, `conv-…`, `msg-…`) stored as
+  `_id`, preserving the API contract and stable, human-readable references.
+- **Demo data is seeded only outside production, and only when a collection is empty**
+  (users Alice, Bob, Carol plus three conversations), so restarts never clobber real data.
 - **Server owns message ids.** `clientMessageId` is only an idempotency key — a
   resend with the same key returns the original message.

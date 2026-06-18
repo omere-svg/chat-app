@@ -184,3 +184,4 @@ When the client sends header `X-Simulate-Failure: 1`, the mock returns **500** w
 |------|--------|
 | 2026-05-27 | Initial contract for Week 2 MVP |
 | 2026-05-27 | Structured error shape; `INVALID_CURSOR` returns 400 |
+| 2026-06-16 | Week 5: backend moved to MongoDB persistence — contract unchanged |
