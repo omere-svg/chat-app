@@ -1,18 +1,26 @@
+import { MongoMemoryServer } from 'mongodb-memory-server'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { INestApplication } from '@nestjs/common'
 import type { Server } from 'node:http'
 import { applyGlobalApiContract } from '../app-http-contract.js'
-import { AppModule } from '../app.module.js'
 
 const SEEDED_FOREIGN_CONVERSATION_ID = 'conv-alice-bob'
 
 describe('Chat API (e2e)', () => {
   let application: INestApplication<Server>
   let httpServer: Server
+  let mongoServer: MongoMemoryServer
 
   beforeAll(async () => {
+    // Run the real Mongo DAOs against an ephemeral in-process MongoDB. MONGO_URI
+    // must be set before AppModule is imported, because ConfigModule.forRoot
+    // validates the environment at module-evaluation time — hence the dynamic import.
+    mongoServer = await MongoMemoryServer.create()
+    process.env.MONGO_URI = mongoServer.getUri()
+
+    const { AppModule } = await import('../app.module.js')
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile()
@@ -25,6 +33,7 @@ describe('Chat API (e2e)', () => {
 
   afterAll(async () => {
     await application.close()
+    await mongoServer.stop()
   })
 
   describe('signup + login', () => {
@@ -191,7 +200,104 @@ describe('Chat API (e2e)', () => {
       expect(response.body.error.code).toBe('SIMULATED_SEND_FAILURE')
     })
   })
+
+  describe('cursor-paginated message history and persistence', () => {
+    it('pages through a 100+ message thread oldest-first with no gaps or duplicates', async () => {
+      const token = await signUpAndGetToken(httpServer, 'olga@example.com', 'Olga')
+      const conversationId = await createConversationWith(httpServer, token, 'bob@example.com')
+
+      const totalMessages = 105
+      for (let index = 1; index <= totalMessages; index++) {
+        const sendResponse = await request(httpServer)
+          .post(`/api/conversations/${conversationId}/messages`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ body: `message ${index.toString()}` })
+        expect(sendResponse.status).toBe(201)
+        // DAO/DTO separation: Mongo internals never leak into the response.
+        expect(sendResponse.body.message).toHaveProperty('id')
+        expect(sendResponse.body.message).not.toHaveProperty('_id')
+        expect(sendResponse.body.message).not.toHaveProperty('__v')
+      }
+
+      const collectedIds: string[] = []
+      let cursor: string | null = null
+      let pageCount = 0
+      do {
+        const query: Record<string, string> = { limit: '50' }
+        if (cursor !== null) {
+          query.cursor = cursor
+        }
+        const pageResponse = await request(httpServer)
+          .get(`/api/conversations/${conversationId}/messages`)
+          .query(query)
+          .set('Authorization', `Bearer ${token}`)
+        expect(pageResponse.status).toBe(200)
+
+        const pageIds = pageResponse.body.messages.map((message: { id: string }) => message.id)
+        // Older messages are prepended so the running list stays oldest-first.
+        collectedIds.unshift(...pageIds)
+        cursor = pageResponse.body.nextCursor
+        pageCount += 1
+      } while (cursor !== null && pageCount < 10)
+
+      expect(cursor).toBeNull()
+      expect(collectedIds).toHaveLength(totalMessages)
+      expect(new Set(collectedIds).size).toBe(totalMessages)
+    })
+
+    it('rejects an unknown pagination cursor with 400', async () => {
+      const token = await signUpAndGetToken(httpServer, 'peggy@example.com', 'Peggy')
+      const conversationId = await createConversationWith(httpServer, token, 'bob@example.com')
+
+      const response = await request(httpServer)
+        .get(`/api/conversations/${conversationId}/messages`)
+        .query({ cursor: 'msg-does-not-exist' })
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('INVALID_CURSOR')
+    })
+
+    it("surfaces a sent message as the conversation's latest activity", async () => {
+      const token = await signUpAndGetToken(httpServer, 'quinn@example.com', 'Quinn')
+      const conversationId = await createConversationWith(httpServer, token, 'carol@example.com')
+
+      await request(httpServer)
+        .post(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ body: 'latest activity wins' })
+
+      const listResponse = await request(httpServer)
+        .get('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+      expect(listResponse.status).toBe(200)
+
+      const preview = listResponse.body.conversations.find(
+        (conversation: { id: string }) => conversation.id === conversationId,
+      )
+      expect(preview.lastMessage.body).toBe('latest activity wins')
+      expect(preview.updatedAt).toBe(preview.lastMessage.createdAt)
+      // The most recently active conversation sorts to the front.
+      expect(listResponse.body.conversations[0].id).toBe(conversationId)
+    })
+  })
 })
+
+async function createConversationWith(
+  httpServer: Server,
+  token: string,
+  participantEmail: string,
+): Promise<string> {
+  const response = await request(httpServer)
+    .post('/api/conversations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ participantEmails: [participantEmail] })
+
+  if (response.status !== 201 || typeof response.body.conversation?.id !== 'string') {
+    throw new Error(`Test setup failed: could not create conversation (status ${response.status})`)
+  }
+  return response.body.conversation.id
+}
 
 async function signUpAndGetToken(
   httpServer: Server,

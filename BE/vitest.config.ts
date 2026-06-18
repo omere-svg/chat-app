@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'node',
     include: ['src/test/**/*.e2e-spec.ts', 'src/test/**/*.spec.ts'],
     env: {
+      NODE_ENV: 'test',
       PORT: '4010',
       FRONTEND_ORIGIN: 'http://localhost:5173',
       JWT_SECRET: 'e2e-test-secret-at-least-32-characters-long',

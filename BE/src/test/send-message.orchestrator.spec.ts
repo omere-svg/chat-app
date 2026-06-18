@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { SendMessageOrchestrator } from '../chat/use-cases/send-message.orchestrator.js'
 import type { ConfigService } from '@nestjs/config'
 import type { AppEnvironment } from '../config/environment.types.js'
+import type { ConversationsService } from '../conversations/conversations.service.js'
 import type { MessageRecord } from '../messages/message.entity.js'
 import type { MessagesService } from '../messages/messages.service.js'
 import type { SendMessageDto } from '../messages/dto/send-message.dto.js'
@@ -19,22 +20,26 @@ const createdMessage: MessageRecord = {
 function buildOrchestrator(nodeEnv: AppEnvironment['NODE_ENV']): {
   orchestrator: SendMessageOrchestrator
   createMessage: ReturnType<typeof vi.fn>
+  advanceLastMessage: ReturnType<typeof vi.fn>
 } {
   const createMessage = vi.fn().mockResolvedValue(createdMessage)
+  const advanceLastMessage = vi.fn().mockResolvedValue(undefined)
   const messagesService = { createMessage } as unknown as MessagesService
+  const conversationsService = { advanceLastMessage } as unknown as ConversationsService
   const configService = {
     get: vi.fn().mockReturnValue(nodeEnv),
   } as unknown as ConfigService<AppEnvironment, true>
 
   return {
-    orchestrator: new SendMessageOrchestrator(messagesService, configService),
+    orchestrator: new SendMessageOrchestrator(messagesService, conversationsService, configService),
     createMessage,
+    advanceLastMessage,
   }
 }
 
-describe('SendMessageOrchestrator simulate-failure gating', () => {
-  it('honors the simulate-failure header outside production', async () => {
-    const { orchestrator, createMessage } = buildOrchestrator('development')
+describe('SendMessageOrchestrator', () => {
+  it('honors the simulate-failure header outside production and writes nothing', async () => {
+    const { orchestrator, createMessage, advanceLastMessage } = buildOrchestrator('development')
 
     await expect(
       orchestrator.send({
@@ -45,6 +50,7 @@ describe('SendMessageOrchestrator simulate-failure gating', () => {
       }),
     ).rejects.toBeInstanceOf(InternalServerErrorException)
     expect(createMessage).not.toHaveBeenCalled()
+    expect(advanceLastMessage).not.toHaveBeenCalled()
   })
 
   it('ignores the simulate-failure header in production', async () => {
@@ -54,10 +60,27 @@ describe('SendMessageOrchestrator simulate-failure gating', () => {
       senderId: 'user-1',
       conversationId: 'conv-1',
       sendMessageDto,
-      simulateFailureHeader: '1',
+      simulateFailureRequested: true,
     })
 
     expect(result).toEqual(createdMessage)
     expect(createMessage).toHaveBeenCalledOnce()
+  })
+
+  it('advances the conversation snapshot after persisting the message', async () => {
+    const { orchestrator, advanceLastMessage } = buildOrchestrator('development')
+
+    await orchestrator.send({
+      senderId: 'user-1',
+      conversationId: 'conv-1',
+      sendMessageDto,
+      simulateFailureRequested: false,
+    })
+
+    expect(advanceLastMessage).toHaveBeenCalledWith('conv-1', {
+      body: createdMessage.body,
+      senderId: createdMessage.senderId,
+      createdAt: createdMessage.createdAt,
+    })
   })
 })
