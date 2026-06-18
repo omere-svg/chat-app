@@ -1,5 +1,5 @@
 import { Type, plainToInstance } from 'class-transformer'
-import { IsIn, IsInt, IsOptional, IsString, IsUrl, Max, Min, MinLength, validateSync } from 'class-validator'
+import { IsIn, IsInt, IsOptional, IsString, IsUrl, Matches, Max, Min, MinLength, validateSync } from 'class-validator'
 import type { ValidationError } from 'class-validator'
 import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
 
@@ -36,6 +36,12 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @Min(MIN_JWT_EXPIRY_SECONDS)
   @Max(MAX_JWT_EXPIRY_SECONDS)
   JWT_EXPIRES_IN!: number
+
+  @IsString()
+  @Matches(/^mongodb(\+srv)?:\/\//, {
+    message: 'MONGO_URI must be a mongodb:// or mongodb+srv:// connection string',
+  })
+  MONGO_URI!: string
 }
 
 function formatValidationFailures(validationErrors: readonly ValidationError[]): string {
@@ -70,5 +76,6 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     FRONTEND_ORIGIN: candidateEnvironment.FRONTEND_ORIGIN,
     JWT_SECRET: candidateEnvironment.JWT_SECRET,
     JWT_EXPIRES_IN: candidateEnvironment.JWT_EXPIRES_IN,
+    MONGO_URI: candidateEnvironment.MONGO_URI,
   }
 }
