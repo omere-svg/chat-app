@@ -43,12 +43,6 @@ export class MessagesService {
     return { messages: result.page.items, nextCursor: result.page.nextCursor }
   }
 
-  findLatestByConversationIds(
-    conversationIds: readonly string[],
-  ): Promise<ReadonlyMap<string, MessageRecord>> {
-    return this.messageRepository.findLatestByConversationIds(conversationIds)
-  }
-
   async createMessage({
     senderId,
     conversationId,
