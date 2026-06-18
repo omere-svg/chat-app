@@ -9,7 +9,7 @@ import { randomUUID } from 'node:crypto'
 import { ERROR_CODES } from '../shared/errors/error-codes.constant.js'
 import { CONVERSATION_REPOSITORY } from './repository/conversation-repository.port.js'
 import type { ConversationRepository } from './repository/conversation-repository.port.js'
-import type { ConversationRecord } from './conversation.entity.js'
+import type { ConversationLastMessage, ConversationRecord } from './conversation.entity.js'
 
 export interface CreateConversationRecordInput {
   title: string
@@ -63,13 +63,22 @@ export class ConversationsService {
       })
     }
 
+    const createdAt = new Date().toISOString()
     const conversation: ConversationRecord = {
       id: `conv-${randomUUID()}`,
       title,
       participantIds,
-      createdAt: new Date().toISOString(),
+      // Seed lastMessageAt to createdAt so a brand-new, empty conversation still
+      // sorts by recency on the (participantIds, lastMessageAt) index.
+      lastMessageAt: createdAt,
+      lastMessage: null,
+      createdAt,
     }
 
     return this.conversationRepository.insert(conversation)
+  }
+
+  advanceLastMessage(conversationId: string, lastMessage: ConversationLastMessage): Promise<void> {
+    return this.conversationRepository.advanceLastMessage(conversationId, lastMessage)
   }
 }
