@@ -38,6 +38,6 @@ export class CreateConversationOrchestrator {
     )
 
     const conversation = await this.conversationsService.create({ title, participantIds })
-    return toConversationPreview(conversation, null)
+    return toConversationPreview(conversation)
   }
 }
