@@ -1,0 +1,20 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: chat-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      # Named volume keeps data across restarts so chat history survives.
+      - chat-mongo-data:/data/db
+    healthcheck:
+      # `docker compose up` reports healthy only once Mongo accepts connections.
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  chat-mongo-data:
