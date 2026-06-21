@@ -8,4 +8,4 @@ import { DemoDataSeeder } from './demo-data.seeder.js'
   imports: [UsersModule, ConversationsModule, MessagesModule],
   providers: [DemoDataSeeder],
 })
-export class DatabaseModule {}
+export class DatabaseSeedModule {}

@@ -5,7 +5,7 @@ import { validateEnvironment } from './config/environment.schema.js'
 import { AuthModule } from './auth/auth.module.js'
 import { ChatModule } from './chat/chat.module.js'
 import { ConversationsModule } from './conversations/conversations.module.js'
-import { DatabaseModule } from './database/database.module.js'
+import { DatabaseSeedModule } from './database-seed/database-seed.module.js'
 import { MessagesModule } from './messages/messages.module.js'
 import { UsersModule } from './users/users.module.js'
 import type { MongooseModuleOptions } from '@nestjs/mongoose'
@@ -32,7 +32,7 @@ import type { AppEnvironment } from './config/environment.types.js'
     ConversationsModule,
     MessagesModule,
     ChatModule,
-    DatabaseModule,
+    DatabaseSeedModule,
   ],
 })
 export class AppModule {}

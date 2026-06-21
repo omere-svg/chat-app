@@ -20,12 +20,12 @@ const createdMessage: MessageRecord = {
 function buildOrchestrator(nodeEnv: AppEnvironment['NODE_ENV']): {
   orchestrator: SendMessageOrchestrator
   createMessage: ReturnType<typeof vi.fn>
-  advanceLastMessage: ReturnType<typeof vi.fn>
+  advanceLastMessageIfNewer: ReturnType<typeof vi.fn>
 } {
   const createMessage = vi.fn().mockResolvedValue(createdMessage)
-  const advanceLastMessage = vi.fn().mockResolvedValue(undefined)
+  const advanceLastMessageIfNewer = vi.fn().mockResolvedValue(undefined)
   const messagesService = { createMessage } as unknown as MessagesService
-  const conversationsService = { advanceLastMessage } as unknown as ConversationsService
+  const conversationsService = { advanceLastMessageIfNewer } as unknown as ConversationsService
   const configService = {
     get: vi.fn().mockReturnValue(nodeEnv),
   } as unknown as ConfigService<AppEnvironment, true>
@@ -33,13 +33,13 @@ function buildOrchestrator(nodeEnv: AppEnvironment['NODE_ENV']): {
   return {
     orchestrator: new SendMessageOrchestrator(messagesService, conversationsService, configService),
     createMessage,
-    advanceLastMessage,
+    advanceLastMessageIfNewer,
   }
 }
 
 describe('SendMessageOrchestrator', () => {
   it('honors the simulate-failure header outside production and writes nothing', async () => {
-    const { orchestrator, createMessage, advanceLastMessage } = buildOrchestrator('development')
+    const { orchestrator, createMessage, advanceLastMessageIfNewer } = buildOrchestrator('development')
 
     await expect(
       orchestrator.send({
@@ -50,7 +50,7 @@ describe('SendMessageOrchestrator', () => {
       }),
     ).rejects.toBeInstanceOf(InternalServerErrorException)
     expect(createMessage).not.toHaveBeenCalled()
-    expect(advanceLastMessage).not.toHaveBeenCalled()
+    expect(advanceLastMessageIfNewer).not.toHaveBeenCalled()
   })
 
   it('ignores the simulate-failure header in production', async () => {
@@ -68,7 +68,7 @@ describe('SendMessageOrchestrator', () => {
   })
 
   it('advances the conversation snapshot after persisting the message', async () => {
-    const { orchestrator, advanceLastMessage } = buildOrchestrator('development')
+    const { orchestrator, advanceLastMessageIfNewer } = buildOrchestrator('development')
 
     await orchestrator.send({
       senderId: 'user-1',
@@ -77,7 +77,7 @@ describe('SendMessageOrchestrator', () => {
       simulateFailureRequested: false,
     })
 
-    expect(advanceLastMessage).toHaveBeenCalledWith('conv-1', {
+    expect(advanceLastMessageIfNewer).toHaveBeenCalledWith('conv-1', {
       body: createdMessage.body,
       senderId: createdMessage.senderId,
       createdAt: createdMessage.createdAt,

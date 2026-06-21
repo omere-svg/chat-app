@@ -30,7 +30,7 @@ export class ConversationDocument {
   // each send. Lets the conversation list resolve in one indexed query with no
   // per-conversation message reads.
   @Prop({ type: Date, default: null })
-  lastMessageAt!: Date | null
+  lastActivityAt!: Date | null
 
   @Prop({ type: ConversationLastMessageSchema, default: null })
   lastMessage!: ConversationLastMessageDocument | null
@@ -44,4 +44,4 @@ export type ConversationHydratedDocument = HydratedDocument<ConversationDocument
 export const ConversationSchema = SchemaFactory.createForClass(ConversationDocument)
 
 // Backs "list my conversations sorted by last activity".
-ConversationSchema.index({ participantIds: 1, lastMessageAt: -1 })
+ConversationSchema.index({ participantIds: 1, lastActivityAt: -1 })

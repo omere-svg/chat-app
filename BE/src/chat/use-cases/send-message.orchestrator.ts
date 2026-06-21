@@ -44,7 +44,7 @@ export class SendMessageOrchestrator {
 
     // Advance the parent conversation's last-activity snapshot. The update is
     // monotonic, so a deduplicated retry of an older message is a no-op.
-    await this.conversationsService.advanceLastMessage(
+    await this.conversationsService.advanceLastMessageIfNewer(
       conversationId,
       toLastMessageSnapshot(message),
     )

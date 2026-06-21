@@ -17,6 +17,6 @@ export function toConversationPreview(conversation: ConversationRecord): Convers
     title: conversation.title,
     participantIds: [...conversation.participantIds],
     lastMessage: conversation.lastMessage,
-    updatedAt: conversation.lastMessageAt,
+    updatedAt: conversation.lastActivityAt,
   }
 }

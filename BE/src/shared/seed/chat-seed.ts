@@ -99,7 +99,7 @@ function buildChatSeed(): ChatSeed {
       id: spec.id,
       title: spec.title,
       participantIds: [...spec.participantIds],
-      lastMessageAt: newestMessage?.createdAt ?? createdAt,
+      lastActivityAt: newestMessage?.createdAt ?? createdAt,
       lastMessage: newestMessage === null ? null : toLastMessageSnapshot(newestMessage),
       createdAt,
     })

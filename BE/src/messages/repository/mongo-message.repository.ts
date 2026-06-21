@@ -2,23 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import type { Model, QueryFilter } from 'mongoose'
 import { MessageDocument } from '../message.schema.js'
+import { toMessageRecord } from '../message.mapper.js'
+import { isDuplicateKeyError } from '../../shared/database/mongo-errors.js'
 import type { CursorPageResult } from '../../shared/pagination/cursor-page.js'
 import type { MessageRepository } from './message-repository.port.js'
 import type { MessageRecord } from '../message.entity.js'
-
-function toMessageRecord(document: MessageDocument): MessageRecord {
-  return {
-    id: document._id,
-    conversationId: document.conversationId,
-    senderId: document.senderId,
-    body: document.body,
-    createdAt: document.createdAt.toISOString(),
-  }
-}
-
-function isDuplicateKeyError(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000
-}
 
 @Injectable()
 export class MongoMessageRepository implements MessageRepository {

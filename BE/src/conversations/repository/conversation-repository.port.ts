@@ -8,7 +8,7 @@ export interface ConversationRepository {
   findById(conversationId: string): Promise<ConversationRecord | null>
 
   // Returns the participant's conversations sorted by last activity (newest first).
-  findByParticipant(userId: string): Promise<ConversationRecord[]>
+  findByParticipantSortedByActivity(userId: string): Promise<ConversationRecord[]>
 
   findByParticipantSet(participantIds: readonly string[]): Promise<ConversationRecord | null>
 
@@ -16,5 +16,5 @@ export interface ConversationRepository {
 
   // Advances the denormalized last-message snapshot, but only when the incoming
   // message is newer than what is already recorded (monotonic, idempotent).
-  advanceLastMessage(conversationId: string, lastMessage: ConversationLastMessage): Promise<void>
+  advanceLastMessageIfNewer(conversationId: string, lastMessage: ConversationLastMessage): Promise<void>
 }

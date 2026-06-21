@@ -2,44 +2,12 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import type { Model } from 'mongoose'
 import { ConversationDocument } from '../conversation.schema.js'
+import {
+  toConversationDocumentInput,
+  toConversationRecord,
+} from '../conversation.mapper.js'
 import type { ConversationRepository } from './conversation-repository.port.js'
 import type { ConversationLastMessage, ConversationRecord } from '../conversation.entity.js'
-
-function toConversationRecord(document: ConversationDocument): ConversationRecord {
-  return {
-    id: document._id,
-    title: document.title,
-    participantIds: [...document.participantIds],
-    lastMessageAt: (document.lastMessageAt ?? document.createdAt).toISOString(),
-    lastMessage:
-      document.lastMessage === null
-        ? null
-        : {
-            body: document.lastMessage.body,
-            senderId: document.lastMessage.senderId,
-            createdAt: document.lastMessage.createdAt.toISOString(),
-          },
-    createdAt: document.createdAt.toISOString(),
-  }
-}
-
-function toConversationDocumentInput(conversation: ConversationRecord): ConversationDocument {
-  return {
-    _id: conversation.id,
-    title: conversation.title,
-    participantIds: [...conversation.participantIds],
-    lastMessageAt: new Date(conversation.lastMessageAt),
-    lastMessage:
-      conversation.lastMessage === null
-        ? null
-        : {
-            body: conversation.lastMessage.body,
-            senderId: conversation.lastMessage.senderId,
-            createdAt: new Date(conversation.lastMessage.createdAt),
-          },
-    createdAt: new Date(conversation.createdAt),
-  }
-}
 
 @Injectable()
 export class MongoConversationRepository implements ConversationRepository {
@@ -59,10 +27,10 @@ export class MongoConversationRepository implements ConversationRepository {
     return document === null ? null : toConversationRecord(document)
   }
 
-  async findByParticipant(userId: string): Promise<ConversationRecord[]> {
+  async findByParticipantSortedByActivity(userId: string): Promise<ConversationRecord[]> {
     const documents = await this.conversationModel
       .find({ participantIds: userId })
-      .sort({ lastMessageAt: -1, _id: -1 })
+      .sort({ lastActivityAt: -1, _id: -1 })
       .lean<ConversationDocument[]>()
     return documents.map(toConversationRecord)
   }
@@ -81,23 +49,23 @@ export class MongoConversationRepository implements ConversationRepository {
     return toConversationRecord(created.toObject())
   }
 
-  async advanceLastMessage(
+  async advanceLastMessageIfNewer(
     conversationId: string,
     lastMessage: ConversationLastMessage,
   ): Promise<void> {
-    const lastMessageAt = new Date(lastMessage.createdAt)
+    const lastActivityAt = new Date(lastMessage.createdAt)
     await this.conversationModel.updateOne(
       {
         _id: conversationId,
-        $or: [{ lastMessageAt: null }, { lastMessageAt: { $lt: lastMessageAt } }],
+        $or: [{ lastActivityAt: null }, { lastActivityAt: { $lt: lastActivityAt } }],
       },
       {
         $set: {
-          lastMessageAt,
+          lastActivityAt,
           lastMessage: {
             body: lastMessage.body,
             senderId: lastMessage.senderId,
-            createdAt: lastMessageAt,
+            createdAt: lastActivityAt,
           },
         },
       },

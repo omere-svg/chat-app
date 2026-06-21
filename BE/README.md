@@ -74,7 +74,8 @@ src/
   main.ts                          # bootstrap: env, CORS, global pipes/filter
   app.module.ts                    # wires ConfigModule + MongooseModule + features
   config/                          # validated environment (fail-fast)
-  database/
+  database-seed/
+    database-seed.module.ts        # wires the demo-data seeder
     demo-data.seeder.ts            # env-gated demo seeding (skipped in production)
   shared/
     errors/                        # structured error filter + error codes
@@ -85,7 +86,7 @@ src/
     repository/                    # UserRepository port + MongoUserRepository
     users.service.ts
   conversations/
-    conversation.schema.ts         # schema + (participantIds, lastMessageAt) index
+    conversation.schema.ts         # schema + (participantIds, lastActivityAt) index
     repository/                    # ConversationRepository port + Mongo impl
     conversations.service.ts
   messages/
@@ -101,14 +102,14 @@ src/
 | Collection | Key fields | Index | Query it backs |
 |------------|------------|-------|----------------|
 | `users` | `_id, email, displayName, passwordHash, createdAt` | `email` (unique) | login / signup / participant lookup |
-| `conversations` | `_id, title, participantIds, lastMessageAt, lastMessage, createdAt` | `(participantIds, lastMessageAt desc)` | "list my conversations by last activity" |
+| `conversations` | `_id, title, participantIds, lastActivityAt, lastMessage, createdAt` | `(participantIds, lastActivityAt desc)` | "list my conversations by last activity" |
 | `messages` | `_id, conversationId, senderId, body, createdAt, clientMessageId?` | `(conversationId, createdAt desc, _id desc)` | message history + cursor pagination |
 | `messages` | — | `(conversationId, clientMessageId)` unique partial | send idempotency |
 
 `conversations.lastMessage` is an **embedded snapshot** of the newest message, so
 the conversation list resolves in a single indexed query with no per-conversation
 message reads. Sending a message persists the message, then advances the parent
-conversation's `lastMessageAt`/`lastMessage` with a monotonic, single-document
+conversation's `lastActivityAt`/`lastMessage` with a monotonic, single-document
 update.
 
 ## Notes

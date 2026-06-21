@@ -9,7 +9,7 @@ export class ListConversationsOrchestrator {
 
   async listForUser(userId: string): Promise<ConversationPreview[]> {
     // The repository returns conversations already sorted by last activity via the
-    // (participantIds, lastMessageAt) index, with the last-message snapshot embedded.
+    // (participantIds, lastActivityAt) index, with the last-message snapshot embedded.
     const conversations = await this.conversationsService.listForParticipant(userId)
     return conversations.map(toConversationPreview)
   }

@@ -2,23 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import type { Model } from 'mongoose'
 import { UserDocument } from '../user.schema.js'
+import { toUserRecord } from '../user.mapper.js'
 import type { UserRepository } from './user-repository.port.js'
 import type { UserRecord } from '../user.entity.js'
-
-function toUserRecord(document: UserDocument): UserRecord {
-  const userRecord: UserRecord = {
-    id: document._id,
-    email: document.email,
-    passwordHash: document.passwordHash,
-    displayName: document.displayName,
-  }
-
-  if (document.avatarUrl !== undefined) {
-    userRecord.avatarUrl = document.avatarUrl
-  }
-
-  return userRecord
-}
 
 @Injectable()
 export class MongoUserRepository implements UserRepository {

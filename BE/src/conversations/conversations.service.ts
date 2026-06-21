@@ -28,7 +28,7 @@ export class ConversationsService {
   ) {}
 
   listForParticipant(userId: string): Promise<ConversationRecord[]> {
-    return this.conversationRepository.findByParticipant(userId)
+    return this.conversationRepository.findByParticipantSortedByActivity(userId)
   }
 
   async getParticipantConversationOrThrow({
@@ -68,9 +68,9 @@ export class ConversationsService {
       id: `conv-${randomUUID()}`,
       title,
       participantIds,
-      // Seed lastMessageAt to createdAt so a brand-new, empty conversation still
-      // sorts by recency on the (participantIds, lastMessageAt) index.
-      lastMessageAt: createdAt,
+      // Seed lastActivityAt to createdAt so a brand-new, empty conversation still
+      // sorts by recency on the (participantIds, lastActivityAt) index.
+      lastActivityAt: createdAt,
       lastMessage: null,
       createdAt,
     }
@@ -78,7 +78,7 @@ export class ConversationsService {
     return this.conversationRepository.insert(conversation)
   }
 
-  advanceLastMessage(conversationId: string, lastMessage: ConversationLastMessage): Promise<void> {
-    return this.conversationRepository.advanceLastMessage(conversationId, lastMessage)
+  advanceLastMessageIfNewer(conversationId: string, lastMessage: ConversationLastMessage): Promise<void> {
+    return this.conversationRepository.advanceLastMessageIfNewer(conversationId, lastMessage)
   }
 }
