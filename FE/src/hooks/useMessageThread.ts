@@ -13,14 +13,14 @@ import {
   type MessagesAction,
   type MessagesState,
 } from "../features/messages/messageReducer.ts";
-import type { Message, PendingMessage } from "../types/domain.ts";
+import type { ThreadMessage } from "../types/domain.ts";
 
 export function useMessageThread(conversationId: string | null): {
   state: MessagesState;
   dispatch: Dispatch<MessagesAction>;
   activeConversationIdRef: RefObject<string | null>;
   threadState: ThreadViewState;
-  threadMessages: Array<Message | PendingMessage>;
+  threadMessages: ThreadMessage[];
   refetchMessages: () => void;
 } {
   const [state, dispatch] = useReducer(messageReducer, initialMessagesState);
@@ -87,8 +87,8 @@ export function useMessageThread(conversationId: string | null): {
   }
 
   const threadMessages = useMemo(
-    () => mergeThreadMessages(state.messages, state.pending),
-    [state.messages, state.pending],
+    () => mergeThreadMessages(state.messages, state.pending, state.streaming),
+    [state.messages, state.pending, state.streaming],
   );
   const threadState = deriveThreadViewState(
     conversationId,

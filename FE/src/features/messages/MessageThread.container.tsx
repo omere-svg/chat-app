@@ -2,7 +2,6 @@ import { useState } from "react";
 import { getThreadScrollAnchorId } from "./deriveThreadViewState.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
 import { useAutoScroll } from "../../hooks/useAutoScroll.ts";
-import { useDevSettings } from "../../hooks/useDevSettings.ts";
 import { useMessages } from "../../hooks/useMessages.ts";
 import { useToast } from "../../hooks/useToast.ts";
 import type { ConversationPreview } from "../../types/domain.ts";
@@ -21,8 +20,11 @@ export function MessageThreadContainer({
 }: MessageThreadContainerProps): React.ReactElement {
   const { currentUser } = useAuth();
   const { showErrorToast } = useToast();
-  const { simulateSendFailure } = useDevSettings();
   const [messageDraft, setMessageDraft] = useState("");
+
+  const selectedConversation = conversations.find(
+    (conversation) => conversation.id === selectedConversationId,
+  );
 
   const {
     threadState,
@@ -37,18 +39,14 @@ export function MessageThreadContainer({
   } = useMessages(
     selectedConversationId,
     currentUser?.id ?? "",
-    simulateSendFailure,
     showErrorToast,
     onMessageSendSuccess,
+    selectedConversation?.type ?? "direct",
   );
 
   const threadScrollAnchorId = getThreadScrollAnchorId(threadMessages);
   const messagesScrollContainerRef =
     useAutoScroll<HTMLDivElement>(threadScrollAnchorId);
-
-  const selectedConversation = conversations.find(
-    (conversation) => conversation.id === selectedConversationId,
-  );
 
   function handleSendMessage(): void {
     const messageContent = messageDraft.trim();

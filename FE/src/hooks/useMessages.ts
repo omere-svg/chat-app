@@ -1,5 +1,6 @@
 import { type ThreadViewState } from "../features/messages/deriveThreadViewState.ts";
-import type { Message, PendingMessage } from "../types/domain.ts";
+import type { ConversationType, ThreadMessage } from "../types/domain.ts";
+import { useAssistantStream } from "./useAssistantStream.ts";
 import { useMessageThread } from "./useMessageThread.ts";
 import { useOlderMessages } from "./useOlderMessages.ts";
 import { useSendMessage } from "./useSendMessage.ts";
@@ -9,12 +10,12 @@ export type { ThreadViewState } from "../features/messages/deriveThreadViewState
 export function useMessages(
   conversationId: string | null,
   currentUserId: string,
-  simulateSendFailure: boolean,
   onSendError: (errorMessage: string) => void,
   onSendSuccess?: () => void,
+  conversationType: ConversationType = "direct",
 ): {
   threadState: ThreadViewState;
-  threadMessages: Array<Message | PendingMessage>;
+  threadMessages: ThreadMessage[];
   hasMoreOlderMessages: boolean;
   isLoadingOlderMessages: boolean;
   loadOlderMessagesError: string | null;
@@ -44,16 +45,28 @@ export function useMessages(
     activeConversationIdRef,
   );
 
-  const { sendMessage, isSendingMessage } = useSendMessage(
+  const { sendMessage: sendHumanMessage, isSendingMessage: isSendingHumanMessage } =
+    useSendMessage(
+      conversationId,
+      currentUserId,
+      onSendError,
+      onSendSuccess,
+      state,
+      dispatch,
+      activeConversationIdRef,
+    );
+
+  const { sendMessage: sendAssistantMessage, isStreaming } = useAssistantStream(
     conversationId,
     currentUserId,
-    simulateSendFailure,
     onSendError,
     onSendSuccess,
     state,
     dispatch,
     activeConversationIdRef,
   );
+
+  const isAssistantConversation = conversationType === "assistant";
 
   return {
     threadState,
@@ -62,8 +75,10 @@ export function useMessages(
     isLoadingOlderMessages,
     loadOlderMessagesError,
     loadOlderMessages,
-    sendMessage,
-    isSendingMessage,
+    sendMessage: isAssistantConversation ? sendAssistantMessage : sendHumanMessage,
+    isSendingMessage: isAssistantConversation
+      ? isStreaming || state.pending.length > 0
+      : isSendingHumanMessage,
     refetchMessages,
   };
 }
