@@ -17,5 +17,9 @@ export interface MessageRepository {
     clientMessageId: string,
   ): Promise<MessageRecord | null>
 
+  // Returns the assistant reply previously generated for a user message, if any.
+  // Backs idempotent replay of an assistant exchange.
+  findAssistantReplyTo(conversationId: string, userMessageId: string): Promise<MessageRecord | null>
+
   insert(message: MessageRecord, clientMessageId?: string): Promise<MessageRecord>
 }

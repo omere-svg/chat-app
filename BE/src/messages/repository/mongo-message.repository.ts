@@ -64,6 +64,16 @@ export class MongoMessageRepository implements MessageRepository {
     return document === null ? null : toMessageRecord(document)
   }
 
+  async findAssistantReplyTo(
+    conversationId: string,
+    userMessageId: string,
+  ): Promise<MessageRecord | null> {
+    const document = await this.messageModel
+      .findOne({ conversationId, 'metadata.replyToMessageId': userMessageId })
+      .lean<MessageDocument | null>()
+    return document === null ? null : toMessageRecord(document)
+  }
+
   async insert(message: MessageRecord, clientMessageId?: string): Promise<MessageRecord> {
     try {
       const created = await this.messageModel.create({
@@ -73,15 +83,30 @@ export class MongoMessageRepository implements MessageRepository {
         body: message.body,
         createdAt: new Date(message.createdAt),
         clientMessageId,
+        metadata: message.metadata ?? null,
       })
       return toMessageRecord(created.toObject())
     } catch (error) {
-      // Concurrent retry of the same clientMessageId: the partial unique index
-      // rejected the duplicate, so return the message that won the race.
-      if (clientMessageId !== undefined && isDuplicateKeyError(error)) {
-        const existing = await this.findByClientMessageId(message.conversationId, clientMessageId)
-        if (existing !== null) {
-          return existing
+      if (isDuplicateKeyError(error)) {
+        // Concurrent retry of the same clientMessageId: the partial unique index
+        // rejected the duplicate, so return the message that won the race.
+        if (clientMessageId !== undefined) {
+          const existing = await this.findByClientMessageId(message.conversationId, clientMessageId)
+          if (existing !== null) {
+            return existing
+          }
+        }
+        // Concurrent assistant reply for the same user message: the unique reply index
+        // rejected the duplicate, so return the reply that won the race.
+        const userMessageId = message.metadata?.replyToMessageId
+        if (userMessageId !== undefined) {
+          const existingReply = await this.findAssistantReplyTo(
+            message.conversationId,
+            userMessageId,
+          )
+          if (existingReply !== null) {
+            return existingReply
+          }
         }
       }
       throw error

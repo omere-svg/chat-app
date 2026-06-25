@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
 import { ERROR_CODES } from '../shared/errors/error-codes.constant.js'
 import { MESSAGE_REPOSITORY } from './repository/message-repository.port.js'
+import { ASSISTANT_SENDER_ID } from './message.entity.js'
 import type { MessageRepository } from './repository/message-repository.port.js'
 import type { MessageRecord } from './message.entity.js'
 import type { ListMessagesQueryDto } from './dto/list-messages-query.dto.js'
@@ -18,6 +19,13 @@ export interface CreateMessageInput {
   senderId: string
   conversationId: string
   sendMessageDto: SendMessageDto
+}
+
+export interface CreateAssistantReplyInput {
+  conversationId: string
+  body: string
+  // The user message this reply answers; lets a retry replay it idempotently.
+  replyToMessageId: string
 }
 
 @Injectable()
@@ -67,5 +75,37 @@ export class MessagesService {
     }
 
     return this.messageRepository.insert(message, sendMessageDto.clientMessageId)
+  }
+
+  // Returns the most recent `limit` messages oldest-first — the order an LLM
+  // expects conversation history in.
+  async listRecentMessagesOldestFirst(
+    conversationId: string,
+    limit: number,
+  ): Promise<MessageRecord[]> {
+    const result = await this.messageRepository.findMessagePage(conversationId, undefined, limit)
+    return result.outcome === 'page' ? result.page.items : []
+  }
+
+  // The assistant reply already generated for a user message, if one was persisted.
+  findAssistantReplyTo(conversationId: string, userMessageId: string): Promise<MessageRecord | null> {
+    return this.messageRepository.findAssistantReplyTo(conversationId, userMessageId)
+  }
+
+  createAssistantReply({
+    conversationId,
+    body,
+    replyToMessageId,
+  }: CreateAssistantReplyInput): Promise<MessageRecord> {
+    const message: MessageRecord = {
+      id: `msg-${randomUUID()}`,
+      conversationId,
+      senderId: ASSISTANT_SENDER_ID,
+      body,
+      createdAt: new Date().toISOString(),
+      metadata: { replyToMessageId },
+    }
+
+    return this.messageRepository.insert(message)
   }
 }
