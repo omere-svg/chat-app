@@ -5,7 +5,15 @@ import type {
   MessagesResponse,
   SendMessageResponse,
 } from '../types/api.ts'
-import type { ConversationPreview, Message, User } from '../types/domain.ts'
+import type {
+  ConversationPreview,
+  ConversationType,
+  Message,
+  MessageMetadata,
+  User,
+} from '../types/domain.ts'
+
+const CONVERSATION_TYPES: readonly ConversationType[] = ['direct', 'assistant', 'tutor']
 
 export class MalformedResponseError extends Error {
   constructor(field: string) {
@@ -74,17 +82,34 @@ function parseUser(value: unknown): User {
   }
 }
 
+function parseMessageMetadata(value: unknown): MessageMetadata | undefined {
+  if (value === undefined || value === null) {
+    return undefined
+  }
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('message.metadata')
+  }
+  const replyToMessageId = readOptionalString(value, 'replyToMessageId', 'message.metadata')
+  // Mirror the backend, which omits empty metadata rather than sending an empty object.
+  return replyToMessageId === undefined ? undefined : { replyToMessageId }
+}
+
 function parseMessage(value: unknown): Message {
   if (!isRecord(value)) {
     throw new MalformedResponseError('message')
   }
-  return {
+  const message: Message = {
     id: readString(value, 'id', 'message'),
     conversationId: readString(value, 'conversationId', 'message'),
     senderId: readString(value, 'senderId', 'message'),
     body: readString(value, 'body', 'message'),
     createdAt: readString(value, 'createdAt', 'message'),
   }
+  const metadata = parseMessageMetadata(value.metadata)
+  if (metadata !== undefined) {
+    message.metadata = metadata
+  }
+  return message
 }
 
 function parseConversationLastMessage(
@@ -103,12 +128,21 @@ function parseConversationLastMessage(
   }
 }
 
+function readConversationType(value: Record<string, unknown>): ConversationType {
+  const candidate = value.type
+  // Tolerate an unknown/absent type (older payloads, future kinds) as 'direct'.
+  return CONVERSATION_TYPES.includes(candidate as ConversationType)
+    ? (candidate as ConversationType)
+    : 'direct'
+}
+
 function parseConversationPreview(value: unknown): ConversationPreview {
   if (!isRecord(value)) {
     throw new MalformedResponseError('conversation')
   }
   return {
     id: readString(value, 'id', 'conversation'),
+    type: readConversationType(value),
     title: readString(value, 'title', 'conversation'),
     participantIds: readStringArray(value, 'participantIds', 'conversation'),
     lastMessage: parseConversationLastMessage(value.lastMessage),
