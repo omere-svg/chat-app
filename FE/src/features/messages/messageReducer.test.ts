@@ -121,8 +121,61 @@ describe('mergeThreadMessages', () => {
     const messageB: Message = { ...baseMessage, id: 'msg-b', createdAt: sameTime }
     const messageA: Message = { ...baseMessage, id: 'msg-a', createdAt: sameTime }
 
-    const merged = mergeThreadMessages([messageB, messageA], [])
+    const merged = mergeThreadMessages([messageB, messageA], [], null)
 
     expect(merged.map((message) => message.id)).toEqual(['msg-a', 'msg-b'])
+  })
+
+  it('includes the in-flight streaming message in order', () => {
+    const streaming = {
+      id: 'assistant-temp',
+      conversationId: 'conv-1',
+      senderId: 'assistant',
+      body: 'thinking',
+      createdAt: '2026-01-01T13:00:00.000Z',
+      status: 'streaming' as const,
+    }
+
+    const merged = mergeThreadMessages([baseMessage], [], streaming)
+
+    expect(merged.map((message) => message.id)).toEqual(['msg-1', 'assistant-temp'])
+  })
+})
+
+describe('messageReducer streaming', () => {
+  it('starts, appends tokens, records tools, and finalizes a streamed reply', () => {
+    const started = messageReducer(initialMessagesState, {
+      type: 'STREAM_START',
+      placeholderMessageId: 'assistant-temp',
+      conversationId: 'conv-1',
+      createdAt: '2026-01-01T13:00:00.000Z',
+    })
+    expect(started.streaming?.status).toBe('streaming')
+
+    const withTool = messageReducer(started, { type: 'STREAM_TOOL', name: 'list_my_conversations' })
+    const withToken = messageReducer(
+      messageReducer(withTool, { type: 'STREAM_TOKEN', text: 'Hi ' }),
+      { type: 'STREAM_TOKEN', text: 'there' },
+    )
+    expect(withToken.streaming?.body).toBe('Hi there')
+    expect(withToken.streaming?.annotations?.tools).toEqual(['list_my_conversations'])
+
+    const done = messageReducer(withToken, {
+      type: 'STREAM_DONE',
+      message: { ...baseMessage, id: 'assistant-1', senderId: 'assistant', body: 'Hi there' },
+    })
+    expect(done.streaming).toBeNull()
+    expect(done.messages.map((message) => message.id)).toContain('assistant-1')
+  })
+
+  it('clears the streaming message on error', () => {
+    const started = messageReducer(initialMessagesState, {
+      type: 'STREAM_START',
+      placeholderMessageId: 'assistant-temp',
+      conversationId: 'conv-1',
+      createdAt: '2026-01-01T13:00:00.000Z',
+    })
+    const errored = messageReducer(started, { type: 'STREAM_ERROR' })
+    expect(errored.streaming).toBeNull()
   })
 })

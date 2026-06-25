@@ -23,6 +23,7 @@ describe('ConversationList', () => {
           conversations: [
             {
               id: 'conv-1',
+              type: 'direct',
               title: 'Team chat',
               participantIds: ['user-alice'],
               lastMessage: null,

@@ -103,6 +103,7 @@ export function createMockDb(): MockDb {
   const conversations: ConversationPreview[] = [
     {
       id: "conv-alice-bob",
+      type: "direct",
       title: "Alice & Bob",
       participantIds: ["user-alice", "user-bob"],
       lastMessage: {
@@ -114,6 +115,7 @@ export function createMockDb(): MockDb {
     },
     {
       id: "conv-alice-carol",
+      type: "direct",
       title: "Project sync",
       participantIds: ["user-alice", "user-carol"],
       lastMessage: {
@@ -125,6 +127,7 @@ export function createMockDb(): MockDb {
     },
     {
       id: "conv-bob-carol",
+      type: "direct",
       title: "Weekend plans",
       participantIds: ["user-bob", "user-carol"],
       lastMessage: {

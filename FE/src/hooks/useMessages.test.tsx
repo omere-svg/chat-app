@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { apiClient } from "../api/apiClient.ts";
+import { ApiError, apiClient } from "../api/apiClient.ts";
 
 vi.mock("../api/constants.ts", () => ({
   MESSAGE_PAGE_LIMIT: 10,
@@ -11,6 +11,7 @@ import { useMessages } from "./useMessages.ts";
 describe("useMessages", () => {
   afterEach(() => {
     apiClient.setToken(null);
+    vi.restoreAllMocks();
   });
 
   it("rolls back optimistic message when send fails", async () => {
@@ -20,9 +21,13 @@ describe("useMessages", () => {
     });
     apiClient.setToken(token);
 
+    vi.spyOn(apiClient, "sendMessage").mockRejectedValueOnce(
+      new ApiError(500, { code: "INTERNAL_ERROR", message: "Send failed" }),
+    );
+
     const onSendError = vi.fn();
     const { result } = renderHook(() =>
-      useMessages("conv-alice-bob", "user-alice", true, onSendError),
+      useMessages("conv-alice-bob", "user-alice", onSendError),
     );
 
     await waitFor(() => {
@@ -54,13 +59,7 @@ describe("useMessages", () => {
     const onSendSuccess = vi.fn();
 
     const { result } = renderHook(() =>
-      useMessages(
-        "conv-alice-bob",
-        "user-alice",
-        false,
-        onSendError,
-        onSendSuccess,
-      ),
+      useMessages("conv-alice-bob", "user-alice", onSendError, onSendSuccess),
     );
 
     await waitFor(() => {
@@ -90,7 +89,7 @@ describe("useMessages", () => {
     apiClient.setToken(token);
 
     const { result } = renderHook(() =>
-      useMessages("conv-alice-bob", "user-alice", false, vi.fn()),
+      useMessages("conv-alice-bob", "user-alice", vi.fn()),
     );
 
     await waitFor(() => {
