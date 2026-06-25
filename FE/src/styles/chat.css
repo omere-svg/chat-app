@@ -184,20 +184,17 @@
   color: #dc2626;
 }
 
+.new-conversation__assistant {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
 .chat-layout__main {
   flex: 1;
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.dev-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text);
 }
 
 .conversation-list {
@@ -226,6 +223,18 @@
 
 .conversation-item__title {
   font-weight: 600;
+}
+
+.conversation-item__badge {
+  margin-left: 0.4rem;
+  padding: 0 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.4;
+  border-radius: 0.5rem;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  vertical-align: middle;
 }
 
 .conversation-item__preview {
@@ -314,6 +323,36 @@
 .message-bubble__body {
   margin: 0;
   word-break: break-word;
+}
+
+/* Assistant tool-use note shown above a streaming reply. */
+.message-bubble__tools {
+  display: block;
+  font-size: 0.6875rem;
+  font-style: italic;
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
+}
+
+/* Blinking caret appended to the assistant reply while it streams in. */
+.message-bubble__cursor {
+  display: inline-block;
+  width: 0.5ch;
+  margin-left: 1px;
+  border-right: 2px solid currentColor;
+  animation: message-bubble-cursor-blink 1s steps(2, start) infinite;
+}
+
+@keyframes message-bubble-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-bubble__cursor {
+    animation: none;
+  }
 }
 
 .message-bubble__meta {

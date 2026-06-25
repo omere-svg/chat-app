@@ -22,7 +22,12 @@ export function ConversationListItem({
       className={`conversation-item${isSelected ? ' conversation-item--selected' : ''}`}
       onClick={() => onSelectConversation(conversation.id)}
     >
-      <span className="conversation-item__title">{conversation.title}</span>
+      <span className="conversation-item__title">
+        {conversation.title}
+        {conversation.type === 'assistant' ? (
+          <span className="conversation-item__badge">AI</span>
+        ) : null}
+      </span>
       <span className="conversation-item__preview">{lastMessagePreview}</span>
     </button>
   )
