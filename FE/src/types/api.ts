@@ -21,7 +21,9 @@ export type ConversationsResponse = {
 }
 
 export type CreateConversationRequest = {
-  participantEmails: string[]
+  // Defaults to 'direct' server-side. An 'assistant' conversation needs no participants.
+  type?: 'direct' | 'assistant'
+  participantEmails?: string[]
   title?: string
 }
 
