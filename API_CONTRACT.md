@@ -42,17 +42,23 @@ type User = {
 type Message = {
   id: string
   conversationId: string
-  senderId: string
+  senderId: string // the reserved id "assistant" for AI replies
   body: string
   createdAt: string // ISO 8601
+  metadata?: {
+    replyToMessageId?: string // set on assistant replies — the user message they answer
+  }
 }
 ```
 
 ### ConversationPreview
 
 ```ts
+type ConversationType = 'direct' | 'assistant' | 'tutor' // 'tutor' reserved, not yet produced
+
 type ConversationPreview = {
   id: string
+  type: ConversationType
   title: string
   participantIds: string[]
   lastMessage: Pick<Message, 'body' | 'createdAt' | 'senderId'> | null
@@ -162,9 +168,9 @@ Create a message in a conversation.
 { message: Message }
 ```
 
-**Simulated failure (Week 2 mock only)**
+**Simulated failure (non-production dev hook)**
 
-When the client sends header `X-Simulate-Failure: 1`, the mock returns **500** with `{ "error": "Simulated send failure" }`.
+When a request carries header `X-Simulate-Failure: 1`, the backend returns **500** with the `SIMULATED_SEND_FAILURE` error shape. The hook is ignored in production. No client sends this header; it exists for manual/automated testing of the send-failure path.
 
 **Errors**
 
@@ -174,7 +180,44 @@ When the client sends header `X-Simulate-Failure: 1`, the mock returns **500** w
 | 401 | Unauthorized |
 | 403 | Not a participant |
 | 404 | Unknown conversation |
-| 500 | Simulated failure (`SIMULATED_SEND_FAILURE`, dev toggle) |
+| 500 | Simulated failure (`SIMULATED_SEND_FAILURE`, non-production dev hook) |
+
+---
+
+## Assistant conversations (Week 6)
+
+### `POST /api/conversations` (assistant variant)
+
+Create an AI chat. The creator is the sole participant; multiple assistant conversations per user are allowed.
+
+**Request**
+
+```ts
+{ type: 'assistant'; title?: string } // no participantEmails; title defaults to "AI Assistant"
+```
+
+**Response `201`**: `{ conversation: ConversationPreview }` (with `type: 'assistant'`).
+
+The existing `{ participantEmails: string[]; title? }` body still creates a `direct` conversation.
+
+### `POST /api/conversations/:id/messages` (assistant streaming)
+
+When `:id` is an **assistant** conversation, the response is a **Server-Sent Events** stream (`Content-Type: text/event-stream`) instead of JSON. The request body is unchanged (`{ body, clientMessageId? }`).
+
+Pre-stream failures (auth, participant, validation) are returned as normal JSON + HTTP status before the stream begins. Once the stream starts (HTTP `200`), failures arrive as an `error` event.
+
+**SSE events** (a tolerant client must ignore unknown event names):
+
+```
+event: user_message   data: { "message": Message }          // the persisted user message
+event: token          data: { "text": string }              // assistant reply delta (repeated)
+event: tool           data: { "name": string }              // a tool the assistant invoked
+event: done           data: { "message": Message }          // the persisted assistant reply
+event: error          data: { "code": "ASSISTANT_UNAVAILABLE", "message": string }
+```
+
+- The assistant reply is persisted only after streaming completes; a client disconnect cancels generation and persists nothing.
+- Idempotent retry: re-posting the same `clientMessageId` replays the existing exchange (`user_message` then `done`) without a new LLM call.
 
 ---
 
@@ -185,3 +228,4 @@ When the client sends header `X-Simulate-Failure: 1`, the mock returns **500** w
 | 2026-05-27 | Initial contract for Week 2 MVP |
 | 2026-05-27 | Structured error shape; `INVALID_CURSOR` returns 400 |
 | 2026-06-16 | Week 5: backend moved to MongoDB persistence — contract unchanged |
+| 2026-06-25 | Week 6: `ConversationType`; assistant conversations; SSE streaming reply with tool calls; optional `Message.metadata` |
