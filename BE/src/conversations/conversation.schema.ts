@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 
+import { DEFAULT_CONVERSATION_TYPE } from './conversation.entity.js'
+import type { ConversationType } from './conversation.entity.js'
 import type { MessageDocument } from '../messages/message.schema.js'
 
 @Schema({ _id: false, versionKey: false })
@@ -23,6 +25,11 @@ const ConversationLastMessageSchema = SchemaFactory.createForClass(ConversationL
 export class ConversationDocument {
   @Prop({ type: String, required: true })
   _id!: string
+
+  // Defaulted so conversations seeded or created before this field existed read
+  // back as 'direct' rather than undefined.
+  @Prop({ type: String, required: true, default: DEFAULT_CONVERSATION_TYPE })
+  type!: ConversationType
 
   @Prop({ type: String, required: true })
   title!: string

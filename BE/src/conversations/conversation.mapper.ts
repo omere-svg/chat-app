@@ -1,9 +1,11 @@
-import { ConversationDocument } from './conversation.schema.js'
+import { DEFAULT_CONVERSATION_TYPE } from './conversation.entity.js'
+import type { ConversationDocument } from './conversation.schema.js'
 import type { ConversationRecord } from './conversation.entity.js'
 
 export function toConversationRecord(document: ConversationDocument): ConversationRecord {
   return {
     id: document._id,
+    type: document.type ?? DEFAULT_CONVERSATION_TYPE,
     title: document.title,
     participantIds: [...document.participantIds],
     lastActivityAt: document.lastActivityAt.toISOString(),
@@ -22,6 +24,7 @@ export function toConversationRecord(document: ConversationDocument): Conversati
 export function toConversationDocumentInput(conversation: ConversationRecord): ConversationDocument {
   return {
     _id: conversation.id,
+    type: conversation.type,
     title: conversation.title,
     participantIds: [...conversation.participantIds],
     lastActivityAt: new Date(conversation.lastActivityAt),

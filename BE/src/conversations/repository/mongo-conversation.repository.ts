@@ -71,4 +71,17 @@ export class MongoConversationRepository implements ConversationRepository {
       },
     )
   }
+
+  async setTitleIfCurrentTitleMatches(
+    conversationId: string,
+    title: string,
+    expectedCurrentTitle: string,
+  ): Promise<void> {
+    // The title guard makes the rename fire only while the conversation still carries
+    // the placeholder title, so it happens once and never overwrites a real title.
+    await this.conversationModel.updateOne(
+      { _id: conversationId, title: expectedCurrentTitle },
+      { $set: { title } },
+    )
+  }
 }

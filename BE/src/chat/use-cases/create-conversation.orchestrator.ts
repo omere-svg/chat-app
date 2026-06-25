@@ -4,6 +4,7 @@ import { ConversationsService } from '../../conversations/conversations.service.
 import { UsersService } from '../../users/users.service.js'
 import { ConversationParticipantsMapper } from '../mapper/conversation-participants.mapper.js'
 import { toConversationPreview } from '../conversation-preview-view.js'
+import { DEFAULT_ASSISTANT_CONVERSATION_TITLE } from '../../conversations/conversation.entity.js'
 import type { ConversationPreview } from '../conversation-preview-view.js'
 import type { CreateConversationDto } from '../../conversations/dto/create-conversation.dto.js'
 
@@ -37,7 +38,29 @@ export class CreateConversationOrchestrator {
       createConversationDto.title,
     )
 
-    const conversation = await this.conversationsService.create({ title, participantIds })
+    const conversation = await this.conversationsService.create({
+      type: 'direct',
+      title,
+      participantIds,
+    })
+    return toConversationPreview(conversation)
+  }
+
+  // An assistant conversation is private to its creator: the creator is the sole
+  // participant and there are no invitees to resolve.
+  async createAssistant(
+    creatorUserId: string,
+    requestedTitle: string | undefined,
+  ): Promise<ConversationPreview> {
+    const trimmedTitle = requestedTitle?.trim()
+    const conversation = await this.conversationsService.create({
+      type: 'assistant',
+      title:
+        trimmedTitle !== undefined && trimmedTitle.length > 0
+          ? trimmedTitle
+          : DEFAULT_ASSISTANT_CONVERSATION_TITLE,
+      participantIds: [creatorUserId],
+    })
     return toConversationPreview(conversation)
   }
 }

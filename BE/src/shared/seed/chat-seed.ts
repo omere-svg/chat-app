@@ -97,6 +97,7 @@ function buildChatSeed(): ChatSeed {
 
     conversations.push({
       id: spec.id,
+      type: 'direct',
       title: spec.title,
       participantIds: [...spec.participantIds],
       lastActivityAt: newestMessage?.createdAt ?? createdAt,
