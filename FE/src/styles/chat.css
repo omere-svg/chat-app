@@ -316,9 +316,21 @@
   word-break: break-word;
 }
 
+.message-bubble__meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
 .message-bubble__status {
   font-size: 0.75rem;
   color: var(--text);
+}
+
+.message-bubble__time {
+  font-size: 0.6875rem;
+  color: var(--text);
+  opacity: 0.65;
 }
 
 .message-thread-skeleton__row {

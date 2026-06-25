@@ -57,7 +57,7 @@ export class MongoConversationRepository implements ConversationRepository {
     await this.conversationModel.updateOne(
       {
         _id: conversationId,
-        $or: [{ lastActivityAt: null }, { lastActivityAt: { $lt: lastActivityAt } }],
+        lastActivityAt: { $lt: lastActivityAt },
       },
       {
         $set: {

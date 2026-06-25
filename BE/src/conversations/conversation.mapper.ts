@@ -6,7 +6,7 @@ export function toConversationRecord(document: ConversationDocument): Conversati
     id: document._id,
     title: document.title,
     participantIds: [...document.participantIds],
-    lastActivityAt: (document.lastActivityAt ?? document.createdAt).toISOString(),
+    lastActivityAt: document.lastActivityAt.toISOString(),
     lastMessage:
       document.lastMessage === null
         ? null

@@ -11,6 +11,13 @@ function isPendingMessage(
   return 'clientMessageId' in message
 }
 
+function formatClockTime(isoTimestamp: string): string {
+  return new Date(isoTimestamp).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export function MessageBubble({
   message,
   isOwnMessage,
@@ -23,9 +30,15 @@ export function MessageBubble({
       data-testid="message-bubble"
     >
       <p className="message-bubble__body">{message.body}</p>
-      {isPending ? (
-        <span className="message-bubble__status">Sending…</span>
-      ) : null}
+      <span className="message-bubble__meta">
+        {isPending ? (
+          <span className="message-bubble__status">Sending…</span>
+        ) : (
+          <time className="message-bubble__time" dateTime={message.createdAt}>
+            {formatClockTime(message.createdAt)}
+          </time>
+        )}
+      </span>
     </div>
   )
 }

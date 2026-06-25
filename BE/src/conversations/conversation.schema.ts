@@ -1,8 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 
+import type { MessageDocument } from '../messages/message.schema.js'
+
 @Schema({ _id: false, versionKey: false })
-export class ConversationLastMessageDocument {
+export class ConversationLastMessageDocument
+  implements Pick<MessageDocument, 'body' | 'senderId' | 'createdAt'>
+{
   @Prop({ type: String, required: true })
   body!: string
 
@@ -29,8 +33,8 @@ export class ConversationDocument {
   // Denormalized sort key + preview snapshot of the newest message, advanced on
   // each send. Lets the conversation list resolve in one indexed query with no
   // per-conversation message reads.
-  @Prop({ type: Date, default: null })
-  lastActivityAt!: Date | null
+  @Prop({ type: Date, required: true })
+  lastActivityAt!: Date
 
   @Prop({ type: ConversationLastMessageSchema, default: null })
   lastMessage!: ConversationLastMessageDocument | null
