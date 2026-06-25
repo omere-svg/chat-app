@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { AssistantModule } from '../assistant/assistant.module.js'
 import { AuthModule } from '../auth/auth.module.js'
 import { ConversationsModule } from '../conversations/conversations.module.js'
 import { MessagesModule } from '../messages/messages.module.js'
@@ -11,15 +12,17 @@ import { CreateConversationOrchestrator } from './use-cases/create-conversation.
 import { ListConversationsOrchestrator } from './use-cases/list-conversations.orchestrator.js'
 import { ListMessagesOrchestrator } from './use-cases/list-messages.orchestrator.js'
 import { SendMessageOrchestrator } from './use-cases/send-message.orchestrator.js'
+import { StreamAssistantReplyOrchestrator } from './use-cases/stream-assistant-reply.orchestrator.js'
 
 @Module({
-  imports: [AuthModule, UsersModule, ConversationsModule, MessagesModule],
+  imports: [AuthModule, UsersModule, ConversationsModule, MessagesModule, AssistantModule],
   controllers: [ConversationsController, MessagesController],
   providers: [
     ListConversationsOrchestrator,
     CreateConversationOrchestrator,
     SendMessageOrchestrator,
     ListMessagesOrchestrator,
+    StreamAssistantReplyOrchestrator,
     ConversationParticipantsMapper,
     ConversationParticipantGuard,
   ],

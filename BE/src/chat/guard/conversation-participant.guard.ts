@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import type { CanActivate, ExecutionContext } from '@nestjs/common'
-import type { Request } from 'express'
 import { ERROR_CODES } from '../../shared/errors/error-codes.constant.js'
 import { ConversationsService } from '../../conversations/conversations.service.js'
+import type { ConversationRequest } from '../decorator/current-conversation.decorator.js'
 import type { PublicUser } from '../../users/user-public-view.js'
 
-interface ParticipantGuardRequest extends Request {
+interface ParticipantGuardRequest extends ConversationRequest {
   user?: PublicUser
 }
 
@@ -32,7 +32,9 @@ export class ConversationParticipantGuard implements CanActivate {
       })
     }
 
-    await this.conversationsService.getParticipantConversationOrThrow({
+    // Loaded once here and attached to the request so handlers can branch on the
+    // conversation (e.g. by type) without re-reading it.
+    request.conversation = await this.conversationsService.getParticipantConversationOrThrow({
       conversationId,
       userId: currentUser.id,
     })
