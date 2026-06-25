@@ -10,7 +10,6 @@ import type { PendingMessage } from "../types/domain.ts";
 export function useSendMessage(
   conversationId: string | null,
   currentUserId: string,
-  simulateSendFailure: boolean,
   onSendError: (errorMessage: string) => void,
   onSendSuccess: (() => void) | undefined,
   state: MessagesState,
@@ -48,11 +47,10 @@ export function useSendMessage(
     dispatch({ type: "OPTIMISTIC_ADD", message: optimisticMessage });
 
     try {
-      const { message } = await apiClient.sendMessage(
-        targetConversationId,
-        { body: messageContent.trim(), clientMessageId },
-        { simulateSendFailure },
-      );
+      const { message } = await apiClient.sendMessage(targetConversationId, {
+        body: messageContent.trim(),
+        clientMessageId,
+      });
 
       if (activeConversationIdRef.current !== targetConversationId) {
         return false;

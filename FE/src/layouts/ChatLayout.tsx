@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { DevToggle } from "../components/DevToggle.tsx";
 import { ConversationList } from "../features/conversations/ConversationList.tsx";
 import { NewConversationFormContainer } from "../features/conversations/NewConversationForm.container.tsx";
 import { MessageThreadContainer } from "../features/messages/MessageThread.container.tsx";
 import { useAuth } from "../hooks/useAuth.ts";
 import { useConversations } from "../hooks/useConversations.ts";
-import { useDevSettings } from "../hooks/useDevSettings.ts";
 
 export function ChatLayout(): React.ReactElement {
   const { currentUser, logout } = useAuth();
-  const { simulateSendFailure, setSimulateSendFailure } = useDevSettings();
   const [userSelectedConversationId, setUserSelectedConversationId] = useState<
     string | null
   >(null);
@@ -39,12 +36,6 @@ export function ChatLayout(): React.ReactElement {
         <span className="chat-layout__user">
           Signed in as {currentUser?.displayName}
         </span>
-        {import.meta.env.DEV && (
-          <DevToggle
-            simulateSendFailure={simulateSendFailure}
-            onSimulateSendFailureChange={setSimulateSendFailure}
-          />
-        )}
         <button type="button" className="btn btn--ghost" onClick={logout}>
           Log out
         </button>

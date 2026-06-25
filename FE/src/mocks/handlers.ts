@@ -125,14 +125,6 @@ export const handlers = [
   http.post(
     `${endpoints.conversations}/:id/messages`,
     async ({ request, params }) => {
-      if (request.headers.get('X-Simulate-Failure') === '1') {
-        return jsonApiError(
-          500,
-          'SIMULATED_SEND_FAILURE',
-          'Simulated send failure',
-        )
-      }
-
       const userId = resolveUserId(bearerToken(request))
       if (!userId) {
         return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
