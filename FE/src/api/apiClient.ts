@@ -1,4 +1,5 @@
 import { endpoints } from './endpoints.ts'
+import { consumeAssistantStream } from './assistantStream.ts'
 import {
   isRecord,
   parseAuthResponse,
@@ -8,6 +9,7 @@ import {
   parseSendMessageResponse,
   parseUserResponse,
 } from './parseApiResponse.ts'
+import type { AssistantStreamHandlers } from './assistantStream.ts'
 import type {
   ApiErrorPayload,
   AuthResponse,
@@ -39,7 +41,6 @@ export class ApiError extends Error {
 type RequestOptions = {
   method?: 'GET' | 'POST'
   body?: unknown
-  simulateSendFailure?: boolean
 }
 
 class ApiClient {
@@ -93,6 +94,53 @@ class ApiClient {
     )
   }
 
+  async createAssistantConversation(title?: string): Promise<CreateConversationResponse> {
+    return this.request(endpoints.conversations, parseCreateConversationResponse, {
+      method: 'POST',
+      body: { type: 'assistant', ...(title === undefined ? {} : { title }) },
+    })
+  }
+
+  // Posts a message to an assistant conversation and consumes the SSE reply stream.
+  // Pre-stream failures throw ApiError (handled like any request); in-stream failures
+  // arrive as an `error` event delivered to handlers.onError.
+  async streamAssistantMessage(
+    conversationId: string,
+    request: SendMessageRequest,
+    handlers: AssistantStreamHandlers & { signal?: AbortSignal },
+  ): Promise<void> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    }
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`
+    }
+
+    const response = await fetch(endpoints.conversationMessages(conversationId), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request),
+      signal: handlers.signal,
+    })
+
+    if (!response.ok) {
+      let errorPayload: ApiErrorPayload
+      try {
+        errorPayload = this.parseErrorPayload(response, await response.json())
+      } catch {
+        errorPayload = { code: 'HTTP_ERROR', message: response.statusText || 'Request failed' }
+      }
+      if (response.status === 401) {
+        this.token = null
+        this.unauthorizedHandler?.()
+      }
+      throw new ApiError(response.status, errorPayload)
+    }
+
+    await consumeAssistantStream(response, handlers)
+  }
+
   async getMessages(
     conversationId: string,
     params?: { cursor?: string; limit?: number },
@@ -113,7 +161,6 @@ class ApiClient {
   async sendMessage(
     conversationId: string,
     request: SendMessageRequest,
-    options?: { simulateSendFailure?: boolean },
   ): Promise<SendMessageResponse> {
     return this.request(
       endpoints.conversationMessages(conversationId),
@@ -121,7 +168,6 @@ class ApiClient {
       {
         method: 'POST',
         body: request,
-        simulateSendFailure: options?.simulateSendFailure,
       },
     )
   }
@@ -150,11 +196,6 @@ class ApiClient {
 
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`
-    }
-
-    // Dev-only hook: never send the simulate-failure header in a production build.
-    if (import.meta.env.DEV && options.simulateSendFailure) {
-      headers['X-Simulate-Failure'] = '1'
     }
 
     const response = await fetch(path, {
