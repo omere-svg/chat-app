@@ -2,11 +2,31 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { ASSISTANT_REPLY_STRATEGY } from '../assistant/reply-strategy.port.js'
+import { FakeAssistantStrategy } from '../assistant/fake-assistant.strategy.js'
 import type { INestApplication } from '@nestjs/common'
 import type { Server } from 'node:http'
 import { applyGlobalApiContract } from '../app-http-contract.js'
 
 const SEEDED_FOREIGN_CONVERSATION_ID = 'conv-alice-bob'
+
+interface SseEvent {
+  event: string
+  data: unknown
+}
+
+// Parses a buffered text/event-stream body into its events.
+function parseSseEvents(body: string): SseEvent[] {
+  return body
+    .split('\n\n')
+    .filter((frame) => frame.trim().length > 0)
+    .map((frame) => {
+      const lines = frame.split('\n')
+      const event = lines.find((line) => line.startsWith('event: '))?.slice('event: '.length) ?? ''
+      const data = lines.find((line) => line.startsWith('data: '))?.slice('data: '.length) ?? 'null'
+      return { event, data: JSON.parse(data) as unknown }
+    })
+}
 
 describe('Chat API (e2e)', () => {
   let application: INestApplication<Server>
@@ -23,7 +43,11 @@ describe('Chat API (e2e)', () => {
     const { AppModule } = await import('../app.module.js')
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile()
+    })
+      // Keep e2e offline and deterministic: never call the real OpenAI API.
+      .overrideProvider(ASSISTANT_REPLY_STRATEGY)
+      .useClass(FakeAssistantStrategy)
+      .compile()
 
     application = moduleRef.createNestApplication()
     applyGlobalApiContract(application)
@@ -181,6 +205,133 @@ describe('Chat API (e2e)', () => {
     })
   })
 
+  describe('assistant conversations', () => {
+    it('creates an assistant conversation with the creator as sole participant (201)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'rita@example.com', 'Rita')
+
+      const response = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ type: 'assistant' })
+
+      expect(response.status).toBe(201)
+      expect(response.body.conversation.type).toBe('assistant')
+      expect(response.body.conversation.title).toBe('AI Assistant')
+      expect(response.body.conversation.participantIds).toHaveLength(1)
+    })
+
+    it('allows multiple assistant conversations for the same user (no 409)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'sam@example.com', 'Sam')
+
+      const first = await createAssistantConversation(httpServer, token)
+      const second = await createAssistantConversation(httpServer, token)
+
+      expect(second).not.toBe(first)
+    })
+
+    it('streams user_message -> tokens -> done and persists the assistant reply', async () => {
+      const token = await signUpAndGetToken(httpServer, 'tara@example.com', 'Tara')
+      const conversationId = await createAssistantConversation(httpServer, token)
+
+      const streamResponse = await request(httpServer)
+        .post(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ body: 'hello there', clientMessageId: 'client-1' })
+
+      expect(streamResponse.status).toBe(200)
+      expect(streamResponse.headers['content-type']).toContain('text/event-stream')
+
+      const events = parseSseEvents(streamResponse.text)
+      const eventNames = events.map((event) => event.event)
+      expect(eventNames[0]).toBe('user_message')
+      expect(eventNames).toContain('token')
+      expect(eventNames.at(-1)).toBe('done')
+
+      const doneEvent = events.at(-1)?.data as { message: { senderId: string; body: string } }
+      expect(doneEvent.message.senderId).toBe('assistant')
+      expect(doneEvent.message.body).toContain('Echo: hello there')
+
+      // The exchange is persisted: history shows the user message then the assistant reply.
+      const historyResponse = await request(httpServer)
+        .get(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+      expect(historyResponse.status).toBe(200)
+      const bodies = historyResponse.body.messages.map((message: { body: string }) => message.body)
+      expect(bodies).toContain('hello there')
+      expect(bodies.some((body: string) => body.startsWith('Echo:'))).toBe(true)
+    })
+
+    it('names the conversation after its first user message', async () => {
+      const token = await signUpAndGetToken(httpServer, 'vince@example.com', 'Vince')
+      const conversationId = await createAssistantConversation(httpServer, token)
+
+      await request(httpServer)
+        .post(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ body: 'Plan a trip to Japan', clientMessageId: 'client-title' })
+
+      const listResponse = await request(httpServer)
+        .get('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+      const conversation = listResponse.body.conversations.find(
+        (candidate: { id: string }) => candidate.id === conversationId,
+      )
+      expect(conversation.title).toBe('Plan a trip to Japan')
+    })
+
+    it('keeps the derived title and does not rename on later messages', async () => {
+      const token = await signUpAndGetToken(httpServer, 'wendy@example.com', 'Wendy')
+      const conversationId = await createAssistantConversation(httpServer, token)
+
+      await request(httpServer)
+        .post(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ body: 'First message wins the title', clientMessageId: 'client-first' })
+
+      await request(httpServer)
+        .post(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ body: 'A later message must not rename it', clientMessageId: 'client-second' })
+
+      const listResponse = await request(httpServer)
+        .get('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+      const conversation = listResponse.body.conversations.find(
+        (candidate: { id: string }) => candidate.id === conversationId,
+      )
+      expect(conversation.title).toBe('First message wins the title')
+    })
+
+    it('replays the same reply for a duplicate clientMessageId without a second exchange', async () => {
+      const token = await signUpAndGetToken(httpServer, 'uma@example.com', 'Uma')
+      const conversationId = await createAssistantConversation(httpServer, token)
+
+      const send = (): request.Test =>
+        request(httpServer)
+          .post(`/api/conversations/${conversationId}/messages`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ body: 'remember me', clientMessageId: 'client-dup' })
+
+      const firstDone = parseSseEvents((await send()).text).at(-1)?.data as {
+        message: { id: string }
+      }
+      const secondDone = parseSseEvents((await send()).text).at(-1)?.data as {
+        message: { id: string }
+      }
+
+      // Same reply replayed — not a second generated message.
+      expect(secondDone.message.id).toBe(firstDone.message.id)
+
+      const historyResponse = await request(httpServer)
+        .get(`/api/conversations/${conversationId}/messages`)
+        .set('Authorization', `Bearer ${token}`)
+      const assistantReplies = historyResponse.body.messages.filter(
+        (message: { senderId: string }) => message.senderId === 'assistant',
+      )
+      expect(assistantReplies).toHaveLength(1)
+    })
+  })
+
   describe('simulated send failure (dev hook)', () => {
     it('returns 500 when the header is set in a non-production environment', async () => {
       const token = await signUpAndGetToken(httpServer, 'niaj@example.com', 'Niaj')
@@ -295,6 +446,20 @@ async function createConversationWith(
 
   if (response.status !== 201 || typeof response.body.conversation?.id !== 'string') {
     throw new Error(`Test setup failed: could not create conversation (status ${response.status})`)
+  }
+  return response.body.conversation.id
+}
+
+async function createAssistantConversation(httpServer: Server, token: string): Promise<string> {
+  const response = await request(httpServer)
+    .post('/api/conversations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ type: 'assistant' })
+
+  if (response.status !== 201 || typeof response.body.conversation?.id !== 'string') {
+    throw new Error(
+      `Test setup failed: could not create assistant conversation (status ${response.status})`,
+    )
   }
   return response.body.conversation.id
 }

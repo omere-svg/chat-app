@@ -17,9 +17,10 @@ function buildOrchestrator(creatorLookup: PublicUser | null): {
   create: ReturnType<typeof vi.fn>
 } {
   const create = vi.fn().mockImplementation(
-    ({ title, participantIds }): Promise<ConversationRecord> =>
+    ({ type, title, participantIds }): Promise<ConversationRecord> =>
       Promise.resolve({
         id: 'conv-1',
+        type: type ?? 'direct',
         title,
         participantIds,
         lastActivityAt: '2026-01-01T00:00:00.000Z',
@@ -44,12 +45,13 @@ function buildOrchestrator(creatorLookup: PublicUser | null): {
 }
 
 describe('CreateConversationOrchestrator', () => {
-  it('persists a preview with the creator included among participants', async () => {
+  it('persists a direct preview with the creator included among participants', async () => {
     const { orchestrator, create } = buildOrchestrator(creator)
 
     const preview = await orchestrator.create(creator.id, createDto)
 
     expect(create).toHaveBeenCalledWith({
+      type: 'direct',
       title: 'Creator & Invitee',
       participantIds: ['user-1', 'user-2'],
     })
@@ -63,5 +65,31 @@ describe('CreateConversationOrchestrator', () => {
       UnauthorizedException,
     )
     expect(create).not.toHaveBeenCalled()
+  })
+
+  it('creates an assistant conversation with the creator as sole participant and a default title', async () => {
+    const { orchestrator, create } = buildOrchestrator(creator)
+
+    const preview = await orchestrator.createAssistant(creator.id, undefined)
+
+    expect(create).toHaveBeenCalledWith({
+      type: 'assistant',
+      title: 'AI Assistant',
+      participantIds: ['user-1'],
+    })
+    expect(preview.type).toBe('assistant')
+    expect(preview.participantIds).toEqual(['user-1'])
+  })
+
+  it('honors a custom assistant-conversation title when provided', async () => {
+    const { orchestrator, create } = buildOrchestrator(creator)
+
+    await orchestrator.createAssistant(creator.id, '  Planning bot  ')
+
+    expect(create).toHaveBeenCalledWith({
+      type: 'assistant',
+      title: 'Planning bot',
+      participantIds: ['user-1'],
+    })
   })
 })
