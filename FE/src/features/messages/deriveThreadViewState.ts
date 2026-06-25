@@ -1,4 +1,4 @@
-import type { Message, PendingMessage } from '../../types/domain.ts'
+import type { ThreadMessage } from '../../types/domain.ts'
 import type { MessagesState } from './messageReducer.ts'
 
 export type ThreadViewState =
@@ -11,7 +11,7 @@ export type ThreadViewState =
 export function deriveThreadViewState(
   conversationId: string | null,
   reducerState: MessagesState,
-  threadMessages: Array<Message | PendingMessage>,
+  threadMessages: ThreadMessage[],
 ): ThreadViewState {
   if (!conversationId) {
     return { status: 'idle' }
@@ -38,7 +38,7 @@ export function deriveThreadViewState(
 }
 
 export function getThreadScrollAnchorId(
-  threadMessages: Array<Message | PendingMessage>,
+  threadMessages: ThreadMessage[],
 ): string {
   const lastMessage = threadMessages.at(-1)
   if (!lastMessage) return 'empty-thread'

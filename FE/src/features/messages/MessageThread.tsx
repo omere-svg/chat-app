@@ -2,14 +2,14 @@ import type { RefObject } from 'react'
 import { EmptyState } from '../../components/EmptyState.tsx'
 import { ErrorBanner } from '../../components/ErrorBanner.tsx'
 import type { ThreadViewState } from './deriveThreadViewState.ts'
-import type { Message, PendingMessage } from '../../types/domain.ts'
+import type { ThreadMessage } from '../../types/domain.ts'
 import { MessageBubble } from './MessageBubble.tsx'
 import { MessageComposer } from './MessageComposer.tsx'
 import { MessageThreadSkeleton } from './MessageThreadSkeleton.tsx'
 
 type MessageThreadProps = {
   threadState: ThreadViewState
-  messages: Array<Message | PendingMessage>
+  messages: ThreadMessage[]
   currentUserId: string
   messageDraft: string
   onMessageDraftChange: (messageDraft: string) => void
