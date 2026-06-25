@@ -9,6 +9,11 @@ const MAX_TCP_PORT = 65_535
 const MIN_JWT_EXPIRY_SECONDS = 60
 const MAX_JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30
 
+const MIN_ASSISTANT_MAX_TOKENS = 256
+const MAX_ASSISTANT_MAX_TOKENS = 16_384
+const DEFAULT_ASSISTANT_MODEL = 'gpt-4o-mini'
+const DEFAULT_ASSISTANT_MAX_TOKENS = 1024
+
 const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
 const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
 
@@ -42,6 +47,23 @@ class EnvironmentVariablesSchema implements AppEnvironment {
     message: 'MONGO_URI must be a mongodb:// or mongodb+srv:// connection string',
   })
   MONGO_URI!: string
+
+  @IsString()
+  @MinLength(1)
+  OPENAI_API_KEY!: string
+
+  // Optional at runtime (defaulted below).
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  ASSISTANT_MODEL!: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(MIN_ASSISTANT_MAX_TOKENS)
+  @Max(MAX_ASSISTANT_MAX_TOKENS)
+  ASSISTANT_MAX_TOKENS!: number
 }
 
 function formatValidationFailures(validationErrors: readonly ValidationError[]): string {
@@ -77,5 +99,8 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     JWT_SECRET: candidateEnvironment.JWT_SECRET,
     JWT_EXPIRES_IN: candidateEnvironment.JWT_EXPIRES_IN,
     MONGO_URI: candidateEnvironment.MONGO_URI,
+    OPENAI_API_KEY: candidateEnvironment.OPENAI_API_KEY,
+    ASSISTANT_MODEL: candidateEnvironment.ASSISTANT_MODEL ?? DEFAULT_ASSISTANT_MODEL,
+    ASSISTANT_MAX_TOKENS: candidateEnvironment.ASSISTANT_MAX_TOKENS ?? DEFAULT_ASSISTANT_MAX_TOKENS,
   }
 }
