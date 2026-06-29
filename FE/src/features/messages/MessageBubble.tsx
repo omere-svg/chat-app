@@ -1,4 +1,5 @@
-import type { PendingMessage, StreamingMessage, ThreadMessage } from '../../types/domain.ts'
+import { MessageCitations } from './MessageCitations.tsx'
+import type { Citation, PendingMessage, StreamingMessage, ThreadMessage } from '../../types/domain.ts'
 
 type MessageBubbleProps = {
   message: ThreadMessage
@@ -27,6 +28,11 @@ export function MessageBubble({
   const isPending = isPendingMessage(message)
   const streaming = isStreamingMessage(message) ? message : null
   const tools = streaming?.annotations?.tools ?? []
+  // Citations stream into annotations live, then arrive on the persisted message's
+  // metadata once done — render from whichever is present.
+  const citations: Citation[] = streaming
+    ? (streaming.annotations?.citations ?? [])
+    : (message.metadata?.citations ?? [])
 
   return (
     <div
@@ -47,6 +53,7 @@ export function MessageBubble({
         {message.body}
         {streaming ? <span className="message-bubble__cursor" aria-hidden="true" /> : null}
       </p>
+      {citations.length > 0 ? <MessageCitations citations={citations} /> : null}
       <span className="message-bubble__meta">
         {isPending ? (
           <span className="message-bubble__status">Sending…</span>
