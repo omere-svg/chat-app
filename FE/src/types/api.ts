@@ -1,5 +1,22 @@
 import type { ConversationPreview, Message, User } from './domain.ts'
 
+export type KnowledgeDocument = {
+  id: string
+  filename: string
+  status: 'ready' | 'failed'
+  chunkCount: number
+  byteSize: number
+  createdAt: string
+}
+
+export type KnowledgeDocumentsResponse = {
+  documents: KnowledgeDocument[]
+}
+
+export type UploadKnowledgeDocumentResponse = {
+  document: KnowledgeDocument
+}
+
 export type SignupRequest = {
   email: string
   password: string
@@ -21,8 +38,9 @@ export type ConversationsResponse = {
 }
 
 export type CreateConversationRequest = {
-  // Defaults to 'direct' server-side. An 'assistant' conversation needs no participants.
-  type?: 'direct' | 'assistant'
+  // Defaults to 'direct' server-side. 'assistant' and 'tutor' conversations need no
+  // participants — the creator is the sole member.
+  type?: 'direct' | 'assistant' | 'tutor'
   participantEmails?: string[]
   title?: string
 }
