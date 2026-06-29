@@ -27,6 +27,9 @@ export function ConversationListItem({
         {conversation.type === 'assistant' ? (
           <span className="conversation-item__badge">AI</span>
         ) : null}
+        {conversation.type === 'tutor' ? (
+          <span className="conversation-item__badge">Tutor</span>
+        ) : null}
       </span>
       <span className="conversation-item__preview">{lastMessagePreview}</span>
     </button>
