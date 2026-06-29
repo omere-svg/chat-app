@@ -2,7 +2,8 @@ import type { RefObject } from 'react'
 import { EmptyState } from '../../components/EmptyState.tsx'
 import { ErrorBanner } from '../../components/ErrorBanner.tsx'
 import type { ThreadViewState } from './deriveThreadViewState.ts'
-import type { ThreadMessage } from '../../types/domain.ts'
+import type { ConversationType, ThreadMessage } from '../../types/domain.ts'
+import { KnowledgeBasePanelContainer } from '../knowledge/KnowledgeBasePanel.container.tsx'
 import { MessageBubble } from './MessageBubble.tsx'
 import { MessageComposer } from './MessageComposer.tsx'
 import { MessageThreadSkeleton } from './MessageThreadSkeleton.tsx'
@@ -21,6 +22,7 @@ type MessageThreadProps = {
   onLoadOlderMessages: () => void
   onRetryMessages?: () => void
   conversationTitle?: string
+  conversationType?: ConversationType
   messagesScrollContainerRef?: RefObject<HTMLDivElement | null>
 }
 
@@ -38,6 +40,7 @@ export function MessageThread({
   onLoadOlderMessages,
   onRetryMessages,
   conversationTitle,
+  conversationType,
   messagesScrollContainerRef,
 }: MessageThreadProps): React.ReactElement {
   if (threadState.status === 'idle') {
@@ -58,6 +61,8 @@ export function MessageThread({
           <h2>{conversationTitle}</h2>
         </header>
       ) : null}
+
+      {conversationType === 'tutor' ? <KnowledgeBasePanelContainer /> : null}
 
       <div className="message-thread__body" ref={messagesScrollContainerRef}>
         {hasMoreOlderMessages && threadState.status === 'success' ? (

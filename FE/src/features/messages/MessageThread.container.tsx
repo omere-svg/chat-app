@@ -79,6 +79,7 @@ export function MessageThreadContainer({
       onLoadOlderMessages={loadOlderMessages}
       onRetryMessages={refetchMessages}
       conversationTitle={selectedConversation?.title}
+      conversationType={selectedConversation?.type ?? 'direct'}
       messagesScrollContainerRef={messagesScrollContainerRef}
     />
   );
