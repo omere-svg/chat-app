@@ -211,6 +211,50 @@ describe('StreamAssistantReplyOrchestrator', () => {
     expect(lastEvent).toMatchObject({ data: { code: 'ASSISTANT_UNAVAILABLE' } })
   })
 
+  it('emits a citations event and persists citations on a grounded tutor reply', async () => {
+    const citations = [
+      {
+        chunkId: 'kchunk-1',
+        documentId: 'kdoc-1',
+        documentName: 'notes.md',
+        text: 'the answer',
+        score: 0.91,
+      },
+    ]
+    const { strategy } = strategyYielding([
+      { type: 'citations', citations },
+      { type: 'text-delta', text: 'Grounded ' },
+      { type: 'text-delta', text: 'answer' },
+    ])
+    const { orchestrator, createAssistantReply } = buildOrchestrator({ strategy })
+    const { emit, events } = collector()
+
+    await orchestrator.stream({
+      userId: 'user-1',
+      conversation: { ...conversation, type: 'tutor' },
+      sendMessageDto,
+      signal: new AbortController().signal,
+      emit,
+    })
+
+    // Sources arrive before the answer text, then done.
+    expect(events.map((event) => event.event)).toEqual([
+      'user_message',
+      'citations',
+      'token',
+      'token',
+      'done',
+    ])
+    const citationsEvent = events.find((event) => event.event === 'citations')
+    expect(citationsEvent).toEqual({ event: 'citations', data: { citations } })
+    expect(createAssistantReply).toHaveBeenCalledWith({
+      conversationId: conversation.id,
+      body: 'Grounded answer',
+      replyToMessageId: userMessage.id,
+      citations,
+    })
+  })
+
   it('emits an error when the assistant produces an empty reply', async () => {
     const { strategy } = strategyYielding([{ type: 'text-delta', text: '   ' }])
     const { orchestrator, createAssistantReply } = buildOrchestrator({ strategy })
