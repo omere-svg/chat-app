@@ -1,4 +1,5 @@
 import type { ConversationType } from '../conversations/conversation.entity.js'
+import type { MessageCitation } from '../messages/message.entity.js'
 
 // DI token for the bound assistant reply strategy. Production binds the OpenAI
 // strategy; tests bind a deterministic fake so CI never calls a real LLM.
@@ -23,10 +24,13 @@ export interface GenerateReplyInput {
 }
 
 // Low-level chunks a strategy emits while producing a reply. The orchestrator turns
-// these into SSE events and accumulates text deltas into the persisted reply body.
+// these into SSE events, accumulates text deltas into the persisted reply body, and
+// attaches citations to the persisted reply. The tutor strategy emits 'citations'; the
+// plain assistant strategy never does.
 export type AssistantReplyChunk =
   | { type: 'text-delta'; text: string }
   | { type: 'tool-invoked'; name: string }
+  | { type: 'citations'; citations: MessageCitation[] }
 
 // The durable seam (weeks 7-8 register additional strategies, e.g. a RAG 'tutor').
 // One strategy per conversation type; the orchestrator and transport never change.
