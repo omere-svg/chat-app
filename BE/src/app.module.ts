@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module.js'
 import { ChatModule } from './chat/chat.module.js'
 import { ConversationsModule } from './conversations/conversations.module.js'
 import { DatabaseSeedModule } from './database-seed/database-seed.module.js'
+import { KnowledgeModule } from './knowledge/knowledge.module.js'
 import { MessagesModule } from './messages/messages.module.js'
 import { UsersModule } from './users/users.module.js'
 import type { MongooseModuleOptions } from '@nestjs/mongoose'
@@ -31,6 +32,7 @@ import type { AppEnvironment } from './config/environment.types.js'
     AuthModule,
     ConversationsModule,
     MessagesModule,
+    KnowledgeModule,
     ChatModule,
     DatabaseSeedModule,
   ],
