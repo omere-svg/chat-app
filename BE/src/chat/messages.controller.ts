@@ -18,6 +18,7 @@ import { ListMessagesOrchestrator } from './use-cases/list-messages.orchestrator
 import { SendMessageOrchestrator } from './use-cases/send-message.orchestrator.js'
 import { StreamAssistantReplyOrchestrator } from './use-cases/stream-assistant-reply.orchestrator.js'
 import { serializeAssistantStreamEvent } from '../assistant/assistant-stream-event.js'
+import { isAssistantReplyType } from '../conversations/conversation.entity.js'
 import { ListMessagesQueryDto } from '../messages/dto/list-messages-query.dto.js'
 import { SendMessageDto } from '../messages/dto/send-message.dto.js'
 import type { Response } from 'express'
@@ -56,7 +57,7 @@ export class MessagesController {
     @Headers('x-simulate-failure') simulateFailureHeader: string | undefined,
     @Res() response: Response,
   ): Promise<void> {
-    if (conversation.type === 'assistant') {
+    if (isAssistantReplyType(conversation.type)) {
       await this.streamAssistantReply(currentUser, conversation, sendMessageDto, response)
       return
     }

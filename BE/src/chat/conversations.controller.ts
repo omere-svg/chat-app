@@ -37,13 +37,27 @@ export class ConversationsController {
     @CurrentUser() currentUser: PublicUser,
     @Body() createConversationDto: CreateConversationDto,
   ): Promise<ConversationCreatedResponse> {
-    const conversation =
-      createConversationDto.type === 'assistant'
-        ? await this.createConversationOrchestrator.createAssistant(
-            currentUser.id,
-            createConversationDto.title,
-          )
-        : await this.createConversationOrchestrator.create(currentUser.id, createConversationDto)
+    const conversation = await this.createConversationFor(currentUser.id, createConversationDto)
     return { conversation }
+  }
+
+  private createConversationFor(
+    creatorUserId: string,
+    createConversationDto: CreateConversationDto,
+  ): Promise<ConversationPreview> {
+    switch (createConversationDto.type) {
+      case 'assistant':
+        return this.createConversationOrchestrator.createAssistant(
+          creatorUserId,
+          createConversationDto.title,
+        )
+      case 'tutor':
+        return this.createConversationOrchestrator.createTutor(
+          creatorUserId,
+          createConversationDto.title,
+        )
+      default:
+        return this.createConversationOrchestrator.create(creatorUserId, createConversationDto)
+    }
   }
 }

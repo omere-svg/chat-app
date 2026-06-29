@@ -16,9 +16,9 @@ import {
 
 const MAX_TITLE_LENGTH = 120
 
-// Only the client-creatable conversation kinds. 'tutor' is created server-side in a
-// later week and is intentionally not accepted here.
-const CREATABLE_CONVERSATION_TYPES = ['direct', 'assistant'] as const
+// The client-creatable conversation kinds. Both 'assistant' and 'tutor' are private
+// single-user AI chats; 'direct' is human-to-human.
+const CREATABLE_CONVERSATION_TYPES = ['direct', 'assistant', 'tutor'] as const
 type CreatableConversationType = (typeof CREATABLE_CONVERSATION_TYPES)[number]
 
 export class CreateConversationDto {
@@ -26,9 +26,9 @@ export class CreateConversationDto {
   @IsIn(CREATABLE_CONVERSATION_TYPES)
   type?: CreatableConversationType
 
-  // Required for 'direct' conversations; an assistant conversation has the creator as
-  // its only participant, so it carries no invitee emails.
-  @ValidateIf((dto: CreateConversationDto) => dto.type !== 'assistant')
+  // Required only for 'direct' conversations. Assistant and tutor conversations have
+  // the creator as their sole participant, so they carry no invitee emails.
+  @ValidateIf((dto: CreateConversationDto) => dto.type !== 'assistant' && dto.type !== 'tutor')
   @IsArray()
   @ArrayMinSize(1)
   @IsEmail({}, { each: true })
