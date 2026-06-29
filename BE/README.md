@@ -32,9 +32,26 @@ Configuration is read from environment variables (see [`.env.example`](./.env.ex
 | `JWT_SECRET` | — | Secret used to sign/verify JWT access tokens (≥ 32 chars) |
 | `JWT_EXPIRES_IN` | `3600` | Access-token lifetime in seconds |
 | `MONGO_URI` | `mongodb://localhost:27017/chat` | MongoDB connection string |
+| `OPENAI_API_KEY` | — | OpenAI key for assistant replies, tutor answers, and embeddings |
+| `ASSISTANT_MODEL` | `gpt-4o-mini` | Chat model for assistant + tutor replies |
+| `EMBEDDINGS_MODEL` | `text-embedding-3-small` | Embedding model (1536 dims) for the knowledge base |
+| `ATLAS_VECTOR_INDEX` | `knowledge_chunks_vector_index` | Name of the Atlas Vector Search index |
 
 The environment is validated on boot (`config/environment.schema.ts`); the server
 fails fast with a clear message if anything is missing or malformed.
+
+### Knowledge base / tutor (RAG) — requires Atlas
+
+The tutor (`type: 'tutor'`) conversation answers from a per-user knowledge base backed
+by **MongoDB Atlas Vector Search**. Local Mongo does **not** support `$vectorSearch`, so
+tutor retrieval needs an Atlas cluster (`MONGO_URI=mongodb+srv://…`). The vector index is
+defined in the repo (`knowledge/atlas/vector-index.config.ts`) and provisioned with:
+
+```bash
+MONGO_URI="mongodb+srv://…" npm run provision:vector-index   # idempotent
+```
+
+The other features (direct + assistant chat) work against local Mongo unchanged.
 
 ## Scripts
 
@@ -46,6 +63,8 @@ npm run typecheck  # tsc --noEmit
 npm run lint       # ESLint (type-checked rules)
 npm test           # Vitest — unit specs + e2e against an in-process MongoDB
 npm run test:watch # Vitest in watch mode
+npm run provision:vector-index  # create the Atlas Vector Search index (idempotent)
+npm run eval                    # tutor retrieval-recall + answer-quality eval (needs Atlas + OpenAI)
 ```
 
 Tests need no running database: the e2e suite spins up
