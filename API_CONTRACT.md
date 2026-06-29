@@ -47,14 +47,30 @@ type Message = {
   createdAt: string // ISO 8601
   metadata?: {
     replyToMessageId?: string // set on assistant replies — the user message they answer
+    citations?: Citation[] // set on tutor replies — the source chunks the answer used
   }
+}
+```
+
+### Citation
+
+A source chunk a tutor answer was grounded in. Persisted on the reply (survives reload)
+and also streamed live (see the `citations` SSE event).
+
+```ts
+type Citation = {
+  chunkId: string
+  documentId: string
+  documentName: string
+  text: string // the chunk text, so the client can show the source inline
+  score: number // cosine similarity to the question, 0..1
 }
 ```
 
 ### ConversationPreview
 
 ```ts
-type ConversationType = 'direct' | 'assistant' | 'tutor' // 'tutor' reserved, not yet produced
+type ConversationType = 'direct' | 'assistant' | 'tutor' // 'tutor' = RAG over the user's knowledge base
 
 type ConversationPreview = {
   id: string
@@ -212,12 +228,83 @@ Pre-stream failures (auth, participant, validation) are returned as normal JSON 
 event: user_message   data: { "message": Message }          // the persisted user message
 event: token          data: { "text": string }              // assistant reply delta (repeated)
 event: tool           data: { "name": string }              // a tool the assistant invoked
+event: citations      data: { "citations": Citation[] }     // tutor only — sources, before tokens
 event: done           data: { "message": Message }          // the persisted assistant reply
 event: error          data: { "code": "ASSISTANT_UNAVAILABLE", "message": string }
 ```
 
 - The assistant reply is persisted only after streaming completes; a client disconnect cancels generation and persists nothing.
 - Idempotent retry: re-posting the same `clientMessageId` replays the existing exchange (`user_message` then `done`) without a new LLM call.
+
+---
+
+## Knowledge base & tutor conversations (Week 7)
+
+A **tutor** conversation answers using ONLY the authenticated user's uploaded documents
+(a private, per-user knowledge base), with citations. Tutor chat reuses the assistant
+streaming path; the only new wire addition is the `citations` SSE event above.
+
+### `POST /api/conversations` (tutor variant)
+
+```ts
+{ type: 'tutor'; title? } // no participantEmails; title defaults to "AI Tutor"
+```
+
+**Response `201`**: `{ conversation: ConversationPreview }` (with `type: 'tutor'`). The
+creator is the sole participant. Grounding: if no uploaded chunk is relevant to a
+question, the tutor replies that it could not find the answer in the documents and the
+reply carries **no** citations — no model is called, so it cannot hallucinate.
+
+### `POST /api/knowledge/documents`
+
+Upload a document into the current user's knowledge base and ingest it synchronously
+(chunk → embed → store). `multipart/form-data` with a single file field named `file`.
+
+- Supported formats: `.txt`, `.md`, `.markdown` (UTF-8 text). Max size **1,000,000 bytes**.
+- Idempotent: re-uploading identical content returns the existing document (by content
+  hash) and creates no duplicate chunks.
+
+**Response `201`**
+
+```ts
+{ document: KnowledgeDocument }
+
+type KnowledgeDocument = {
+  id: string
+  filename: string
+  status: 'ready' | 'failed' // synchronous ingestion: 'ready' on success
+  chunkCount: number
+  byteSize: number
+  createdAt: string // ISO 8601
+}
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Missing/empty file, or file over the size limit (`VALIDATION_ERROR`) |
+| 400 | Unsupported file type (`UNSUPPORTED_DOCUMENT`) |
+| 401 | Unauthorized |
+
+### `GET /api/knowledge/documents`
+
+List the current user's uploaded documents, newest first.
+
+**Response `200`**: `{ documents: KnowledgeDocument[] }`
+
+### `DELETE /api/knowledge/documents/:id`
+
+Remove a document and all of its chunks. Scoped to the owner.
+
+**Response `204`** (no body).
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 401 | Unauthorized |
+| 404 | Unknown document, or not owned by the user (`KNOWLEDGE_DOCUMENT_NOT_FOUND`) |
 
 ---
 
@@ -229,3 +316,4 @@ event: error          data: { "code": "ASSISTANT_UNAVAILABLE", "message": string
 | 2026-05-27 | Structured error shape; `INVALID_CURSOR` returns 400 |
 | 2026-06-16 | Week 5: backend moved to MongoDB persistence — contract unchanged |
 | 2026-06-25 | Week 6: `ConversationType`; assistant conversations; SSE streaming reply with tool calls; optional `Message.metadata` |
+| 2026-06-29 | Week 7: tutor (RAG) conversations; `/knowledge/documents` upload/list/delete; `Citation` + `Message.metadata.citations`; `citations` SSE event |
