@@ -1,6 +1,7 @@
 import { Type, plainToInstance } from 'class-transformer'
 import { IsIn, IsInt, IsOptional, IsString, IsUrl, Matches, Max, Min, MinLength, validateSync } from 'class-validator'
 import type { ValidationError } from 'class-validator'
+import { DEFAULT_ATLAS_VECTOR_INDEX } from '../knowledge/atlas/vector-index.config.js'
 import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
 
 const MIN_JWT_SECRET_LENGTH = 32
@@ -13,6 +14,7 @@ const MIN_ASSISTANT_MAX_TOKENS = 256
 const MAX_ASSISTANT_MAX_TOKENS = 16_384
 const DEFAULT_ASSISTANT_MODEL = 'gpt-4o-mini'
 const DEFAULT_ASSISTANT_MAX_TOKENS = 1024
+const DEFAULT_EMBEDDINGS_MODEL = 'text-embedding-3-small'
 
 const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
 const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
@@ -64,6 +66,20 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @Min(MIN_ASSISTANT_MAX_TOKENS)
   @Max(MAX_ASSISTANT_MAX_TOKENS)
   ASSISTANT_MAX_TOKENS!: number
+
+  // Optional at runtime (defaulted below). OpenAI embedding model used for ingestion
+  // and query embedding; must match the Atlas index's numDimensions.
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  EMBEDDINGS_MODEL!: string
+
+  // Optional at runtime (defaulted below). Name of the Atlas Vector Search index on
+  // the knowledge_chunks collection.
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  ATLAS_VECTOR_INDEX!: string
 }
 
 function formatValidationFailures(validationErrors: readonly ValidationError[]): string {
@@ -102,5 +118,7 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     OPENAI_API_KEY: candidateEnvironment.OPENAI_API_KEY,
     ASSISTANT_MODEL: candidateEnvironment.ASSISTANT_MODEL ?? DEFAULT_ASSISTANT_MODEL,
     ASSISTANT_MAX_TOKENS: candidateEnvironment.ASSISTANT_MAX_TOKENS ?? DEFAULT_ASSISTANT_MAX_TOKENS,
+    EMBEDDINGS_MODEL: candidateEnvironment.EMBEDDINGS_MODEL ?? DEFAULT_EMBEDDINGS_MODEL,
+    ATLAS_VECTOR_INDEX: candidateEnvironment.ATLAS_VECTOR_INDEX ?? DEFAULT_ATLAS_VECTOR_INDEX,
   }
 }

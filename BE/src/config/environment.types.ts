@@ -10,4 +10,6 @@ export interface AppEnvironment {
   OPENAI_API_KEY: string
   ASSISTANT_MODEL: string
   ASSISTANT_MAX_TOKENS: number
+  EMBEDDINGS_MODEL: string
+  ATLAS_VECTOR_INDEX: string
 }
