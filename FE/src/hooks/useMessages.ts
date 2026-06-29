@@ -66,7 +66,10 @@ export function useMessages(
     activeConversationIdRef,
   );
 
-  const isAssistantConversation = conversationType === "assistant";
+  // Both assistant and tutor conversations reply over the SSE stream; tutor adds
+  // retrieval + citations but flows through the same streaming path.
+  const isStreamingConversation =
+    conversationType === "assistant" || conversationType === "tutor";
 
   return {
     threadState,
@@ -75,8 +78,8 @@ export function useMessages(
     isLoadingOlderMessages,
     loadOlderMessagesError,
     loadOlderMessages,
-    sendMessage: isAssistantConversation ? sendAssistantMessage : sendHumanMessage,
-    isSendingMessage: isAssistantConversation
+    sendMessage: isStreamingConversation ? sendAssistantMessage : sendHumanMessage,
+    isSendingMessage: isStreamingConversation
       ? isStreaming || state.pending.length > 0
       : isSendingHumanMessage,
     refetchMessages,

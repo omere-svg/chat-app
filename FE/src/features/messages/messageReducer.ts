@@ -1,5 +1,6 @@
 import { ASSISTANT_SENDER_ID } from '../../types/domain.ts'
 import type {
+  Citation,
   Message,
   PendingMessage,
   StreamingMessage,
@@ -71,6 +72,7 @@ export type MessagesAction =
     }
   | { type: 'STREAM_TOKEN'; text: string }
   | { type: 'STREAM_TOOL'; name: string }
+  | { type: 'STREAM_CITATIONS'; citations: Citation[] }
   | { type: 'STREAM_DONE'; message: Message }
   | { type: 'STREAM_ERROR' }
 
@@ -194,6 +196,18 @@ export function messageReducer(
           annotations: {
             tools: [...(state.streaming.annotations?.tools ?? []), action.name],
           },
+        },
+      }
+
+    case 'STREAM_CITATIONS':
+      if (state.streaming === null) {
+        return state
+      }
+      return {
+        ...state,
+        streaming: {
+          ...state.streaming,
+          annotations: { ...state.streaming.annotations, citations: action.citations },
         },
       }
 

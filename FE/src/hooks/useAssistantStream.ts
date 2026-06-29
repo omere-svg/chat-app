@@ -101,6 +101,9 @@ export function useAssistantStream(
           onTool: (name) => {
             if (!isStale()) dispatch({ type: "STREAM_TOOL", name });
           },
+          onCitations: (citations) => {
+            if (!isStale()) dispatch({ type: "STREAM_CITATIONS", citations });
+          },
           onDone: (message) => {
             if (isStale()) return;
             dispatch({ type: "STREAM_DONE", message });
