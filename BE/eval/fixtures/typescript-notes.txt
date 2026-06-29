@@ -1,0 +1,22 @@
+TypeScript Notes
+
+TypeScript is a strongly typed superset of JavaScript that compiles to plain
+JavaScript. It was first released by Microsoft in 2012.
+
+Strict mode
+Enabling "strict": true in tsconfig turns on a family of checks including
+strictNullChecks, noImplicitAny, and strictFunctionTypes. strictNullChecks makes null
+and undefined distinct types that must be handled explicitly.
+
+Type vs interface
+Interfaces can be reopened and merged via declaration merging, while type aliases
+cannot. Type aliases can express unions and tuples directly; interfaces cannot.
+
+Unknown vs any
+The unknown type is the type-safe counterpart of any: a value of type unknown must be
+narrowed with a type guard before it can be used, whereas any disables type checking
+entirely.
+
+Generics
+Generics let you write reusable components that work over a range of types while
+preserving type information, for example Array<T> or Promise<T>.

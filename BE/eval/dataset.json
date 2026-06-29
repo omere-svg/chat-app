@@ -1,0 +1,89 @@
+{
+  "description": "Retrieval + answer-quality eval for the AI tutor. Each item names the document the answer should be retrieved from (for recall@k) and keywords the answer should cover (a rough answer-quality proxy alongside the printed answers).",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Which is the hottest planet and why?",
+      "expectedDocument": "solar-system.md",
+      "expectedKeywords": ["venus", "greenhouse"]
+    },
+    {
+      "id": "q2",
+      "question": "Why was Pluto reclassified as a dwarf planet?",
+      "expectedDocument": "solar-system.md",
+      "expectedKeywords": ["2006", "orbit"]
+    },
+    {
+      "id": "q3",
+      "question": "What is the tallest volcano in the Solar System?",
+      "expectedDocument": "solar-system.md",
+      "expectedKeywords": ["olympus mons", "mars"]
+    },
+    {
+      "id": "q4",
+      "question": "How many moons does Mars have and what are they called?",
+      "expectedDocument": "solar-system.md",
+      "expectedKeywords": ["two", "phobos", "deimos"]
+    },
+    {
+      "id": "q5",
+      "question": "What fraction of the Solar System's mass is in the Sun?",
+      "expectedDocument": "solar-system.md",
+      "expectedKeywords": ["99.8"]
+    },
+    {
+      "id": "q6",
+      "question": "Why is Mars called the Red Planet?",
+      "expectedDocument": "solar-system.md",
+      "expectedKeywords": ["iron oxide"]
+    },
+    {
+      "id": "q7",
+      "question": "Where does the oxygen released during photosynthesis come from?",
+      "expectedDocument": "photosynthesis.md",
+      "expectedKeywords": ["water"]
+    },
+    {
+      "id": "q8",
+      "question": "Why do leaves appear green?",
+      "expectedDocument": "photosynthesis.md",
+      "expectedKeywords": ["chlorophyll", "green"]
+    },
+    {
+      "id": "q9",
+      "question": "What does the Calvin cycle do and where does it happen?",
+      "expectedDocument": "photosynthesis.md",
+      "expectedKeywords": ["stroma", "carbon dioxide"]
+    },
+    {
+      "id": "q10",
+      "question": "What are the inputs needed for photosynthesis?",
+      "expectedDocument": "photosynthesis.md",
+      "expectedKeywords": ["carbon dioxide", "water", "light"]
+    },
+    {
+      "id": "q11",
+      "question": "What is the difference between the unknown and any types?",
+      "expectedDocument": "typescript-notes.txt",
+      "expectedKeywords": ["narrow", "guard"]
+    },
+    {
+      "id": "q12",
+      "question": "What does strictNullChecks do?",
+      "expectedDocument": "typescript-notes.txt",
+      "expectedKeywords": ["null", "undefined"]
+    },
+    {
+      "id": "q13",
+      "question": "Can interfaces be merged in TypeScript?",
+      "expectedDocument": "typescript-notes.txt",
+      "expectedKeywords": ["declaration merging"]
+    },
+    {
+      "id": "q14",
+      "question": "When was TypeScript first released?",
+      "expectedDocument": "typescript-notes.txt",
+      "expectedKeywords": ["2012"]
+    }
+  ]
+}
