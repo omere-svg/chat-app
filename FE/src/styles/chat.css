@@ -502,3 +502,170 @@
     border-bottom: 1px solid var(--border);
   }
 }
+
+/* Link-style button used for inline actions (delete, retry). */
+.btn--link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.btn--link:disabled {
+  color: var(--text);
+  cursor: default;
+  text-decoration: none;
+}
+
+/* Knowledge-base panel (tutor conversations). */
+.knowledge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.knowledge-panel__title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.knowledge-panel__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.knowledge-panel__upload {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Hide the native file input; the styled <label> triggers it (and is keyboard-focusable
+   via the input it labels). */
+.knowledge-panel__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.knowledge-panel__status,
+.knowledge-panel__empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.knowledge-panel__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger, #c0392b);
+}
+
+.knowledge-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.knowledge-panel__doc {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.knowledge-panel__doc-name {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.knowledge-panel__doc-meta {
+  color: var(--text);
+  margin-right: auto;
+}
+
+/* Citations rendered under a tutor reply. */
+.message-citations {
+  margin-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.5rem;
+}
+
+.message-citations__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.message-citations__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.message-citations__toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-h);
+}
+
+.message-citations__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.message-citations__score {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One-line snippet so sources from the same document are distinguishable at a glance. */
+.message-citations__preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.message-citations__text {
+  margin: 0.25rem 0 0;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  background: var(--code-bg);
+  border-radius: 6px;
+  color: var(--text-h);
+  white-space: pre-wrap;
+}
