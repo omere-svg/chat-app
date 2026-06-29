@@ -5,8 +5,10 @@ import {
   parseAuthResponse,
   parseConversationsResponse,
   parseCreateConversationResponse,
+  parseKnowledgeDocumentsResponse,
   parseMessagesResponse,
   parseSendMessageResponse,
+  parseUploadKnowledgeDocumentResponse,
   parseUserResponse,
 } from './parseApiResponse.ts'
 import type { AssistantStreamHandlers } from './assistantStream.ts'
@@ -16,11 +18,13 @@ import type {
   ConversationsResponse,
   CreateConversationRequest,
   CreateConversationResponse,
+  KnowledgeDocumentsResponse,
   LoginRequest,
   MessagesResponse,
   SendMessageRequest,
   SendMessageResponse,
   SignupRequest,
+  UploadKnowledgeDocumentResponse,
 } from '../types/api.ts'
 import type { User } from '../types/domain.ts'
 
@@ -101,6 +105,54 @@ class ApiClient {
     })
   }
 
+  async createTutorConversation(title?: string): Promise<CreateConversationResponse> {
+    return this.request(endpoints.conversations, parseCreateConversationResponse, {
+      method: 'POST',
+      body: { type: 'tutor', ...(title === undefined ? {} : { title }) },
+    })
+  }
+
+  async listKnowledgeDocuments(): Promise<KnowledgeDocumentsResponse> {
+    return this.request(endpoints.knowledgeDocuments, parseKnowledgeDocumentsResponse)
+  }
+
+  // Uploads a document as multipart/form-data. The browser sets the multipart boundary,
+  // so Content-Type is deliberately left unset here.
+  async uploadKnowledgeDocument(file: File): Promise<UploadKnowledgeDocumentResponse> {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const headers: Record<string, string> = {}
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`
+    }
+
+    const response = await fetch(endpoints.knowledgeDocuments, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    if (!response.ok) {
+      throw await this.toApiError(response)
+    }
+    return parseUploadKnowledgeDocumentResponse(await response.json())
+  }
+
+  async deleteKnowledgeDocument(documentId: string): Promise<void> {
+    const headers: Record<string, string> = {}
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`
+    }
+
+    const response = await fetch(endpoints.knowledgeDocument(documentId), {
+      method: 'DELETE',
+      headers,
+    })
+    if (!response.ok) {
+      throw await this.toApiError(response)
+    }
+  }
+
   // Posts a message to an assistant conversation and consumes the SSE reply stream.
   // Pre-stream failures throw ApiError (handled like any request); in-stream failures
   // arrive as an `error` event delivered to handlers.onError.
@@ -170,6 +222,22 @@ class ApiClient {
         body: request,
       },
     )
+  }
+
+  // Builds an ApiError from a non-ok response, parsing the structured body when present
+  // and clearing the token on 401 (mirrors the inline handling in request/stream).
+  private async toApiError(response: Response): Promise<ApiError> {
+    let errorPayload: ApiErrorPayload
+    try {
+      errorPayload = this.parseErrorPayload(response, await response.json())
+    } catch {
+      errorPayload = { code: 'HTTP_ERROR', message: response.statusText || 'Request failed' }
+    }
+    if (response.status === 401) {
+      this.token = null
+      this.unauthorizedHandler?.()
+    }
+    return new ApiError(response.status, errorPayload)
   }
 
   private parseErrorPayload(response: Response, body: unknown): ApiErrorPayload {

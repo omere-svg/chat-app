@@ -7,4 +7,6 @@ export const endpoints = {
   conversations: `${API_BASE}/conversations`,
   conversationMessages: (id: string): string =>
     `${API_BASE}/conversations/${id}/messages`,
+  knowledgeDocuments: `${API_BASE}/knowledge/documents`,
+  knowledgeDocument: (id: string): string => `${API_BASE}/knowledge/documents/${id}`,
 } as const

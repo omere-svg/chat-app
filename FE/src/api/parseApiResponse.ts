@@ -2,10 +2,14 @@ import type {
   AuthResponse,
   ConversationsResponse,
   CreateConversationResponse,
+  KnowledgeDocument,
+  KnowledgeDocumentsResponse,
   MessagesResponse,
   SendMessageResponse,
+  UploadKnowledgeDocumentResponse,
 } from '../types/api.ts'
 import type {
+  Citation,
   ConversationPreview,
   ConversationType,
   Message,
@@ -53,6 +57,18 @@ function readOptionalString(
   return value
 }
 
+function readNumber(
+  record: Record<string, unknown>,
+  field: string,
+  context: string,
+): number {
+  const value = record[field]
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    throw new MalformedResponseError(`${context}.${field}`)
+  }
+  return value
+}
+
 function readStringArray(
   record: Record<string, unknown>,
   field: string,
@@ -82,6 +98,31 @@ function parseUser(value: unknown): User {
   }
 }
 
+export function parseCitation(value: unknown, context: string): Citation {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError(context)
+  }
+  return {
+    chunkId: readString(value, 'chunkId', context),
+    documentId: readString(value, 'documentId', context),
+    documentName: readString(value, 'documentName', context),
+    text: readString(value, 'text', context),
+    score: readNumber(value, 'score', context),
+  }
+}
+
+function parseCitations(value: unknown): Citation[] | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  if (!Array.isArray(value)) {
+    throw new MalformedResponseError('message.metadata.citations')
+  }
+  return value.map((entry, index) =>
+    parseCitation(entry, `message.metadata.citations[${index}]`),
+  )
+}
+
 function parseMessageMetadata(value: unknown): MessageMetadata | undefined {
   if (value === undefined || value === null) {
     return undefined
@@ -90,8 +131,19 @@ function parseMessageMetadata(value: unknown): MessageMetadata | undefined {
     throw new MalformedResponseError('message.metadata')
   }
   const replyToMessageId = readOptionalString(value, 'replyToMessageId', 'message.metadata')
+  const citations = parseCitations(value.citations)
   // Mirror the backend, which omits empty metadata rather than sending an empty object.
-  return replyToMessageId === undefined ? undefined : { replyToMessageId }
+  if (replyToMessageId === undefined && citations === undefined) {
+    return undefined
+  }
+  const metadata: MessageMetadata = {}
+  if (replyToMessageId !== undefined) {
+    metadata.replyToMessageId = replyToMessageId
+  }
+  if (citations !== undefined) {
+    metadata.citations = citations
+  }
+  return metadata
 }
 
 function parseMessage(value: unknown): Message {
@@ -198,4 +250,40 @@ export function parseSendMessageResponse(value: unknown): SendMessageResponse {
     throw new MalformedResponseError('sendMessageResponse')
   }
   return { message: parseMessage(value.message) }
+}
+
+function parseKnowledgeDocument(value: unknown): KnowledgeDocument {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('knowledgeDocument')
+  }
+  const status = readString(value, 'status', 'knowledgeDocument')
+  if (status !== 'ready' && status !== 'failed') {
+    throw new MalformedResponseError('knowledgeDocument.status')
+  }
+  return {
+    id: readString(value, 'id', 'knowledgeDocument'),
+    filename: readString(value, 'filename', 'knowledgeDocument'),
+    status,
+    chunkCount: readNumber(value, 'chunkCount', 'knowledgeDocument'),
+    byteSize: readNumber(value, 'byteSize', 'knowledgeDocument'),
+    createdAt: readString(value, 'createdAt', 'knowledgeDocument'),
+  }
+}
+
+export function parseKnowledgeDocumentsResponse(
+  value: unknown,
+): KnowledgeDocumentsResponse {
+  if (!isRecord(value) || !Array.isArray(value.documents)) {
+    throw new MalformedResponseError('knowledgeDocumentsResponse.documents')
+  }
+  return { documents: value.documents.map(parseKnowledgeDocument) }
+}
+
+export function parseUploadKnowledgeDocumentResponse(
+  value: unknown,
+): UploadKnowledgeDocumentResponse {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('uploadKnowledgeDocumentResponse')
+  }
+  return { document: parseKnowledgeDocument(value.document) }
 }

@@ -1,11 +1,12 @@
-import { isRecord, parseSendMessageResponse } from './parseApiResponse.ts'
+import { isRecord, parseCitation, parseSendMessageResponse } from './parseApiResponse.ts'
 import type { ApiErrorPayload } from '../types/api.ts'
-import type { Message } from '../types/domain.ts'
+import type { Citation, Message } from '../types/domain.ts'
 
 export type AssistantStreamHandlers = {
   onUserMessage: (message: Message) => void
   onToken: (text: string) => void
   onTool: (name: string) => void
+  onCitations: (citations: Citation[]) => void
   onDone: (message: Message) => void
   onError: (error: ApiErrorPayload) => void
 }
@@ -77,6 +78,15 @@ function dispatchFrame(frame: string, handlers: AssistantStreamHandlers): void {
     case 'tool':
       if (isRecord(data) && typeof data.name === 'string') {
         handlers.onTool(data.name)
+      }
+      break
+    case 'citations':
+      if (isRecord(data) && Array.isArray(data.citations)) {
+        handlers.onCitations(
+          data.citations.map((entry, index) =>
+            parseCitation(entry, `citations[${index}]`),
+          ),
+        )
       }
       break
     case 'done':
