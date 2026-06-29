@@ -4,7 +4,17 @@ import globals from 'globals'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'eslint.config.js', 'vitest.config.ts'],
+    // eval/ and scripts/ are standalone operational scripts run directly via node's
+    // TypeScript support; they are typechecked via tsconfig.scripts.json, not linted
+    // by the app's src-scoped project service.
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'eslint.config.js',
+      'vitest.config.ts',
+      'eval/**',
+      'scripts/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
