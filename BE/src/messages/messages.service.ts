@@ -4,7 +4,7 @@ import { ERROR_CODES } from '../shared/errors/error-codes.constant.js'
 import { MESSAGE_REPOSITORY } from './repository/message-repository.port.js'
 import { ASSISTANT_SENDER_ID } from './message.entity.js'
 import type { MessageRepository } from './repository/message-repository.port.js'
-import type { MessageRecord } from './message.entity.js'
+import type { MessageCitation, MessageMetadata, MessageRecord } from './message.entity.js'
 import type { ListMessagesQueryDto } from './dto/list-messages-query.dto.js'
 import type { SendMessageDto } from './dto/send-message.dto.js'
 
@@ -26,6 +26,8 @@ export interface CreateAssistantReplyInput {
   body: string
   // The user message this reply answers; lets a retry replay it idempotently.
   replyToMessageId: string
+  // Source chunks a tutor reply was grounded in. Omitted for plain assistant replies.
+  citations?: MessageCitation[]
 }
 
 @Injectable()
@@ -96,14 +98,20 @@ export class MessagesService {
     conversationId,
     body,
     replyToMessageId,
+    citations,
   }: CreateAssistantReplyInput): Promise<MessageRecord> {
+    const metadata: MessageMetadata = { replyToMessageId }
+    if (citations !== undefined && citations.length > 0) {
+      metadata.citations = citations
+    }
+
     const message: MessageRecord = {
       id: `msg-${randomUUID()}`,
       conversationId,
       senderId: ASSISTANT_SENDER_ID,
       body,
       createdAt: new Date().toISOString(),
-      metadata: { replyToMessageId },
+      metadata,
     }
 
     return this.messageRepository.insert(message)

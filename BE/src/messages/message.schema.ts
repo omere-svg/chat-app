@@ -2,9 +2,33 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 
 @Schema({ _id: false, versionKey: false })
+export class MessageCitationDocument {
+  @Prop({ type: String, required: true })
+  chunkId!: string
+
+  @Prop({ type: String, required: true })
+  documentId!: string
+
+  @Prop({ type: String, required: true })
+  documentName!: string
+
+  @Prop({ type: String, required: true })
+  text!: string
+
+  @Prop({ type: Number, required: true })
+  score!: number
+}
+
+const MessageCitationSchema = SchemaFactory.createForClass(MessageCitationDocument)
+
+@Schema({ _id: false, versionKey: false })
 export class MessageMetadataDocument {
   @Prop({ type: String })
   replyToMessageId?: string
+
+  // Source chunks a tutor reply cites. Absent on plain assistant/direct messages.
+  @Prop({ type: [MessageCitationSchema] })
+  citations?: MessageCitationDocument[]
 }
 
 const MessageMetadataSchema = SchemaFactory.createForClass(MessageMetadataDocument)
