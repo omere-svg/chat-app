@@ -8,7 +8,7 @@ import { deriveConversationTitleFromMessage } from '../../conversations/derive-c
 import type { ConversationRecord } from '../../conversations/conversation.entity.js'
 import type { AssistantStreamEvent } from '../../assistant/assistant-stream-event.js'
 import type { AssistantTurnMessage } from '../../assistant/reply-strategy.port.js'
-import type { MessageRecord } from '../../messages/message.entity.js'
+import type { MessageCitation, MessageRecord } from '../../messages/message.entity.js'
 import type { SendMessageDto } from '../../messages/dto/send-message.dto.js'
 
 const HISTORY_LIMIT = 20
@@ -82,6 +82,7 @@ export class StreamAssistantReplyOrchestrator {
     const strategy = this.replyStrategyRegistry.resolve(conversation.type)
 
     let replyText = ''
+    let citations: MessageCitation[] = []
     try {
       for await (const chunk of strategy.generate({
         userId,
@@ -89,11 +90,18 @@ export class StreamAssistantReplyOrchestrator {
         history,
         signal,
       })) {
-        if (chunk.type === 'text-delta') {
-          replyText += chunk.text
-          emit({ event: 'token', data: { text: chunk.text } })
-        } else {
-          emit({ event: 'tool', data: { name: chunk.name } })
+        switch (chunk.type) {
+          case 'text-delta':
+            replyText += chunk.text
+            emit({ event: 'token', data: { text: chunk.text } })
+            break
+          case 'tool-invoked':
+            emit({ event: 'tool', data: { name: chunk.name } })
+            break
+          case 'citations':
+            citations = chunk.citations
+            emit({ event: 'citations', data: { citations } })
+            break
         }
       }
     } catch (error) {
@@ -128,6 +136,9 @@ export class StreamAssistantReplyOrchestrator {
         conversationId: conversation.id,
         body: trimmedReply,
         replyToMessageId: userMessage.id,
+        // Only tutor replies carry citations; omit the field entirely otherwise so the
+        // plain assistant reply shape is unchanged.
+        ...(citations.length > 0 ? { citations } : {}),
       })
       await this.conversationsService.advanceLastMessageIfNewer(
         conversation.id,
