@@ -67,6 +67,9 @@ export const MessageSchema = SchemaFactory.createForClass(MessageDocument)
 // Backs message-history pagination and the (createdAt, _id) cursor walk.
 MessageSchema.index({ conversationId: 1, createdAt: -1, _id: -1 })
 
+// Backs the search_my_messages tool: newest-first scan over a single author's messages.
+MessageSchema.index({ senderId: 1, createdAt: -1, _id: -1 })
+
 // Enforces send idempotency per conversation when a clientMessageId is present.
 MessageSchema.index(
   { conversationId: 1, clientMessageId: 1 },
