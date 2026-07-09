@@ -1,15 +1,18 @@
 import { describe, expect, it } from 'vitest'
+import { ChatOpenAI } from '@langchain/openai'
+import { MemorySaver } from '@langchain/langgraph'
 import {
   ASSISTANT_SYSTEM_PROMPT,
   ASSISTANT_SYSTEM_PROMPT_VERSION,
 } from '../assistant/prompts/assistant-system-prompt.js'
 import { ListMyConversationsTool } from '../assistant/tools/list-my-conversations.tool.js'
 import { AssistantToolRegistry } from '../assistant/tools/assistant-tool.registry.js'
-import { OpenAiAssistantStrategy } from '../assistant/openai-assistant.strategy.js'
-import type { ConfigService } from '@nestjs/config'
-import type { AppEnvironment } from '../config/environment.types.js'
+import { buildAgentGraph } from '../agent/agent.graph.js'
+import { LangGraphAgentStrategy } from '../agent/langgraph-agent.strategy.js'
 import type { ConversationsService } from '../conversations/conversations.service.js'
 import type { ConversationRecord } from '../conversations/conversation.entity.js'
+import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
+import type { VectorRetriever } from '../knowledge/retrieval/vector-retriever.port.js'
 import type { AssistantReplyChunk } from '../assistant/reply-strategy.port.js'
 
 // ---- Tier 1: deterministic checks (always run in CI; no network) ----
@@ -22,7 +25,7 @@ describe('assistant prompt (deterministic)', () => {
   it('encodes the load-bearing constraints (scope + no fabrication + tool guidance)', () => {
     const prompt = ASSISTANT_SYSTEM_PROMPT.toLowerCase()
     expect(prompt).toContain('list_my_conversations')
-    expect(prompt).toContain("another user")
+    expect(prompt).toContain('another user')
     expect(prompt).toContain('fabricate')
   })
 
@@ -41,19 +44,15 @@ describe('assistant prompt (deterministic)', () => {
 
 const runLlmEvals = process.env.RUN_LLM_EVALS === '1'
 
-function buildRealStrategy(): OpenAiAssistantStrategy {
-  const configService = {
-    get: (key: keyof AppEnvironment) => {
-      if (key === 'ASSISTANT_MODEL') {
-        // `||` (not `??`) so an empty/unset env var falls back to the default.
-        return process.env.ASSISTANT_MODEL || 'gpt-4o-mini'
-      }
-      if (key === 'ASSISTANT_MAX_TOKENS') {
-        return 512
-      }
-      return process.env[key]
-    },
-  } as unknown as ConfigService<AppEnvironment, true>
+// The assistant path of the shared agent graph, over an in-memory checkpoint saver so the
+// eval needs no MongoDB. Embeddings/retriever are never reached (assistant has no
+// retrieval tool), so no-op fakes suffice.
+function buildRealAssistantStrategy(): LangGraphAgentStrategy {
+  const chatModel = new ChatOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: process.env.ASSISTANT_MODEL || 'gpt-4o-mini',
+    maxTokens: 512,
+  })
 
   const conversation: ConversationRecord = {
     id: 'conv-eval',
@@ -69,7 +68,27 @@ function buildRealStrategy(): OpenAiAssistantStrategy {
   } as unknown as ConversationsService
 
   const registry = new AssistantToolRegistry([new ListMyConversationsTool(conversationsService)])
-  return new OpenAiAssistantStrategy(configService, registry)
+  const noopEmbeddings: EmbeddingsProvider = {
+    embedDocuments: () => Promise.resolve([]),
+    embedQuery: () => Promise.resolve([]),
+  }
+  const noopRetriever: VectorRetriever = { retrieveSimilarForUser: () => Promise.resolve([]) }
+
+  const graph = buildAgentGraph({
+    chatModel,
+    embeddings: noopEmbeddings,
+    retriever: noopRetriever,
+    toolRegistry: registry,
+    checkpointer: new MemorySaver(),
+  })
+
+  return new LangGraphAgentStrategy(
+    'assistant',
+    graph,
+    ASSISTANT_SYSTEM_PROMPT,
+    registry.definitions(),
+    false,
+  )
 }
 
 async function collect(chunks: AsyncIterable<AssistantReplyChunk>): Promise<AssistantReplyChunk[]> {
@@ -80,9 +99,9 @@ async function collect(chunks: AsyncIterable<AssistantReplyChunk>): Promise<Assi
   return collected
 }
 
-describe.skipIf(!runLlmEvals)('assistant prompt (real OpenAI)', () => {
+describe.skipIf(!runLlmEvals)('assistant agent (real OpenAI)', () => {
   it('calls list_my_conversations when asked about the user\'s chats', async () => {
-    const strategy = buildRealStrategy()
+    const strategy = buildRealAssistantStrategy()
     const chunks = await collect(
       strategy.generate({
         userId: 'user-eval',
@@ -92,15 +111,17 @@ describe.skipIf(!runLlmEvals)('assistant prompt (real OpenAI)', () => {
       }),
     )
 
-    expect(chunks.some((chunk) => chunk.type === 'tool-invoked' && chunk.name === 'list_my_conversations')).toBe(true)
+    expect(
+      chunks.some((chunk) => chunk.type === 'tool-invoked' && chunk.name === 'list_my_conversations'),
+    ).toBe(true)
   }, 30_000)
 
   it('answers a general question directly with text', async () => {
-    const strategy = buildRealStrategy()
+    const strategy = buildRealAssistantStrategy()
     const chunks = await collect(
       strategy.generate({
         userId: 'user-eval',
-        conversationId: 'conv-eval',
+        conversationId: 'conv-eval-2',
         history: [{ role: 'user', content: 'In one word, what color is the sky on a clear day?' }],
         signal: new AbortController().signal,
       }),
