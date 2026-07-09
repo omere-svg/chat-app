@@ -14,6 +14,21 @@ function isStreamingMessage(message: ThreadMessage): message is StreamingMessage
   return 'status' in message
 }
 
+// Turns a raw tool name into a user-facing progress phrase. Falls back gracefully so a
+// tool added on the backend still renders something sensible before the FE knows it.
+function friendlyToolLabel(toolName: string): string {
+  switch (toolName) {
+    case 'retrieve_knowledge':
+      return 'Searching your documents'
+    case 'search_my_messages':
+      return 'Looking up your messages'
+    case 'list_my_conversations':
+      return 'Reviewing your conversations'
+    default:
+      return `Using ${toolName}`
+  }
+}
+
 function formatClockTime(isoTimestamp: string): string {
   return new Date(isoTimestamp).toLocaleTimeString([], {
     hour: '2-digit',
@@ -28,6 +43,7 @@ export function MessageBubble({
   const isPending = isPendingMessage(message)
   const streaming = isStreamingMessage(message) ? message : null
   const tools = streaming?.annotations?.tools ?? []
+  const completedTools = streaming?.annotations?.completedTools ?? []
   // Citations stream into annotations live, then arrive on the persisted message's
   // metadata once done — render from whichever is present.
   const citations: Citation[] = streaming
@@ -47,7 +63,22 @@ export function MessageBubble({
       data-testid="message-bubble"
     >
       {tools.length > 0 ? (
-        <span className="message-bubble__tools">Using {tools.join(', ')}…</span>
+        <ul className="message-bubble__tools" aria-label="Agent progress">
+          {tools.map((tool, index) => {
+            // The k-th run of a tool is done once k completions for that name arrived.
+            const priorSameName = tools.slice(0, index).filter((name) => name === tool).length
+            const isDone = priorSameName < completedTools.filter((name) => name === tool).length
+            return (
+              <li
+                key={`${tool}-${index.toString()}`}
+                className={`message-bubble__tool${isDone ? ' message-bubble__tool--done' : ''}`}
+              >
+                {friendlyToolLabel(tool)}
+                {isDone ? '' : '…'}
+              </li>
+            )
+          })}
+        </ul>
       ) : null}
       <p className="message-bubble__body">
         {message.body}
