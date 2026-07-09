@@ -1,9 +1,11 @@
 import type { ConversationType } from '../conversations/conversation.entity.js'
 import type { MessageCitation } from '../messages/message.entity.js'
 
-// DI token for the bound assistant reply strategy. Production binds the OpenAI
-// strategy; tests bind a deterministic fake so CI never calls a real LLM.
+// DI tokens for the bound reply strategies, one per AI conversation type. Production
+// binds the LangGraph agent strategy to both; tests bind a deterministic fake to
+// ASSISTANT_REPLY_STRATEGY so CI never calls a real LLM.
 export const ASSISTANT_REPLY_STRATEGY = Symbol('ASSISTANT_REPLY_STRATEGY')
+export const TUTOR_REPLY_STRATEGY = Symbol('TUTOR_REPLY_STRATEGY')
 
 // A single turn of conversation history as the LLM sees it. The orchestrator maps
 // persisted messages to this shape (own user -> 'user', assistant -> 'assistant').
@@ -25,11 +27,13 @@ export interface GenerateReplyInput {
 
 // Low-level chunks a strategy emits while producing a reply. The orchestrator turns
 // these into SSE events, accumulates text deltas into the persisted reply body, and
-// attaches citations to the persisted reply. The tutor strategy emits 'citations'; the
-// plain assistant strategy never does.
+// attaches citations to the persisted reply. 'tool-invoked' announces a tool starting and
+// 'tool-result' its completion; 'citations' carries retrieval sources (tutor only, by
+// virtue of it being the only type with the retrieval tool available).
 export type AssistantReplyChunk =
   | { type: 'text-delta'; text: string }
   | { type: 'tool-invoked'; name: string }
+  | { type: 'tool-result'; name: string }
   | { type: 'citations'; citations: MessageCitation[] }
 
 // The durable seam (weeks 7-8 register additional strategies, e.g. a RAG 'tutor').

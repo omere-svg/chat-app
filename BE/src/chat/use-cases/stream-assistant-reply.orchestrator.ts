@@ -98,6 +98,9 @@ export class StreamAssistantReplyOrchestrator {
           case 'tool-invoked':
             emit({ event: 'tool', data: { name: chunk.name } })
             break
+          case 'tool-result':
+            emit({ event: 'tool_result', data: { name: chunk.name } })
+            break
           case 'citations':
             citations = chunk.citations
             emit({ event: 'citations', data: { citations } })
