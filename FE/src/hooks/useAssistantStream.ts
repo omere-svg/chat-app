@@ -101,6 +101,9 @@ export function useAssistantStream(
           onTool: (name) => {
             if (!isStale()) dispatch({ type: "STREAM_TOOL", name });
           },
+          onToolResult: (name) => {
+            if (!isStale()) dispatch({ type: "STREAM_TOOL_RESULT", name });
+          },
           onCitations: (citations) => {
             if (!isStale()) dispatch({ type: "STREAM_CITATIONS", citations });
           },
