@@ -17,11 +17,12 @@ function streamingResponse(chunks: string[]): Response {
 }
 
 function buildHandlers(): AssistantStreamHandlers & {
-  calls: { tokens: string[]; tools: string[]; citations: Citation[][] }
+  calls: { tokens: string[]; tools: string[]; toolResults: string[]; citations: Citation[][] }
 } {
   const calls = {
     tokens: [] as string[],
     tools: [] as string[],
+    toolResults: [] as string[],
     citations: [] as Citation[][],
   }
   return {
@@ -29,6 +30,7 @@ function buildHandlers(): AssistantStreamHandlers & {
     onUserMessage: vi.fn(),
     onToken: vi.fn((text: string) => calls.tokens.push(text)),
     onTool: vi.fn((name: string) => calls.tools.push(name)),
+    onToolResult: vi.fn((name: string) => calls.toolResults.push(name)),
     onCitations: vi.fn((citations: Citation[]) => calls.citations.push(citations)),
     onDone: vi.fn(),
     onError: vi.fn(),
@@ -57,6 +59,22 @@ describe('consumeAssistantStream', () => {
     expect(handlers.calls.tokens).toEqual(['Hi ', 'there'])
     expect(handlers.onDone).toHaveBeenCalledOnce()
     expect(handlers.onError).not.toHaveBeenCalled()
+  })
+
+  it('dispatches tool announcements and completions to their handlers', async () => {
+    const handlers = buildHandlers()
+    const response = streamingResponse([
+      userMessageFrame,
+      'event: tool\ndata: {"name":"retrieve_knowledge"}\n\n',
+      'event: tool_result\ndata: {"name":"retrieve_knowledge"}\n\n',
+      doneFrame,
+    ])
+
+    await consumeAssistantStream(response, handlers)
+
+    expect(handlers.calls.tools).toEqual(['retrieve_knowledge'])
+    expect(handlers.calls.toolResults).toEqual(['retrieve_knowledge'])
+    expect(handlers.onDone).toHaveBeenCalledOnce()
   })
 
   it('ignores unknown event types (forward-compatible)', async () => {
