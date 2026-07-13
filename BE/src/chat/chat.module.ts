@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { AssistantModule } from '../assistant/assistant.module.js'
+import { AgentModule } from '../agent/agent.module.js'
 import { AuthModule } from '../auth/auth.module.js'
 import { ConversationsModule } from '../conversations/conversations.module.js'
 import { MessagesModule } from '../messages/messages.module.js'
@@ -15,7 +15,7 @@ import { SendMessageOrchestrator } from './use-cases/send-message.orchestrator.j
 import { StreamAssistantReplyOrchestrator } from './use-cases/stream-assistant-reply.orchestrator.js'
 
 @Module({
-  imports: [AuthModule, UsersModule, ConversationsModule, MessagesModule, AssistantModule],
+  imports: [AuthModule, UsersModule, ConversationsModule, MessagesModule, AgentModule],
   controllers: [ConversationsController, MessagesController],
   providers: [
     ListConversationsOrchestrator,

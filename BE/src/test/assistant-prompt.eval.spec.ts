@@ -4,16 +4,16 @@ import { MemorySaver } from '@langchain/langgraph'
 import {
   ASSISTANT_SYSTEM_PROMPT,
   ASSISTANT_SYSTEM_PROMPT_VERSION,
-} from '../assistant/prompts/assistant-system-prompt.js'
-import { ListMyConversationsTool } from '../assistant/tools/list-my-conversations.tool.js'
-import { AssistantToolRegistry } from '../assistant/tools/assistant-tool.registry.js'
+} from '../agent/prompts/assistant-system-prompt.js'
+import { ListMyConversationsTool } from '../agent/tools/list-my-conversations.tool.js'
+import { AgentToolRegistry } from '../agent/tools/agent-tool.registry.js'
 import { buildAgentGraph } from '../agent/agent.graph.js'
 import { LangGraphAgentStrategy } from '../agent/langgraph-agent.strategy.js'
 import type { ConversationsService } from '../conversations/conversations.service.js'
 import type { ConversationRecord } from '../conversations/conversation.entity.js'
 import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
 import type { VectorRetriever } from '../knowledge/retrieval/vector-retriever.port.js'
-import type { AssistantReplyChunk } from '../assistant/reply-strategy.port.js'
+import type { AgentReplyChunk } from '../agent/reply-strategy.port.js'
 
 // ---- Tier 1: deterministic checks (always run in CI; no network) ----
 
@@ -67,7 +67,7 @@ function buildRealAssistantStrategy(): LangGraphAgentStrategy {
     listForParticipant: () => Promise.resolve([conversation]),
   } as unknown as ConversationsService
 
-  const registry = new AssistantToolRegistry([new ListMyConversationsTool(conversationsService)])
+  const registry = new AgentToolRegistry([new ListMyConversationsTool(conversationsService)])
   const noopEmbeddings: EmbeddingsProvider = {
     embedDocuments: () => Promise.resolve([]),
     embedQuery: () => Promise.resolve([]),
@@ -91,8 +91,8 @@ function buildRealAssistantStrategy(): LangGraphAgentStrategy {
   )
 }
 
-async function collect(chunks: AsyncIterable<AssistantReplyChunk>): Promise<AssistantReplyChunk[]> {
-  const collected: AssistantReplyChunk[] = []
+async function collect(chunks: AsyncIterable<AgentReplyChunk>): Promise<AgentReplyChunk[]> {
+  const collected: AgentReplyChunk[] = []
   for await (const chunk of chunks) {
     collected.push(chunk)
   }

@@ -7,16 +7,16 @@ import { MessagesModule } from '../messages/messages.module.js'
 import { KnowledgeModule } from '../knowledge/knowledge.module.js'
 import { EMBEDDINGS_PROVIDER } from '../knowledge/ingestion/embeddings.port.js'
 import { VECTOR_RETRIEVER } from '../knowledge/retrieval/vector-retriever.port.js'
-import { buildAgentGraph } from '../agent/agent.graph.js'
-import { createMongoCheckpointer } from '../agent/mongo-checkpointer.provider.js'
-import { AGENT_CHAT_MODEL, AGENT_CHECKPOINTER, AGENT_GRAPH } from '../agent/agent.tokens.js'
-import { RETRIEVE_KNOWLEDGE_DEFINITION } from '../agent/agent.config.js'
-import { LangGraphAgentStrategy } from '../agent/langgraph-agent.strategy.js'
+import { buildAgentGraph } from './agent.graph.js'
+import { createMongoCheckpointer } from './mongo-checkpointer.provider.js'
+import { AGENT_CHAT_MODEL, AGENT_CHECKPOINTER, AGENT_GRAPH } from './agent.tokens.js'
+import { RETRIEVE_KNOWLEDGE_DEFINITION } from './agent.config.js'
+import { LangGraphAgentStrategy } from './langgraph-agent.strategy.js'
 import { ASSISTANT_REPLY_STRATEGY, TUTOR_REPLY_STRATEGY } from './reply-strategy.port.js'
 import { REPLY_STRATEGIES, ReplyStrategyRegistry } from './reply-strategy.registry.js'
 import { ASSISTANT_SYSTEM_PROMPT } from './prompts/assistant-system-prompt.js'
-import { ASSISTANT_TOOLS } from './tools/assistant-tool.port.js'
-import { AssistantToolRegistry } from './tools/assistant-tool.registry.js'
+import { AGENT_TOOLS } from './tools/agent-tool.port.js'
+import { AgentToolRegistry } from './tools/agent-tool.registry.js'
 import { ListMyConversationsTool } from './tools/list-my-conversations.tool.js'
 import { SearchMyMessagesTool } from './tools/search-my-messages.tool.js'
 import { TUTOR_SYSTEM_PROMPT } from '../knowledge/tutor/tutor-prompt.js'
@@ -25,13 +25,13 @@ import type { Connection } from 'mongoose'
 import type { AppEnvironment } from '../config/environment.types.js'
 import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
 import type { VectorRetriever } from '../knowledge/retrieval/vector-retriever.port.js'
-import type { CompiledAgentGraph } from '../agent/agent.graph.js'
-import type { AssistantTool } from './tools/assistant-tool.port.js'
+import type { CompiledAgentGraph } from './agent.graph.js'
+import type { AgentTool } from './tools/agent-tool.port.js'
 import type { ConversationReplyStrategy } from './reply-strategy.port.js'
 
-// The assistant / agent bounded context. The tutor and the assistant share ONE compiled
-// LangGraph agent graph and one event mapping; the two strategies differ only in the
-// bound tools, the system prompt, and whether retrieval is forced. Tests override
+// The agent bounded context. The tutor and the assistant conversation types share ONE
+// compiled LangGraph agent graph and one event mapping; the two strategies differ only in
+// the bound tools, the system prompt, and whether retrieval is forced. Tests override
 // ASSISTANT_REPLY_STRATEGY with a fake so the OpenAI client is never called.
 @Module({
   imports: [ConversationsModule, MessagesModule, KnowledgeModule],
@@ -40,14 +40,14 @@ import type { ConversationReplyStrategy } from './reply-strategy.port.js'
     ListMyConversationsTool,
     SearchMyMessagesTool,
     {
-      provide: ASSISTANT_TOOLS,
+      provide: AGENT_TOOLS,
       useFactory: (
         listMyConversations: ListMyConversationsTool,
         searchMyMessages: SearchMyMessagesTool,
-      ): AssistantTool[] => [listMyConversations, searchMyMessages],
+      ): AgentTool[] => [listMyConversations, searchMyMessages],
       inject: [ListMyConversationsTool, SearchMyMessagesTool],
     },
-    AssistantToolRegistry,
+    AgentToolRegistry,
 
     // Shared singletons the graph is built from.
     {
@@ -72,11 +72,11 @@ import type { ConversationReplyStrategy } from './reply-strategy.port.js'
         chatModel: ChatOpenAI,
         embeddings: EmbeddingsProvider,
         retriever: VectorRetriever,
-        toolRegistry: AssistantToolRegistry,
+        toolRegistry: AgentToolRegistry,
         checkpointer: BaseCheckpointSaver,
       ): CompiledAgentGraph =>
         buildAgentGraph({ chatModel, embeddings, retriever, toolRegistry, checkpointer }),
-      inject: [AGENT_CHAT_MODEL, EMBEDDINGS_PROVIDER, VECTOR_RETRIEVER, AssistantToolRegistry, AGENT_CHECKPOINTER],
+      inject: [AGENT_CHAT_MODEL, EMBEDDINGS_PROVIDER, VECTOR_RETRIEVER, AgentToolRegistry, AGENT_CHECKPOINTER],
     },
 
     // One strategy per conversation type, over the same graph. Assistant: user-data tools
@@ -86,7 +86,7 @@ import type { ConversationReplyStrategy } from './reply-strategy.port.js'
       provide: ASSISTANT_REPLY_STRATEGY,
       useFactory: (
         graph: CompiledAgentGraph,
-        toolRegistry: AssistantToolRegistry,
+        toolRegistry: AgentToolRegistry,
       ): ConversationReplyStrategy =>
         new LangGraphAgentStrategy(
           'assistant',
@@ -95,13 +95,13 @@ import type { ConversationReplyStrategy } from './reply-strategy.port.js'
           toolRegistry.definitions(),
           false,
         ),
-      inject: [AGENT_GRAPH, AssistantToolRegistry],
+      inject: [AGENT_GRAPH, AgentToolRegistry],
     },
     {
       provide: TUTOR_REPLY_STRATEGY,
       useFactory: (
         graph: CompiledAgentGraph,
-        toolRegistry: AssistantToolRegistry,
+        toolRegistry: AgentToolRegistry,
       ): ConversationReplyStrategy =>
         new LangGraphAgentStrategy(
           'tutor',
@@ -110,7 +110,7 @@ import type { ConversationReplyStrategy } from './reply-strategy.port.js'
           [RETRIEVE_KNOWLEDGE_DEFINITION, ...toolRegistry.definitions()],
           true,
         ),
-      inject: [AGENT_GRAPH, AssistantToolRegistry],
+      inject: [AGENT_GRAPH, AgentToolRegistry],
     },
 
     {
@@ -125,4 +125,4 @@ import type { ConversationReplyStrategy } from './reply-strategy.port.js'
   ],
   exports: [ReplyStrategyRegistry],
 })
-export class AssistantModule {}
+export class AgentModule {}

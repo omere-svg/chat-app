@@ -3,13 +3,13 @@ import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { readAgentConfigurable } from '../agent.config.js'
 import { AGENT_EVENT, getToolCalls } from '../agent-events.js'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { AssistantToolRegistry } from '../../assistant/tools/assistant-tool.registry.js'
+import type { AgentToolRegistry } from '../tools/agent-tool.registry.js'
 import type { AgentState, AgentStateUpdate } from '../agent.state.js'
 
 // Executes the user-data tool calls the model requested, each scoped to the authenticated
 // user (never a userId from model output), and answers every call with a ToolMessage so
 // the transcript stays valid for the next model turn.
-export function createToolCallNode(toolRegistry: AssistantToolRegistry) {
+export function createToolCallNode(toolRegistry: AgentToolRegistry) {
   return async function toolCall(
     state: AgentState,
     config: RunnableConfig,

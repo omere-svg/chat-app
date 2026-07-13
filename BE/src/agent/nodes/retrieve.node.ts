@@ -14,8 +14,8 @@ import type { AgentState, AgentStateUpdate } from '../agent.state.js'
 
 // Runs the RAG retrieval the model asked for, user-scoped. Emits the sources as
 // citations and answers the tool call with the grounding context. When nothing clears
-// the relevance floor it flags `groundingEmpty` so `answer` refuses without an LLM call —
-// the Week 7 no-hallucination guarantee, preserved.
+// the relevance floor it flags `groundingEmpty` so the graph routes to `refuse` (no LLM
+// call) — the Week 7 no-hallucination guarantee, preserved.
 export function createRetrieveNode(
   embeddings: EmbeddingsProvider,
   retriever: VectorRetriever,
@@ -56,6 +56,12 @@ export function createRetrieveNode(
     await dispatchCustomEvent(AGENT_EVENT.toolResult, { name: RETRIEVE_KNOWLEDGE_TOOL }, config)
     return { messages: [toolMessage], retrievedChunks: chunks, groundingEmpty: false }
   }
+}
+
+// After retrieval: a required retrieval that came back empty routes to `refuse` (fixed
+// no-context reply, no LLM call); otherwise the grounded transcript goes to `answer`.
+export function retrieveDecision(state: AgentState): 'answer' | 'refuse' {
+  return state.groundingEmpty ? 'refuse' : 'answer'
 }
 
 function findRetrievalCall(

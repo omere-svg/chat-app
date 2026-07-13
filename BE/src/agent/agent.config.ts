@@ -1,5 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { AssistantToolDefinition } from '../assistant/tools/assistant-tool.port.js'
+import type { AgentToolDefinition } from './tools/agent-tool.port.js'
 
 // The tool the agent invokes to ground an answer in the user's uploaded documents.
 // Retrieval is modelled as a tool the model calls, but handled by the dedicated
@@ -16,7 +16,7 @@ export const MAX_TOOL_ROUNDS = 3
 export interface AgentRunConfigurable {
   userId: string
   // Tool definitions the `route` node binds to the model this run.
-  toolDefinitions: AssistantToolDefinition[]
+  toolDefinitions: AgentToolDefinition[]
   // Tutor only: force a retrieval before the model may answer, preserving grounding.
   forceRetrieval: boolean
 }
@@ -35,7 +35,7 @@ export function readAgentConfigurable(config: RunnableConfig): AgentRunConfigura
   return {
     userId: configurable.userId,
     toolDefinitions: Array.isArray(configurable.toolDefinitions)
-      ? (configurable.toolDefinitions as AssistantToolDefinition[])
+      ? (configurable.toolDefinitions as AgentToolDefinition[])
       : [],
     forceRetrieval: configurable.forceRetrieval === true,
   }
@@ -43,7 +43,7 @@ export function readAgentConfigurable(config: RunnableConfig): AgentRunConfigura
 
 // The model-facing definition of the retrieval tool. Only the search query is exposed to
 // the model; the user scope is injected server-side in the `retrieve` node.
-export const RETRIEVE_KNOWLEDGE_DEFINITION: AssistantToolDefinition = {
+export const RETRIEVE_KNOWLEDGE_DEFINITION: AgentToolDefinition = {
   name: RETRIEVE_KNOWLEDGE_TOOL,
   description:
     "Search the signed-in user's own uploaded documents for passages relevant to a " +

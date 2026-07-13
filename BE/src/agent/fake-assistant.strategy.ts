@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common'
 import type { ConversationType } from '../conversations/conversation.entity.js'
 import type {
-  AssistantReplyChunk,
+  AgentReplyChunk,
   ConversationReplyStrategy,
   GenerateReplyInput,
 } from './reply-strategy.port.js'
 
-// Deterministic stand-in for the OpenAI strategy, bound in tests so CI never calls a
+// Deterministic stand-in for the agent strategy, bound in tests so CI never calls a
 // real LLM. Streams a short, predictable reply word-by-word and honors the abort signal.
 @Injectable()
 export class FakeAssistantStrategy implements ConversationReplyStrategy {
   readonly conversationType: ConversationType = 'assistant'
 
-  async *generate(input: GenerateReplyInput): AsyncIterable<AssistantReplyChunk> {
+  async *generate(input: GenerateReplyInput): AsyncIterable<AgentReplyChunk> {
     const lastUserMessage = [...input.history].reverse().find((turn) => turn.role === 'user')
     const reply = `Echo: ${lastUserMessage?.content ?? ''}`.trim()
 

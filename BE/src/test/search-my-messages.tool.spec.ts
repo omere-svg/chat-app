@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { SearchMyMessagesTool } from '../assistant/tools/search-my-messages.tool.js'
+import { SearchMyMessagesTool } from '../agent/tools/search-my-messages.tool.js'
 import type { MessagesService } from '../messages/messages.service.js'
 import type { MessageRecord } from '../messages/message.entity.js'
 

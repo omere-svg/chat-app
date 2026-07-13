@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { z } from 'zod'
 import { MessagesService } from '../../messages/messages.service.js'
-import type { AssistantTool, AssistantToolContext, AssistantToolDefinition } from './assistant-tool.port.js'
+import type { AgentTool, AgentToolContext, AgentToolDefinition } from './agent-tool.port.js'
 
 const DEFAULT_LIMIT = 10
 const MAX_LIMIT = 25
@@ -31,10 +31,10 @@ interface MessageSearchHit {
 }
 
 @Injectable()
-export class SearchMyMessagesTool implements AssistantTool {
+export class SearchMyMessagesTool implements AgentTool {
   constructor(private readonly messagesService: MessagesService) {}
 
-  readonly definition: AssistantToolDefinition = {
+  readonly definition: AgentToolDefinition = {
     name: 'search_my_messages',
     description:
       "Search the signed-in user's own messages by keyword, most recent first. Use this " +
@@ -42,7 +42,7 @@ export class SearchMyMessagesTool implements AssistantTool {
     parameters: z.toJSONSchema(inputSchema),
   }
 
-  async execute(rawInput: unknown, context: AssistantToolContext): Promise<MessageSearchHit[]> {
+  async execute(rawInput: unknown, context: AgentToolContext): Promise<MessageSearchHit[]> {
     const { query, limit } = inputSchema.parse(rawInput)
     const messages = await this.messagesService.searchMessagesAuthoredByUser(
       context.userId,

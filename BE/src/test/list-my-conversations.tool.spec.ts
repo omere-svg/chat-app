@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { ListMyConversationsTool } from '../assistant/tools/list-my-conversations.tool.js'
+import { ListMyConversationsTool } from '../agent/tools/list-my-conversations.tool.js'
 import type { ConversationsService } from '../conversations/conversations.service.js'
 import type { ConversationRecord } from '../conversations/conversation.entity.js'
 

@@ -5,7 +5,7 @@ import { ChatGenerationChunk } from '@langchain/core/outputs'
 import { MemorySaver } from '@langchain/langgraph'
 import { buildAgentGraph } from '../agent/agent.graph.js'
 import { LangGraphAgentStrategy } from '../agent/langgraph-agent.strategy.js'
-import { AssistantToolRegistry } from '../assistant/tools/assistant-tool.registry.js'
+import { AgentToolRegistry } from '../agent/tools/agent-tool.registry.js'
 import { RETRIEVE_KNOWLEDGE_DEFINITION, RETRIEVE_KNOWLEDGE_TOOL } from '../agent/agent.config.js'
 import {
   TUTOR_NO_CONTEXT_REPLY,
@@ -22,8 +22,8 @@ import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager
 import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
 import type { VectorRetriever } from '../knowledge/retrieval/vector-retriever.port.js'
 import type { RetrievedChunk } from '../knowledge/knowledge-chunk.entity.js'
-import type { AssistantTool } from '../assistant/tools/assistant-tool.port.js'
-import type { AssistantReplyChunk } from '../assistant/reply-strategy.port.js'
+import type { AgentTool } from '../agent/tools/agent-tool.port.js'
+import type { AgentReplyChunk } from '../agent/reply-strategy.port.js'
 
 // A chat model whose replies are scripted, so the graph runs deterministically offline.
 // Each model call (route via invoke, answer via stream) pops the next scripted response.
@@ -100,8 +100,8 @@ function retrievedChunk(): RetrievedChunk {
   }
 }
 
-async function collect(iterable: AsyncIterable<AssistantReplyChunk>): Promise<AssistantReplyChunk[]> {
-  const chunks: AssistantReplyChunk[] = []
+async function collect(iterable: AsyncIterable<AgentReplyChunk>): Promise<AgentReplyChunk[]> {
+  const chunks: AgentReplyChunk[] = []
   for await (const chunk of iterable) {
     chunks.push(chunk)
   }
@@ -121,7 +121,7 @@ describe('agent graph (tutor grounding)', () => {
       chatModel: model as unknown as ChatOpenAI,
       embeddings: fakeEmbeddings,
       retriever,
-      toolRegistry: new AssistantToolRegistry([]),
+      toolRegistry: new AgentToolRegistry([]),
       checkpointer: new MemorySaver(),
     })
     const strategy = new LangGraphAgentStrategy(
@@ -166,7 +166,7 @@ describe('agent graph (tutor grounding)', () => {
       chatModel: model as unknown as ChatOpenAI,
       embeddings: fakeEmbeddings,
       retriever,
-      toolRegistry: new AssistantToolRegistry([]),
+      toolRegistry: new AgentToolRegistry([]),
       checkpointer: new MemorySaver(),
     })
     const strategy = new LangGraphAgentStrategy(
@@ -210,7 +210,7 @@ describe('agent graph (tutor grounding)', () => {
 describe('agent graph (assistant tools)', () => {
   it('runs a user-data tool scoped to the caller, then answers', async () => {
     const executed: Array<{ name: string; userId: string }> = []
-    const listTool: AssistantTool = {
+    const listTool: AgentTool = {
       definition: {
         name: 'list_my_conversations',
         description: 'list',
@@ -221,7 +221,7 @@ describe('agent graph (assistant tools)', () => {
         return Promise.resolve([{ id: 'conv-1' }])
       },
     }
-    const registry = new AssistantToolRegistry([listTool])
+    const registry = new AgentToolRegistry([listTool])
     const model = new ScriptedChatModel([
       { toolCalls: [{ name: 'list_my_conversations', args: {}, id: 'c1', type: 'tool_call' }] },
       // Route's second pass: a plain (no-tool) reply signals "go to answer"; discarded.
@@ -262,9 +262,72 @@ describe('agent graph (assistant tools)', () => {
     const tuple = await checkpointer.getTuple({ configurable: { thread_id: 'conv-assistant-tool' } })
     expect(tuple).toBeDefined()
   })
+
+  it('resets the per-turn tool budget so tools still run on later turns of one conversation', async () => {
+    // Regression: the per-turn working channels (toolRounds here) used to carry forward
+    // from the previous turn's checkpoint, so MAX_TOOL_ROUNDS capped the whole conversation
+    // instead of a single turn — after a few turns every tool went permanently dead.
+    const executed: string[] = []
+    const listTool: AgentTool = {
+      definition: {
+        name: 'list_my_conversations',
+        description: 'list',
+        parameters: { type: 'object', properties: {}, additionalProperties: false },
+      },
+      execute: () => {
+        executed.push('list_my_conversations')
+        return Promise.resolve([{ id: 'conv-1' }])
+      },
+    }
+    const registry = new AgentToolRegistry([listTool])
+
+    // Four turns, each: a tool call, then a no-tool routing pass, then the answer text.
+    const TURNS = 4
+    const script: ScriptedResponse[] = []
+    for (let turn = 0; turn < TURNS; turn++) {
+      script.push(
+        { toolCalls: [{ name: 'list_my_conversations', args: {}, id: `c${turn}`, type: 'tool_call' }] },
+        { content: 'thinking' },
+        { content: `Answer ${turn}.` },
+      )
+    }
+    const model = new ScriptedChatModel(script)
+    const graph = buildAgentGraph({
+      chatModel: model as unknown as ChatOpenAI,
+      embeddings: fakeEmbeddings,
+      retriever: { retrieveSimilarForUser: vi.fn() },
+      toolRegistry: registry,
+      checkpointer: new MemorySaver(),
+    })
+    const strategy = new LangGraphAgentStrategy(
+      'assistant',
+      graph,
+      'assistant system prompt',
+      registry.definitions(),
+      false,
+    )
+
+    let lastTurnChunks: AgentReplyChunk[] = []
+    for (let turn = 0; turn < TURNS; turn++) {
+      lastTurnChunks = await collect(
+        strategy.generate({
+          userId: 'user-9',
+          conversationId: 'conv-budget',
+          history: [{ role: 'user', content: `message ${turn}` }],
+          signal: new AbortController().signal,
+        }),
+      )
+    }
+
+    // A tool ran on every turn (including the last), not just the first MAX_TOOL_ROUNDS.
+    expect(executed).toHaveLength(TURNS)
+    expect(
+      lastTurnChunks.some((chunk) => chunk.type === 'tool-invoked' && chunk.name === 'list_my_conversations'),
+    ).toBe(true)
+  })
 })
 
-function textOf(chunks: AssistantReplyChunk[]): string {
+function textOf(chunks: AgentReplyChunk[]): string {
   return chunks
     .filter((chunk): chunk is { type: 'text-delta'; text: string } => chunk.type === 'text-delta')
     .map((chunk) => chunk.text)

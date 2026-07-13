@@ -2,7 +2,7 @@ import type { BaseMessage, MessageContent } from '@langchain/core/messages'
 import type { MessageCitation } from '../messages/message.entity.js'
 import type { RetrievedChunk } from '../knowledge/knowledge-chunk.entity.js'
 
-// A tool call as it appears on an assistant message. Kept minimal and structural so it
+// A tool call as it appears on an AI message. Kept minimal and structural so it
 // works whether the message is a full AIMessage (production) or an AIMessageChunk (some
 // streaming paths).
 export interface AgentToolCall {
@@ -12,7 +12,7 @@ export interface AgentToolCall {
 }
 
 // Reads tool calls off any message without relying on `instanceof AIMessage` (which fails
-// for AIMessageChunk). Non-assistant messages yield an empty list.
+// for AIMessageChunk). Non-AI messages yield an empty list.
 export function getToolCalls(message: BaseMessage | undefined): AgentToolCall[] {
   if (message === undefined) {
     return []
@@ -22,7 +22,7 @@ export function getToolCalls(message: BaseMessage | undefined): AgentToolCall[] 
 }
 
 // Custom stream events dispatched from within graph nodes and mapped by the strategy to
-// AssistantReplyChunks. Token deltas are NOT sent this way — they come from the answer
+// AgentReplyChunks. Token deltas are NOT sent this way — they come from the answer
 // node's model stream so the client sees real progressive generation.
 export const AGENT_EVENT = {
   // A tool is about to run. Carries { name }.

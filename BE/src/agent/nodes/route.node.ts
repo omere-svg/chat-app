@@ -2,7 +2,7 @@ import { MAX_TOOL_ROUNDS, RETRIEVE_KNOWLEDGE_TOOL, readAgentConfigurable } from 
 import { getToolCalls } from '../agent-events.js'
 import type { ChatOpenAI } from '@langchain/openai'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { AssistantToolDefinition } from '../../assistant/tools/assistant-tool.port.js'
+import type { AgentToolDefinition } from '../tools/agent-tool.port.js'
 import type { AgentState, AgentStateUpdate } from '../agent.state.js'
 
 // Decides what happens next. Calls the model with the run's tools bound; if the model
@@ -51,7 +51,7 @@ export function routeDecision(state: AgentState): 'retrieve' | 'tool_call' | 'an
   return toolCalls.some((call) => call.name === RETRIEVE_KNOWLEDGE_TOOL) ? 'retrieve' : 'tool_call'
 }
 
-function toOpenAiTool(definition: AssistantToolDefinition): {
+function toOpenAiTool(definition: AgentToolDefinition): {
   type: 'function'
   function: { name: string; description: string; parameters: Record<string, unknown> }
 } {

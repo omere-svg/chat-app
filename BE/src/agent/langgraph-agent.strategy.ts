@@ -10,13 +10,13 @@ import type { BaseMessage, MessageContent } from '@langchain/core/messages'
 import type { StreamEvent } from '@langchain/core/tracers/log_stream'
 import type { ConversationType } from '../conversations/conversation.entity.js'
 import type { MessageCitation } from '../messages/message.entity.js'
-import type { AssistantToolDefinition } from '../assistant/tools/assistant-tool.port.js'
+import type { AgentToolDefinition } from './tools/agent-tool.port.js'
 import type {
-  AssistantReplyChunk,
-  AssistantTurnMessage,
+  AgentReplyChunk,
+  AgentTurnMessage,
   ConversationReplyStrategy,
   GenerateReplyInput,
-} from '../assistant/reply-strategy.port.js'
+} from './reply-strategy.port.js'
 import type { CompiledAgentGraph } from './agent.graph.js'
 
 // Bounds the graph's step count as a final safety net beyond MAX_TOOL_ROUNDS.
@@ -31,11 +31,11 @@ export class LangGraphAgentStrategy implements ConversationReplyStrategy {
     readonly conversationType: ConversationType,
     private readonly graph: CompiledAgentGraph,
     private readonly systemPrompt: string,
-    private readonly toolDefinitions: AssistantToolDefinition[],
+    private readonly toolDefinitions: AgentToolDefinition[],
     private readonly forceRetrieval: boolean,
   ) {}
 
-  async *generate(input: GenerateReplyInput): AsyncIterable<AssistantReplyChunk> {
+  async *generate(input: GenerateReplyInput): AsyncIterable<AgentReplyChunk> {
     // Re-seed the transcript from MongoDB every turn: RemoveMessage(REMOVE_ALL_MESSAGES)
     // clears any prior checkpointed transcript so Mongo stays the single source of truth,
     // then the system prompt and fresh history are appended.
@@ -45,8 +45,18 @@ export class LangGraphAgentStrategy implements ConversationReplyStrategy {
       ...input.history.map(toBaseMessage),
     ]
 
+    // Reset the per-turn working channels alongside the transcript. LangGraph would
+    // otherwise carry retrievedChunks/groundingEmpty/toolRounds forward from the previous
+    // turn's checkpoint (their reducer just takes the latest value), which would (1) let
+    // `forceRetrieveNow` fire only on the conversation's first message and (2) make
+    // MAX_TOOL_ROUNDS cap the whole conversation instead of a single turn.
     const eventStream = this.graph.streamEvents(
-      { messages: seededMessages },
+      {
+        messages: seededMessages,
+        retrievedChunks: [],
+        groundingEmpty: false,
+        toolRounds: 0,
+      },
       {
         version: 'v2',
         signal: input.signal,
@@ -72,7 +82,7 @@ export class LangGraphAgentStrategy implements ConversationReplyStrategy {
   }
 }
 
-function toReplyChunk(event: StreamEvent): AssistantReplyChunk | null {
+function toReplyChunk(event: StreamEvent): AgentReplyChunk | null {
   // Progressive answer tokens come only from the answer node's model stream.
   if (
     event.event === 'on_chat_model_stream' &&
@@ -104,7 +114,7 @@ function toReplyChunk(event: StreamEvent): AssistantReplyChunk | null {
   return null
 }
 
-function toBaseMessage(turn: AssistantTurnMessage): BaseMessage {
+function toBaseMessage(turn: AgentTurnMessage): BaseMessage {
   return turn.role === 'user' ? new HumanMessage(turn.content) : new AIMessage(turn.content)
 }
 
