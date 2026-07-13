@@ -2,12 +2,12 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ERROR_CODES } from '../../shared/errors/error-codes.constant.js'
 import { ConversationsService } from '../../conversations/conversations.service.js'
 import { MessagesService } from '../../messages/messages.service.js'
-import { ReplyStrategyRegistry } from '../../assistant/reply-strategy.registry.js'
+import { ReplyStrategyRegistry } from '../../agent/reply-strategy.registry.js'
 import { toLastMessageSnapshot } from '../../conversations/conversation.entity.js'
 import { deriveConversationTitleFromMessage } from '../../conversations/derive-conversation-title.js'
 import type { ConversationRecord } from '../../conversations/conversation.entity.js'
-import type { AssistantStreamEvent } from '../../assistant/assistant-stream-event.js'
-import type { AssistantTurnMessage } from '../../assistant/reply-strategy.port.js'
+import type { AssistantStreamEvent } from '../assistant-stream-event.js'
+import type { AgentTurnMessage } from '../../agent/reply-strategy.port.js'
 import type { MessageCitation, MessageRecord } from '../../messages/message.entity.js'
 import type { SendMessageDto } from '../../messages/dto/send-message.dto.js'
 
@@ -98,6 +98,9 @@ export class StreamAssistantReplyOrchestrator {
           case 'tool-invoked':
             emit({ event: 'tool', data: { name: chunk.name } })
             break
+          case 'tool-result':
+            emit({ event: 'tool_result', data: { name: chunk.name } })
+            break
           case 'citations':
             citations = chunk.citations
             emit({ event: 'citations', data: { citations } })
@@ -155,7 +158,7 @@ export class StreamAssistantReplyOrchestrator {
   private async buildHistory(
     conversationId: string,
     userId: string,
-  ): Promise<AssistantTurnMessage[]> {
+  ): Promise<AgentTurnMessage[]> {
     const recentMessages = await this.messagesService.listRecentMessagesOldestFirst(
       conversationId,
       HISTORY_LIMIT,

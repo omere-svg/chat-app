@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { ASSISTANT_TOOLS } from './assistant-tool.port.js'
-import type { AssistantTool, AssistantToolContext, AssistantToolDefinition } from './assistant-tool.port.js'
+import { AGENT_TOOLS } from './agent-tool.port.js'
+import type { AgentTool, AgentToolContext, AgentToolDefinition } from './agent-tool.port.js'
 
 @Injectable()
-export class AssistantToolRegistry {
-  private readonly toolsByName: ReadonlyMap<string, AssistantTool>
+export class AgentToolRegistry {
+  private readonly toolsByName: ReadonlyMap<string, AgentTool>
 
-  constructor(@Inject(ASSISTANT_TOOLS) tools: AssistantTool[]) {
+  constructor(@Inject(AGENT_TOOLS) tools: AgentTool[]) {
     this.toolsByName = new Map(tools.map((tool) => [tool.definition.name, tool]))
   }
 
-  definitions(): AssistantToolDefinition[] {
+  definitions(): AgentToolDefinition[] {
     return [...this.toolsByName.values()].map((tool) => tool.definition)
   }
 
@@ -19,7 +19,7 @@ export class AssistantToolRegistry {
   async execute(
     name: string,
     rawInput: unknown,
-    context: AssistantToolContext,
+    context: AgentToolContext,
   ): Promise<unknown> {
     const tool = this.toolsByName.get(name)
     if (tool === undefined) {

@@ -8,6 +8,11 @@ import type { CursorPageResult } from '../../shared/pagination/cursor-page.js'
 import type { MessageRepository } from './message-repository.port.js'
 import type { MessageRecord } from '../message.entity.js'
 
+// Escapes user-supplied text so it is matched literally inside a $regex query.
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 @Injectable()
 export class MongoMessageRepository implements MessageRepository {
   constructor(
@@ -72,6 +77,22 @@ export class MongoMessageRepository implements MessageRepository {
       .findOne({ conversationId, 'metadata.replyToMessageId': userMessageId })
       .lean<MessageDocument | null>()
     return document === null ? null : toMessageRecord(document)
+  }
+
+  async searchAuthoredByUser(
+    userId: string,
+    query: string,
+    limit: number,
+  ): Promise<MessageRecord[]> {
+    // Case-insensitive substring match on the body, scoped to the author. The
+    // (senderId, createdAt, _id) index serves the equality filter and the sort; the
+    // regex itself is a residual scan over the (small) per-user slice.
+    const documents = await this.messageModel
+      .find({ senderId: userId, body: { $regex: escapeRegExp(query), $options: 'i' } })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit)
+      .lean<MessageDocument[]>()
+    return documents.map(toMessageRecord)
   }
 
   async insert(message: MessageRecord, clientMessageId?: string): Promise<MessageRecord> {

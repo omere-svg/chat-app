@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import { StreamAssistantReplyOrchestrator } from '../chat/use-cases/stream-assistant-reply.orchestrator.js'
-import type { AssistantStreamEvent } from '../assistant/assistant-stream-event.js'
+import type { AssistantStreamEvent } from '../chat/assistant-stream-event.js'
 import type {
-  AssistantReplyChunk,
+  AgentReplyChunk,
   ConversationReplyStrategy,
-} from '../assistant/reply-strategy.port.js'
-import type { ReplyStrategyRegistry } from '../assistant/reply-strategy.registry.js'
+} from '../agent/reply-strategy.port.js'
+import type { ReplyStrategyRegistry } from '../agent/reply-strategy.registry.js'
 import type { ConversationRecord } from '../conversations/conversation.entity.js'
 import type { ConversationsService } from '../conversations/conversations.service.js'
 import type { MessageRecord } from '../messages/message.entity.js'
@@ -39,11 +39,11 @@ const assistantReply: MessageRecord = {
   metadata: { replyToMessageId: userMessage.id },
 }
 
-function strategyYielding(chunks: AssistantReplyChunk[]): {
+function strategyYielding(chunks: AgentReplyChunk[]): {
   strategy: ConversationReplyStrategy
   generate: ReturnType<typeof vi.fn>
 } {
-  const generate = vi.fn(async function* (): AsyncIterable<AssistantReplyChunk> {
+  const generate = vi.fn(async function* (): AsyncIterable<AgentReplyChunk> {
     await Promise.resolve()
     for (const chunk of chunks) {
       yield chunk
@@ -188,7 +188,7 @@ describe('StreamAssistantReplyOrchestrator', () => {
   })
 
   it('emits an error and persists nothing when generation fails', async () => {
-    const generate = vi.fn(async function* (): AsyncIterable<AssistantReplyChunk> {
+    const generate = vi.fn(async function* (): AsyncIterable<AgentReplyChunk> {
       await Promise.resolve()
       yield { type: 'text-delta', text: 'partial' }
       throw new Error('openai exploded')

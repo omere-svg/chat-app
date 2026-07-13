@@ -1,12 +1,14 @@
 // Provider-agnostic tool contract. Tools are the durable asset reused across weeks
-// 6-8 (plain LLM loop, RAG, LangGraph), so they depend on no specific SDK.
+// 6-8 (plain LLM loop, RAG, LangGraph), so they depend on no specific SDK. Named
+// `Agent*` because both conversation types (assistant and tutor) share this machinery;
+// `Assistant` is reserved for the assistant conversation type.
 
-// DI token for the array of registered tools, collected by the assistant module.
-export const ASSISTANT_TOOLS = Symbol('ASSISTANT_TOOLS')
+// DI token for the array of registered tools, collected by the agent module.
+export const AGENT_TOOLS = Symbol('AGENT_TOOLS')
 
 // Everything a tool exposes to the model. `parameters` is a JSON Schema describing
 // ONLY model-facing inputs — never the user id, which is injected server-side.
-export interface AssistantToolDefinition {
+export interface AgentToolDefinition {
   name: string
   description: string
   parameters: Record<string, unknown>
@@ -14,13 +16,13 @@ export interface AssistantToolDefinition {
 
 // Server-side execution context. `userId` is the authenticated caller; tools must
 // scope every read to it and never accept a user id from model output.
-export interface AssistantToolContext {
+export interface AgentToolContext {
   userId: string
 }
 
-export interface AssistantTool {
-  readonly definition: AssistantToolDefinition
+export interface AgentTool {
+  readonly definition: AgentToolDefinition
   // Validates rawInput (untrusted model output) at the boundary, then runs scoped to
   // context.userId. Returns a JSON-serializable result handed back to the model.
-  execute(rawInput: unknown, context: AssistantToolContext): Promise<unknown>
+  execute(rawInput: unknown, context: AgentToolContext): Promise<unknown>
 }

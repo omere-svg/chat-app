@@ -72,6 +72,7 @@ export type MessagesAction =
     }
   | { type: 'STREAM_TOKEN'; text: string }
   | { type: 'STREAM_TOOL'; name: string }
+  | { type: 'STREAM_TOOL_RESULT'; name: string }
   | { type: 'STREAM_CITATIONS'; citations: Citation[] }
   | { type: 'STREAM_DONE'; message: Message }
   | { type: 'STREAM_ERROR' }
@@ -194,7 +195,26 @@ export function messageReducer(
         streaming: {
           ...state.streaming,
           annotations: {
+            ...state.streaming.annotations,
             tools: [...(state.streaming.annotations?.tools ?? []), action.name],
+          },
+        },
+      }
+
+    case 'STREAM_TOOL_RESULT':
+      if (state.streaming === null) {
+        return state
+      }
+      return {
+        ...state,
+        streaming: {
+          ...state.streaming,
+          annotations: {
+            ...state.streaming.annotations,
+            completedTools: [
+              ...(state.streaming.annotations?.completedTools ?? []),
+              action.name,
+            ],
           },
         },
       }

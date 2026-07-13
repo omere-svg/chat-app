@@ -4,10 +4,12 @@ import type { ErrorCode } from '../shared/errors/error-codes.constant.js'
 // The SSE event union sent to the client over the streaming POST. Named events keep
 // the contract forward-compatible: a tolerant client parser ignores event names it
 // does not know. Week 7 adds `citations`, emitted by tutor replies before `done`.
+// Week 8 adds `tool_result`, marking a tool announced by `tool` as complete.
 export type AssistantStreamEvent =
   | { event: 'user_message'; data: { message: MessageRecord } }
   | { event: 'token'; data: { text: string } }
   | { event: 'tool'; data: { name: string } }
+  | { event: 'tool_result'; data: { name: string } }
   | { event: 'citations'; data: { citations: MessageCitation[] } }
   | { event: 'done'; data: { message: MessageRecord } }
   | { event: 'error'; data: { code: ErrorCode; message: string } }

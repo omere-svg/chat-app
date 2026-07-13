@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { z } from 'zod'
 import { ConversationsService } from '../../conversations/conversations.service.js'
 import type { ConversationType } from '../../conversations/conversation.entity.js'
-import type { AssistantTool, AssistantToolContext, AssistantToolDefinition } from './assistant-tool.port.js'
+import type { AgentTool, AgentToolContext, AgentToolDefinition } from './agent-tool.port.js'
 
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 50
@@ -29,10 +29,10 @@ interface ConversationToolView {
 }
 
 @Injectable()
-export class ListMyConversationsTool implements AssistantTool {
+export class ListMyConversationsTool implements AgentTool {
   constructor(private readonly conversationsService: ConversationsService) {}
 
-  readonly definition: AssistantToolDefinition = {
+  readonly definition: AgentToolDefinition = {
     name: 'list_my_conversations',
     description:
       "List the signed-in user's own conversations, most recently active first. " +
@@ -40,7 +40,7 @@ export class ListMyConversationsTool implements AssistantTool {
     parameters: z.toJSONSchema(inputSchema),
   }
 
-  async execute(rawInput: unknown, context: AssistantToolContext): Promise<ConversationToolView[]> {
+  async execute(rawInput: unknown, context: AgentToolContext): Promise<ConversationToolView[]> {
     const { limit } = inputSchema.parse(rawInput)
     const conversations = await this.conversationsService.listForParticipant(context.userId)
     return conversations.slice(0, limit ?? DEFAULT_LIMIT).map(toConversationToolView)

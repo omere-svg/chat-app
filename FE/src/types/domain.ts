@@ -55,9 +55,11 @@ export type PendingMessage = Message & {
 // A stream failure clears the streaming message entirely (it never carries an error
 // state), so the only live status is 'streaming'.
 // `annotations` carries live tool/citation UI state until the persisted Message lands.
+// `tools` are announced tool runs in order; `completedTools` are those that have finished,
+// so the UI can show progress ("Searching…") turning into completion.
 export type StreamingMessage = Message & {
   status: 'streaming'
-  annotations?: { tools?: string[]; citations?: Citation[] }
+  annotations?: { tools?: string[]; completedTools?: string[]; citations?: Citation[] }
 }
 
 export type ThreadMessage = Message | PendingMessage | StreamingMessage

@@ -21,5 +21,10 @@ export interface MessageRepository {
   // Backs idempotent replay of an assistant exchange.
   findAssistantReplyTo(conversationId: string, userMessageId: string): Promise<MessageRecord | null>
 
+  // Full-text-ish search over the messages a user authored (senderId === userId),
+  // newest first. Backs the search_my_messages agent tool; scoped to the caller so it
+  // can never surface another user's messages.
+  searchAuthoredByUser(userId: string, query: string, limit: number): Promise<MessageRecord[]>
+
   insert(message: MessageRecord, clientMessageId?: string): Promise<MessageRecord>
 }

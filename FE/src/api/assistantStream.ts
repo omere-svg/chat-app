@@ -6,6 +6,7 @@ export type AssistantStreamHandlers = {
   onUserMessage: (message: Message) => void
   onToken: (text: string) => void
   onTool: (name: string) => void
+  onToolResult: (name: string) => void
   onCitations: (citations: Citation[]) => void
   onDone: (message: Message) => void
   onError: (error: ApiErrorPayload) => void
@@ -78,6 +79,11 @@ function dispatchFrame(frame: string, handlers: AssistantStreamHandlers): void {
     case 'tool':
       if (isRecord(data) && typeof data.name === 'string') {
         handlers.onTool(data.name)
+      }
+      break
+    case 'tool_result':
+      if (isRecord(data) && typeof data.name === 'string') {
+        handlers.onToolResult(data.name)
       }
       break
     case 'citations':

@@ -94,6 +94,15 @@ export class MessagesService {
     return this.messageRepository.findAssistantReplyTo(conversationId, userMessageId)
   }
 
+  // Searches the messages a user authored, newest first. Scoped to the caller.
+  searchMessagesAuthoredByUser(
+    userId: string,
+    query: string,
+    limit: number,
+  ): Promise<MessageRecord[]> {
+    return this.messageRepository.searchAuthoredByUser(userId, query, limit)
+  }
+
   createAssistantReply({
     conversationId,
     body,

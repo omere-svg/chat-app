@@ -168,6 +168,26 @@ describe('messageReducer streaming', () => {
     expect(done.messages.map((message) => message.id)).toContain('assistant-1')
   })
 
+  it('records tool completion separately from announced tools', () => {
+    const started = messageReducer(initialMessagesState, {
+      type: 'STREAM_START',
+      placeholderMessageId: 'assistant-temp',
+      conversationId: 'conv-1',
+      createdAt: '2026-01-01T13:00:00.000Z',
+    })
+    const announced = messageReducer(started, {
+      type: 'STREAM_TOOL',
+      name: 'retrieve_knowledge',
+    })
+    const completed = messageReducer(announced, {
+      type: 'STREAM_TOOL_RESULT',
+      name: 'retrieve_knowledge',
+    })
+
+    expect(completed.streaming?.annotations?.tools).toEqual(['retrieve_knowledge'])
+    expect(completed.streaming?.annotations?.completedTools).toEqual(['retrieve_knowledge'])
+  })
+
   it('clears the streaming message on error', () => {
     const started = messageReducer(initialMessagesState, {
       type: 'STREAM_START',
