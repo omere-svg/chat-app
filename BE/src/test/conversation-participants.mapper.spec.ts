@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { ConversationParticipantsMapper } from '../chat/mapper/conversation-participants.mapper.js'
 import type { PublicUser } from '../users/user-public-view.js'
 
-const creator: PublicUser = { id: 'user-b', email: 'b@example.com', displayName: 'Bea' }
-const alice: PublicUser = { id: 'user-a', email: 'a@example.com', displayName: 'Alice' }
-const cleo: PublicUser = { id: 'user-c', email: 'c@example.com', displayName: 'Cleo' }
+const creator: PublicUser = { id: 'user-b', email: 'b@example.com', firstName: 'Bea', lastName: 'Baxter' }
+const alice: PublicUser = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams' }
+const cleo: PublicUser = { id: 'user-c', email: 'c@example.com', firstName: 'Cleo', lastName: 'Cole' }
 
 const mapper = new ConversationParticipantsMapper()
 
@@ -15,10 +15,10 @@ describe('ConversationParticipantsMapper', () => {
     expect(participantIds).toEqual(['user-a', 'user-b', 'user-c'])
   })
 
-  it('derives a default title from sorted participant display names', () => {
+  it('derives a default title from sorted participant full names', () => {
     const { title } = mapper.shape(creator, [cleo, alice], undefined)
 
-    expect(title).toBe('Alice & Bea & Cleo')
+    expect(title).toBe('Alice Adams & Bea Baxter & Cleo Cole')
   })
 
   it('trims an explicitly requested title and keeps it', () => {

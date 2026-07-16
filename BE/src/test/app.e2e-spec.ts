@@ -61,14 +61,23 @@ describe('Chat API (e2e)', () => {
   })
 
   describe('signup + login', () => {
-    const credentials = { email: 'erin@example.com', password: 'password123', name: 'Erin' }
+    const credentials = {
+      email: 'erin@example.com',
+      password: 'password123',
+      firstName: 'Erin',
+      lastName: 'Example',
+    }
 
     it('signs up a new user (201) returning a token and a password-free user', async () => {
       const response = await request(httpServer).post('/api/auth/signup').send(credentials)
 
       expect(response.status).toBe(201)
       expect(typeof response.body.token).toBe('string')
-      expect(response.body.user).toMatchObject({ email: credentials.email, displayName: 'Erin' })
+      expect(response.body.user).toMatchObject({
+        email: credentials.email,
+        firstName: 'Erin',
+        lastName: 'Example',
+      })
       expect(response.body.user).not.toHaveProperty('passwordHash')
       expect(response.body.user).not.toHaveProperty('password')
     })
@@ -111,6 +120,91 @@ describe('Chat API (e2e)', () => {
 
       expect(response.status).toBe(400)
       expect(response.body.error.code).toBe('VALIDATION_ERROR')
+    })
+  })
+
+  describe('profile updates', () => {
+    it('updates the first and last name via PATCH /api/me/profile', async () => {
+      const token = await signUpAndGetToken(httpServer, 'nora@example.com', 'Nora')
+
+      const response = await request(httpServer)
+        .patch('/api/me/profile')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ firstName: 'Nora', lastName: 'Newman' })
+
+      expect(response.status).toBe(200)
+      expect(response.body).toMatchObject({ firstName: 'Nora', lastName: 'Newman' })
+    })
+
+    it('changes the email when the current password is correct', async () => {
+      const token = await signUpAndGetToken(httpServer, 'oscar@example.com', 'Oscar')
+
+      const response = await request(httpServer)
+        .patch('/api/me/email')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'oscar.new@example.com', currentPassword: 'password123' })
+
+      expect(response.status).toBe(200)
+      expect(response.body.email).toBe('oscar.new@example.com')
+    })
+
+    it('rejects an email change with a wrong password (401)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'pat@example.com', 'Pat')
+
+      const response = await request(httpServer)
+        .patch('/api/me/email')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'pat.new@example.com', currentPassword: 'not-the-password' })
+
+      expect(response.status).toBe(401)
+      expect(response.body.error.code).toBe('INVALID_CREDENTIALS')
+    })
+
+    it('rejects changing to an already-registered email (409)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'quincy@example.com', 'Quincy')
+
+      const response = await request(httpServer)
+        .patch('/api/me/email')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'bob@example.com', currentPassword: 'password123' })
+
+      expect(response.status).toBe(409)
+      expect(response.body.error.code).toBe('EMAIL_ALREADY_REGISTERED')
+    })
+
+    it('requires authentication (401)', async () => {
+      const response = await request(httpServer)
+        .patch('/api/me/profile')
+        .send({ firstName: 'No', lastName: 'Auth' })
+
+      expect(response.status).toBe(401)
+    })
+
+    it('reflects a renamed participant in existing direct conversation titles', async () => {
+      const token = await signUpAndGetToken(httpServer, 'rex@example.com', 'Rex')
+
+      const createResponse = await request(httpServer)
+        .post('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ participantEmails: ['bob@example.com'] })
+      expect(createResponse.status).toBe(201)
+      expect(createResponse.body.conversation.title).toContain('Rex')
+      const conversationId = createResponse.body.conversation.id
+
+      await request(httpServer)
+        .patch('/api/me/profile')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ firstName: 'Maximus', lastName: 'Renamed' })
+
+      const listResponse = await request(httpServer)
+        .get('/api/conversations')
+        .set('Authorization', `Bearer ${token}`)
+      const conversation = listResponse.body.conversations.find(
+        (candidate: { id: string }) => candidate.id === conversationId,
+      )
+      // The title now shows the current name, not the snapshot from creation time.
+      expect(conversation.title).toContain('Maximus')
+      expect(conversation.title).not.toContain('Rex')
     })
   })
 
@@ -467,11 +561,11 @@ async function createAssistantConversation(httpServer: Server, token: string): P
 async function signUpAndGetToken(
   httpServer: Server,
   email: string,
-  name: string,
+  firstName: string,
 ): Promise<string> {
   const response = await request(httpServer)
     .post('/api/auth/signup')
-    .send({ email, password: 'password123', name })
+    .send({ email, password: 'password123', firstName, lastName: 'Tester' })
 
   if (response.status !== 201 || typeof response.body.token !== 'string') {
     throw new Error(`Test setup failed: could not sign up ${email} (status ${response.status})`)
