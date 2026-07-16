@@ -13,10 +13,10 @@ export class UserDocument {
   passwordHash!: string
 
   @Prop({ type: String, required: true })
-  displayName!: string
+  firstName!: string
 
-  @Prop({ type: String })
-  avatarUrl?: string
+  @Prop({ type: String, required: true })
+  lastName!: string
 
   @Prop({ type: Date, required: true })
   createdAt!: Date

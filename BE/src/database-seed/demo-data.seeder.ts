@@ -44,7 +44,8 @@ export class DemoDataSeeder implements OnModuleInit {
       await this.userRepository.insert({
         id: demoUser.id,
         email: demoUser.email,
-        displayName: demoUser.displayName,
+        firstName: demoUser.firstName,
+        lastName: demoUser.lastName,
         passwordHash,
       })
     }

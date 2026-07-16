@@ -25,7 +25,8 @@ export class AuthService {
     const userRecord = await this.usersService.createUser({
       email: signupDto.email,
       password: signupDto.password,
-      displayName: signupDto.name.trim(),
+      firstName: signupDto.firstName.trim(),
+      lastName: signupDto.lastName.trim(),
     })
 
     return this.issueAuthentication(userRecord)
