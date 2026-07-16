@@ -31,8 +31,9 @@ Errors use JSON body:
 ```ts
 type User = {
   id: string
-  displayName: string
-  avatarUrl?: string
+  email?: string
+  firstName: string
+  lastName: string
 }
 ```
 
@@ -200,6 +201,75 @@ When a request carries header `X-Simulate-Failure: 1`, the backend returns **500
 
 ---
 
+## Account & profile
+
+### `POST /api/auth/signup`
+
+Create an account and start a session.
+
+**Request**
+
+```ts
+{ email: string; password: string; firstName: string; lastName: string }
+```
+
+**Response `201`**: `{ token: string; user: User }`
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Missing/invalid fields (`VALIDATION_ERROR`) |
+| 409 | Email already registered (`EMAIL_ALREADY_REGISTERED`) |
+
+### `GET /api/me`
+
+Return the authenticated user.
+
+**Response `200`**: `User`. **Errors**: `401` when unauthenticated.
+
+### `PATCH /api/me/profile`
+
+Update the current user's first and last name.
+
+**Request**
+
+```ts
+{ firstName: string; lastName: string }
+```
+
+**Response `200`**: the updated `User`.
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Blank first/last name (`VALIDATION_ERROR`) |
+| 401 | Unauthorized |
+
+### `PATCH /api/me/email`
+
+Change the current user's email. Requires re-entering the account password, since email
+is the login identifier.
+
+**Request**
+
+```ts
+{ email: string; currentPassword: string }
+```
+
+**Response `200`**: the updated `User`.
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid email or missing password (`VALIDATION_ERROR`) |
+| 401 | Unauthorized, or wrong current password (`INVALID_CREDENTIALS`) |
+| 409 | Email already registered to another account (`EMAIL_ALREADY_REGISTERED`) |
+
+---
+
 ## Assistant conversations (Week 6)
 
 ### `POST /api/conversations` (assistant variant)
@@ -317,3 +387,4 @@ Remove a document and all of its chunks. Scoped to the owner.
 | 2026-06-16 | Week 5: backend moved to MongoDB persistence — contract unchanged |
 | 2026-06-25 | Week 6: `ConversationType`; assistant conversations; SSE streaming reply with tool calls; optional `Message.metadata` |
 | 2026-06-29 | Week 7: tutor (RAG) conversations; `/knowledge/documents` upload/list/delete; `Citation` + `Message.metadata.citations`; `citations` SSE event |
+| 2026-07-16 | Profile: `User` now uses `firstName`/`lastName` (replaces `displayName`); added `PATCH /me/profile` and `PATCH /me/email` (password-confirmed); signup takes first/last name |
