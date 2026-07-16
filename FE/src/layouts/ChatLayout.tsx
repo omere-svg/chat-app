@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ConversationList } from "../features/conversations/ConversationList.tsx";
 import { NewConversationFormContainer } from "../features/conversations/NewConversationForm.container.tsx";
 import { MessageThreadContainer } from "../features/messages/MessageThread.container.tsx";
 import { useAuth } from "../hooks/useAuth.ts";
 import { useConversations } from "../hooks/useConversations.ts";
+import { fullName } from "../types/domain.ts";
 
 export function ChatLayout(): React.ReactElement {
   const { currentUser, logout } = useAuth();
@@ -34,11 +36,16 @@ export function ChatLayout(): React.ReactElement {
     <div className="chat-layout">
       <header className="chat-layout__topbar">
         <span className="chat-layout__user">
-          Signed in as {currentUser?.displayName}
+          Signed in as {currentUser ? fullName(currentUser) : ""}
         </span>
-        <button type="button" className="btn btn--ghost" onClick={logout}>
-          Log out
-        </button>
+        <div className="chat-layout__topbar-actions">
+          <Link to="/profile" className="btn btn--ghost">
+            Profile
+          </Link>
+          <button type="button" className="btn btn--ghost" onClick={logout}>
+            Log out
+          </button>
+        </div>
       </header>
 
       <div className="chat-layout__panels">

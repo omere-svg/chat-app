@@ -4,6 +4,8 @@ export const endpoints = {
   signup: `${API_BASE}/auth/signup`,
   login: `${API_BASE}/auth/login`,
   currentUser: `${API_BASE}/me`,
+  updateProfile: `${API_BASE}/me/profile`,
+  updateEmail: `${API_BASE}/me/email`,
   conversations: `${API_BASE}/conversations`,
   conversationMessages: (id: string): string =>
     `${API_BASE}/conversations/${id}/messages`,

@@ -1,8 +1,14 @@
 export type User = {
   id: string
   email?: string
-  displayName: string
-  avatarUrl?: string
+  firstName: string
+  lastName: string
+}
+
+// Composes a person's full name for display. Collapses incidental whitespace so a blank
+// part never produces a leading/trailing space.
+export function fullName(user: Pick<User, 'firstName' | 'lastName'>): string {
+  return `${user.firstName} ${user.lastName}`.trim().replace(/\s+/g, ' ')
 }
 
 // 'direct' is human-to-human; 'assistant' is an AI chat; 'tutor' is the RAG mode that

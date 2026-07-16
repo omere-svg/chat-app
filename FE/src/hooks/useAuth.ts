@@ -7,7 +7,13 @@ type AuthContextValue = {
   isAuthenticated: boolean
   isRestoringSession: boolean
   login: (email: string, password: string) => Promise<void>
-  signup: (email: string, password: string, name: string) => Promise<void>
+  signup: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ) => Promise<void>
+  updateCurrentUser: (user: User) => void
   logout: () => void
 }
 

@@ -92,9 +92,9 @@ function parseUser(value: unknown): User {
   }
   return {
     id: readString(value, 'id', 'user'),
-    displayName: readString(value, 'displayName', 'user'),
+    firstName: readString(value, 'firstName', 'user'),
+    lastName: readString(value, 'lastName', 'user'),
     email: readOptionalString(value, 'email', 'user'),
-    avatarUrl: readOptionalString(value, 'avatarUrl', 'user'),
   }
 }
 

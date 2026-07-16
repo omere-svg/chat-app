@@ -8,7 +8,8 @@ export function AuthScreenContainer(): React.ReactElement {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -22,7 +23,7 @@ export function AuthScreenContainer(): React.ReactElement {
     setErrorMessage(null);
     try {
       if (mode === "signup") {
-        await signup(email.trim(), password, name.trim());
+        await signup(email.trim(), password, firstName.trim(), lastName.trim());
       } else {
         await login(email.trim(), password);
       }
@@ -42,12 +43,14 @@ export function AuthScreenContainer(): React.ReactElement {
       mode={mode}
       email={email}
       password={password}
-      name={name}
+      firstName={firstName}
+      lastName={lastName}
       isSubmitting={isSubmitting}
       errorMessage={errorMessage}
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
-      onNameChange={setName}
+      onFirstNameChange={setFirstName}
+      onLastNameChange={setLastName}
       onModeChange={switchMode}
       onSubmit={() => void handleSubmit()}
     />

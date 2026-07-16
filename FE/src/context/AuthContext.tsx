@@ -15,7 +15,13 @@ type AuthContextValue = {
   isAuthenticated: boolean
   isRestoringSession: boolean
   login: (email: string, password: string) => Promise<void>
-  signup: (email: string, password: string, name: string) => Promise<void>
+  signup: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ) => Promise<void>
+  updateCurrentUser: (user: User) => void
   logout: () => void
 }
 
@@ -114,10 +120,21 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
   async function signup(
     email: string,
     password: string,
-    name: string,
+    firstName: string,
+    lastName: string,
   ): Promise<void> {
-    const { token, user } = await apiClient.signup({ email, password, name })
+    const { token, user } = await apiClient.signup({ email, password, firstName, lastName })
     persistSession(token, user)
+  }
+
+  // Reflects a profile edit (name/email) in memory and in the persisted session, so the
+  // topbar and any other consumer stay in sync without a full re-login.
+  function updateCurrentUser(user: User): void {
+    const token = apiClient.getToken()
+    if (token !== null) {
+      writeStoredAuth({ token, user })
+    }
+    setCurrentUser(user)
   }
 
   function logout(): void {
@@ -132,6 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     isRestoringSession,
     login,
     signup,
+    updateCurrentUser,
     logout,
   }
 
