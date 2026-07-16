@@ -4,12 +4,14 @@ type AuthScreenProps = {
   mode: AuthMode;
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   isSubmitting: boolean;
   errorMessage: string | null;
   onEmailChange: (email: string) => void;
   onPasswordChange: (password: string) => void;
-  onNameChange: (name: string) => void;
+  onFirstNameChange: (firstName: string) => void;
+  onLastNameChange: (lastName: string) => void;
   onModeChange: (mode: AuthMode) => void;
   onSubmit: () => void;
 };
@@ -36,12 +38,14 @@ export function AuthScreen({
   mode,
   email,
   password,
-  name,
+  firstName,
+  lastName,
   isSubmitting,
   errorMessage,
   onEmailChange,
   onPasswordChange,
-  onNameChange,
+  onFirstNameChange,
+  onLastNameChange,
   onModeChange,
   onSubmit,
 }: AuthScreenProps): React.ReactElement {
@@ -50,7 +54,7 @@ export function AuthScreen({
   const canSubmit =
     email.trim().length > 0 &&
     password.length > 0 &&
-    (!isSignup || name.trim().length > 0);
+    (!isSignup || (firstName.trim().length > 0 && lastName.trim().length > 0));
 
   return (
     <form
@@ -65,18 +69,32 @@ export function AuthScreen({
       <p className="auth-screen__subtitle">{copy.title}</p>
 
       {isSignup ? (
-        <label className="auth-field">
-          <span className="auth-field__label">Name</span>
-          <input
-            className="auth-field__input"
-            type="text"
-            name="name"
-            autoComplete="name"
-            value={name}
-            disabled={isSubmitting}
-            onChange={(event) => onNameChange(event.target.value)}
-          />
-        </label>
+        <>
+          <label className="auth-field">
+            <span className="auth-field__label">First name</span>
+            <input
+              className="auth-field__input"
+              type="text"
+              name="firstName"
+              autoComplete="given-name"
+              value={firstName}
+              disabled={isSubmitting}
+              onChange={(event) => onFirstNameChange(event.target.value)}
+            />
+          </label>
+          <label className="auth-field">
+            <span className="auth-field__label">Last name</span>
+            <input
+              className="auth-field__input"
+              type="text"
+              name="lastName"
+              autoComplete="family-name"
+              value={lastName}
+              disabled={isSubmitting}
+              onChange={(event) => onLastNameChange(event.target.value)}
+            />
+          </label>
+        </>
       ) : null}
 
       <label className="auth-field">

@@ -20,12 +20,23 @@ export type UploadKnowledgeDocumentResponse = {
 export type SignupRequest = {
   email: string
   password: string
-  name: string
+  firstName: string
+  lastName: string
 }
 
 export type LoginRequest = {
   email: string
   password: string
+}
+
+export type UpdateProfileRequest = {
+  firstName: string
+  lastName: string
+}
+
+export type UpdateEmailRequest = {
+  email: string
+  currentPassword: string
 }
 
 export type AuthResponse = {

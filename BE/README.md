@@ -120,7 +120,7 @@ src/
 
 | Collection | Key fields | Index | Query it backs |
 |------------|------------|-------|----------------|
-| `users` | `_id, email, displayName, passwordHash, createdAt` | `email` (unique) | login / signup / participant lookup |
+| `users` | `_id, email, firstName, lastName, passwordHash, createdAt` | `email` (unique) | login / signup / participant lookup |
 | `conversations` | `_id, title, participantIds, lastActivityAt, lastMessage, createdAt` | `(participantIds, lastActivityAt desc)` | "list my conversations by last activity" |
 | `messages` | `_id, conversationId, senderId, body, createdAt, clientMessageId?` | `(conversationId, createdAt desc, _id desc)` | message history + cursor pagination |
 | `messages` | — | `(conversationId, clientMessageId)` unique partial | send idempotency |

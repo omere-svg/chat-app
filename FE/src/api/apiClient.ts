@@ -24,6 +24,8 @@ import type {
   SendMessageRequest,
   SendMessageResponse,
   SignupRequest,
+  UpdateEmailRequest,
+  UpdateProfileRequest,
   UploadKnowledgeDocumentResponse,
 } from '../types/api.ts'
 import type { User } from '../types/domain.ts'
@@ -43,7 +45,7 @@ export class ApiError extends Error {
 }
 
 type RequestOptions = {
-  method?: 'GET' | 'POST'
+  method?: 'GET' | 'POST' | 'PATCH'
   body?: unknown
 }
 
@@ -79,6 +81,20 @@ class ApiClient {
 
   async getCurrentUser(): Promise<User> {
     return this.request(endpoints.currentUser, parseUserResponse)
+  }
+
+  async updateProfile(request: UpdateProfileRequest): Promise<User> {
+    return this.request(endpoints.updateProfile, parseUserResponse, {
+      method: 'PATCH',
+      body: request,
+    })
+  }
+
+  async updateEmail(request: UpdateEmailRequest): Promise<User> {
+    return this.request(endpoints.updateEmail, parseUserResponse, {
+      method: 'PATCH',
+      body: request,
+    })
   }
 
   async getConversations(): Promise<ConversationsResponse> {

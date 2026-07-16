@@ -25,7 +25,7 @@ class FakeEmbeddingsProvider implements EmbeddingsProvider {
 async function signUpAndGetToken(httpServer: Server, email: string): Promise<string> {
   const response = await request(httpServer)
     .post('/api/auth/signup')
-    .send({ email, password: 'password123', name: email.split('@')[0] })
+    .send({ email, password: 'password123', firstName: email.split('@')[0], lastName: 'Tester' })
   if (response.status !== 201 || typeof response.body.token !== 'string') {
     throw new Error(`Test setup failed: could not sign up ${email} (status ${response.status})`)
   }

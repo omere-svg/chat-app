@@ -8,8 +8,8 @@ import type { ConversationRecord } from '../conversations/conversation.entity.js
 import type { CreateConversationDto } from '../conversations/dto/create-conversation.dto.js'
 import type { PublicUser } from '../users/user-public-view.js'
 
-const creator: PublicUser = { id: 'user-1', email: 'creator@example.com', displayName: 'Creator' }
-const invitee: PublicUser = { id: 'user-2', email: 'invitee@example.com', displayName: 'Invitee' }
+const creator: PublicUser = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One' }
+const invitee: PublicUser = { id: 'user-2', email: 'invitee@example.com', firstName: 'Invitee', lastName: 'Two' }
 const createDto = { participantEmails: ['invitee@example.com'] } as CreateConversationDto
 
 function buildOrchestrator(creatorLookup: PublicUser | null): {
@@ -52,7 +52,7 @@ describe('CreateConversationOrchestrator', () => {
 
     expect(create).toHaveBeenCalledWith({
       type: 'direct',
-      title: 'Creator & Invitee',
+      title: 'Creator One & Invitee Two',
       participantIds: ['user-1', 'user-2'],
     })
     expect(preview.participantIds).toEqual(['user-1', 'user-2'])

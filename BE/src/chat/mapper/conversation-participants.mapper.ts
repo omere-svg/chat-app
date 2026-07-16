@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { formatFullName } from '../../users/user-public-view.js'
 import type { PublicUser } from '../../users/user-public-view.js'
 
 export interface ShapedConversationParticipants {
@@ -31,12 +32,22 @@ export class ConversationParticipantsMapper {
 
     const title =
       requestedTitle === undefined
-        ? participants.map((participant) => participant.displayName).join(' & ')
+        ? this.deriveTitle(participants)
         : requestedTitle.trim()
 
     return {
       title,
       participantIds: participants.map((participant) => participant.id),
     }
+  }
+
+  // Composes a direct-conversation title from participants' current names, sorted by id
+  // so it is stable regardless of input order. Used both when creating a conversation and
+  // when listing, so titles reflect the latest profile names rather than a stale snapshot.
+  deriveTitle(participants: PublicUser[]): string {
+    return [...participants]
+      .sort(compareByIdAscending)
+      .map((participant) => formatFullName(participant))
+      .join(' & ')
   }
 }

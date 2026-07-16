@@ -9,15 +9,16 @@ import type { MessageRecord } from '../../messages/message.entity.js'
 export interface DemoUserSeed {
   id: string
   email: string
-  displayName: string
+  firstName: string
+  lastName: string
 }
 
 export const DEMO_USER_PASSWORD = 'password123'
 
 export const DEMO_USERS: readonly DemoUserSeed[] = [
-  { id: 'user-alice', email: 'alice@example.com', displayName: 'Alice' },
-  { id: 'user-bob', email: 'bob@example.com', displayName: 'Bob' },
-  { id: 'user-carol', email: 'carol@example.com', displayName: 'Carol' },
+  { id: 'user-alice', email: 'alice@example.com', firstName: 'Alice', lastName: 'Anderson' },
+  { id: 'user-bob', email: 'bob@example.com', firstName: 'Bob', lastName: 'Brown' },
+  { id: 'user-carol', email: 'carol@example.com', firstName: 'Carol', lastName: 'Clark' },
 ]
 
 interface SeedConversationSpec {

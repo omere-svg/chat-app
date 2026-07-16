@@ -2,14 +2,15 @@
 // BE/src/shared/seed/chat-seed.ts (same ids, formulas, and message bodies) —
 // the two are separate runtimes and cannot share a module.
 import type { ApiErrorPayload } from "../types/api.ts";
+import { fullName } from "../types/domain.ts";
 import type { ConversationPreview, Message, User } from "../types/domain.ts";
 
 type StoredUser = {
   id: string;
   email: string;
   password: string;
-  displayName: string;
-  avatarUrl?: string;
+  firstName: string;
+  lastName: string;
 };
 
 const SHARED_DEMO_PASSWORD = "password123";
@@ -20,19 +21,22 @@ function buildSeedUsers(): StoredUser[] {
       id: "user-alice",
       email: "alice@example.com",
       password: SHARED_DEMO_PASSWORD,
-      displayName: "Alice",
+      firstName: "Alice",
+      lastName: "Anderson",
     },
     {
       id: "user-bob",
       email: "bob@example.com",
       password: SHARED_DEMO_PASSWORD,
-      displayName: "Bob",
+      firstName: "Bob",
+      lastName: "Brown",
     },
     {
       id: "user-carol",
       email: "carol@example.com",
       password: SHARED_DEMO_PASSWORD,
-      displayName: "Carol",
+      firstName: "Carol",
+      lastName: "Clark",
     },
   ];
 }
@@ -41,8 +45,8 @@ export function toPublicUser(user: StoredUser): User {
   return {
     id: user.id,
     email: user.email,
-    displayName: user.displayName,
-    avatarUrl: user.avatarUrl,
+    firstName: user.firstName,
+    lastName: user.lastName,
   };
 }
 
@@ -194,7 +198,8 @@ export type CreateUserResult =
 export function createUser(input: {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
 }): CreateUserResult {
   const normalizedEmail = input.email.trim().toLowerCase();
   if (db.users.some((candidate) => candidate.email === normalizedEmail)) {
@@ -205,15 +210,74 @@ export function createUser(input: {
     id: `user-${crypto.randomUUID()}`,
     email: normalizedEmail,
     password: input.password,
-    displayName: input.name.trim(),
+    firstName: input.firstName.trim(),
+    lastName: input.lastName.trim(),
   };
   db.users.push(user);
   return { user };
 }
 
+export function updateUserName(
+  userId: string,
+  firstName: string,
+  lastName: string,
+): StoredUser | null {
+  const user = findUserById(userId);
+  if (!user) return null;
+  user.firstName = firstName.trim();
+  user.lastName = lastName.trim();
+  return user;
+}
+
+export type UpdateEmailResult =
+  | { user: StoredUser }
+  | { error: "INVALID_CREDENTIALS" | "EMAIL_ALREADY_REGISTERED" };
+
+export function updateUserEmail(
+  userId: string,
+  email: string,
+  currentPassword: string,
+): UpdateEmailResult {
+  const user = findUserById(userId);
+  if (!user) return { error: "INVALID_CREDENTIALS" };
+  if (user.password !== currentPassword) {
+    return { error: "INVALID_CREDENTIALS" };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (normalizedEmail === user.email) {
+    return { user };
+  }
+  if (db.users.some((candidate) => candidate.email === normalizedEmail)) {
+    return { error: "EMAIL_ALREADY_REGISTERED" };
+  }
+
+  user.email = normalizedEmail;
+  return { user };
+}
+
+// Mirrors the backend: a direct conversation's title is derived from participants'
+// current names, so a profile rename is reflected immediately instead of showing the
+// stale snapshot. Falls back to the stored title if any participant can't be resolved.
+function deriveDirectTitle(conversation: ConversationPreview): string {
+  const names = [...conversation.participantIds]
+    .sort()
+    .map((participantId) => {
+      const user = findUserById(participantId);
+      return user ? fullName(user) : null;
+    });
+  if (names.some((name) => name === null)) {
+    return conversation.title;
+  }
+  return names.join(" & ");
+}
+
 export function getUserConversations(userId: string): ConversationPreview[] {
   return db.conversations
     .filter((c) => c.participantIds.includes(userId))
+    .map((c) =>
+      c.type === "direct" ? { ...c, title: deriveDirectTitle(c) } : c,
+    )
     .sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
