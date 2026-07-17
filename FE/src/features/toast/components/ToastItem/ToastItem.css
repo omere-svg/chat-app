@@ -1,0 +1,32 @@
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.toast--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: inherit;
+  line-height: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .toast--error {
+    background: #450a0a;
+    color: #fecaca;
+    border-color: #7f1d1d;
+  }
+}
