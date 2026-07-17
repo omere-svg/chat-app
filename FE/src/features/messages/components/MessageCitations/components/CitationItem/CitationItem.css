@@ -1,0 +1,43 @@
+.message-citations__toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-h);
+}
+
+.message-citations__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.message-citations__score {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.message-citations__preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.message-citations__text {
+  margin: 0.25rem 0 0;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  background: var(--code-bg);
+  border-radius: 6px;
+  color: var(--text-h);
+  white-space: pre-wrap;
+}

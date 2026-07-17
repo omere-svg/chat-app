@@ -1,0 +1,39 @@
+.new-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.new-conversation__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.new-conversation__input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.new-conversation__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.new-conversation__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.new-conversation__assistant {
+  width: 100%;
+  margin-top: 0.5rem;
+}

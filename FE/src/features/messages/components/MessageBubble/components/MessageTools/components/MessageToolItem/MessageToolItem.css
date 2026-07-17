@@ -1,0 +1,11 @@
+.message-bubble__tool {
+  display: block;
+}
+
+.message-bubble__tool--done {
+  opacity: 0.6;
+}
+
+.message-bubble__tool--done::before {
+  content: '\2713\00a0';
+}
