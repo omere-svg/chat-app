@@ -1,0 +1,20 @@
+.chat-layout__topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.chat-layout__user {
+  font-weight: 500;
+  color: var(--text-h);
+  margin-right: auto;
+}
+
+.chat-layout__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

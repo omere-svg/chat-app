@@ -45,7 +45,6 @@ const doneFrame =
 describe('consumeAssistantStream', () => {
   it('dispatches user_message, tokens, tool, and done in order — across split chunks', async () => {
     const handlers = buildHandlers()
-    // Deliberately split a frame across two network chunks to exercise buffering.
     const response = streamingResponse([
       userMessageFrame + 'event: tool\ndata: {"name":"list_my_convers',
       'ations"}\n\nevent: token\ndata: {"text":"Hi "}\n\nevent: token\ndata: {"text":"there"}\n\n',

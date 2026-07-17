@@ -49,8 +49,6 @@ export type ConversationsResponse = {
 }
 
 export type CreateConversationRequest = {
-  // Defaults to 'direct' server-side. 'assistant' and 'tutor' conversations need no
-  // participants — the creator is the sole member.
   type?: 'direct' | 'assistant' | 'tutor'
   participantEmails?: string[]
   title?: string
