@@ -1,0 +1,12 @@
+.profile-status {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.profile-status--success {
+  color: var(--success);
+}
+
+.profile-status--error {
+  color: var(--danger);
+}
