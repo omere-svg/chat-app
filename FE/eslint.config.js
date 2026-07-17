@@ -26,9 +26,8 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/context/**/*.{ts,tsx}', 'src/hooks/useConversations.ts'],
+    files: ['src/features/conversations/hooks/useConversations.ts'],
     rules: {
-      'react-refresh/only-export-components': 'off',
       'react-hooks/set-state-in-effect': 'off',
     },
   },

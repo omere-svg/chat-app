@@ -12,9 +12,6 @@ export type AssistantStreamHandlers = {
   onError: (error: ApiErrorPayload) => void
 }
 
-// Reads a text/event-stream body and dispatches each frame to the handlers. Unknown
-// event names are ignored, so the backend can add event types (citations, tool calls)
-// in later weeks without breaking this client.
 export async function consumeAssistantStream(
   response: Response,
   handlers: AssistantStreamHandlers,
@@ -60,7 +57,6 @@ function dispatchFrame(frame: string, handlers: AssistantStreamHandlers): void {
       dataLines.push(line.slice('data:'.length).trim())
     }
   }
-  // Per the SSE spec, multiple data: lines in one frame join with a newline.
   const rawData = dataLines.join('\n')
   if (eventName === '' || rawData === '') {
     return
@@ -102,7 +98,6 @@ function dispatchFrame(frame: string, handlers: AssistantStreamHandlers): void {
       handlers.onError(toErrorPayload(data))
       break
     default:
-      // Forward-compatible: ignore event types this client doesn't know yet.
       break
   }
 }

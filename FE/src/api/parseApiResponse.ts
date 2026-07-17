@@ -132,7 +132,6 @@ function parseMessageMetadata(value: unknown): MessageMetadata | undefined {
   }
   const replyToMessageId = readOptionalString(value, 'replyToMessageId', 'message.metadata')
   const citations = parseCitations(value.citations)
-  // Mirror the backend, which omits empty metadata rather than sending an empty object.
   if (replyToMessageId === undefined && citations === undefined) {
     return undefined
   }
@@ -182,7 +181,6 @@ function parseConversationLastMessage(
 
 function readConversationType(value: Record<string, unknown>): ConversationType {
   const candidate = value.type
-  // Tolerate an unknown/absent type (older payloads, future kinds) as 'direct'.
   return CONVERSATION_TYPES.includes(candidate as ConversationType)
     ? (candidate as ConversationType)
     : 'direct'

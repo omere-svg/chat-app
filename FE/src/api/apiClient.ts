@@ -132,8 +132,6 @@ class ApiClient {
     return this.request(endpoints.knowledgeDocuments, parseKnowledgeDocumentsResponse)
   }
 
-  // Uploads a document as multipart/form-data. The browser sets the multipart boundary,
-  // so Content-Type is deliberately left unset here.
   async uploadKnowledgeDocument(file: File): Promise<UploadKnowledgeDocumentResponse> {
     const formData = new FormData()
     formData.append('file', file)
@@ -169,9 +167,6 @@ class ApiClient {
     }
   }
 
-  // Posts a message to an assistant conversation and consumes the SSE reply stream.
-  // Pre-stream failures throw ApiError (handled like any request); in-stream failures
-  // arrive as an `error` event delivered to handlers.onError.
   async streamAssistantMessage(
     conversationId: string,
     request: SendMessageRequest,
@@ -240,8 +235,6 @@ class ApiClient {
     )
   }
 
-  // Builds an ApiError from a non-ok response, parsing the structured body when present
-  // and clearing the token on 401 (mirrors the inline handling in request/stream).
   private async toApiError(response: Response): Promise<ApiError> {
     let errorPayload: ApiErrorPayload
     try {

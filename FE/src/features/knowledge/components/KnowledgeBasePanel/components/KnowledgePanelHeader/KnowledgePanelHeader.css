@@ -1,0 +1,11 @@
+.knowledge-panel__title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.knowledge-panel__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}

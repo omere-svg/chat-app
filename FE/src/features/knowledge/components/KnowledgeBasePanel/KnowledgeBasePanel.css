@@ -1,0 +1,14 @@
+.knowledge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.knowledge-panel__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger, #c0392b);
+}

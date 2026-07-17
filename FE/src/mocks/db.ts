@@ -1,6 +1,3 @@
-// Demo seed data for the MSW mock backend. Keep in sync with the BE seed at
-// BE/src/shared/seed/chat-seed.ts (same ids, formulas, and message bodies) —
-// the two are separate runtimes and cannot share a module.
 import type { ApiErrorPayload } from "../types/api.ts";
 import { fullName } from "../types/domain.ts";
 import type { ConversationPreview, Message, User } from "../types/domain.ts";
@@ -256,9 +253,6 @@ export function updateUserEmail(
   return { user };
 }
 
-// Mirrors the backend: a direct conversation's title is derived from participants'
-// current names, so a profile rename is reflected immediately instead of showing the
-// stale snapshot. Falls back to the stored title if any participant can't be resolved.
 function deriveDirectTitle(conversation: ConversationPreview): string {
   const names = [...conversation.participantIds]
     .sort()

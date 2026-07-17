@@ -1,0 +1,7 @@
+.message-thread-skeleton__row {
+  display: flex;
+}
+
+.message-thread-skeleton__row--right {
+  justify-content: flex-end;
+}

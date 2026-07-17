@@ -1,0 +1,20 @@
+.auth-screen__switch {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.auth-screen__switch-btn {
+  font: inherit;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-screen__switch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

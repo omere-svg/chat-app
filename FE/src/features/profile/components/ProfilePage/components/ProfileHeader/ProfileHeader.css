@@ -1,0 +1,12 @@
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.profile-header__title {
+  font-size: 1.75rem;
+  margin: 0;
+  color: var(--text-h);
+}

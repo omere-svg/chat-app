@@ -1,0 +1,6 @@
+.knowledge-panel__status,
+.knowledge-panel__empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}

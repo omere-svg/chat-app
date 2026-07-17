@@ -1,0 +1,42 @@
+.message-bubble {
+  max-width: 75%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 12px;
+  background: var(--code-bg);
+  align-self: flex-start;
+}
+
+.message-bubble--own {
+  align-self: flex-end;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}
+
+.message-bubble--pending {
+  opacity: 0.75;
+}
+
+.message-bubble__body {
+  margin: 0;
+  word-break: break-word;
+}
+
+.message-bubble__cursor {
+  display: inline-block;
+  width: 0.5ch;
+  margin-left: 1px;
+  border-right: 2px solid currentColor;
+  animation: message-bubble-cursor-blink 1s steps(2, start) infinite;
+}
+
+@keyframes message-bubble-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-bubble__cursor {
+    animation: none;
+  }
+}
