@@ -14,6 +14,4 @@ export type MessageBubbleProps = {
 
 export type MessageBubbleContainerProps = {
   message: ThreadMessage
-  isOwnMessage: boolean
-  avatar: ReactNode
 }

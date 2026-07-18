@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { UserAvatarContainer } from '@/shared/components/UserAvatar/UserAvatarContainer.tsx'
 import {
   CHAT_TOPBAR_CLASS,
   CHAT_TOPBAR_ROUTE,
@@ -9,13 +10,13 @@ import './ChatTopbar.css'
 
 export function ChatTopbar({
   userName,
-  avatar,
+  avatarUrl,
   onLogout,
 }: ChatTopbarProps): React.ReactElement {
   return (
     <header className={CHAT_TOPBAR_CLASS.topbar}>
       <div className={CHAT_TOPBAR_CLASS.identity}>
-        {avatar}
+        <UserAvatarContainer name={userName} imageUrl={avatarUrl} size="sm" />
         <span className={CHAT_TOPBAR_CLASS.user}>
           {CHAT_TOPBAR_TEXT.signedInPrefix} {userName}
         </span>

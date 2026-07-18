@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner.tsx'
 import { useAutoScroll } from '@/shared/hooks/useAutoScroll.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
+import { useChatLayout } from '@/app/components/ChatLayout/context/useChatLayoutContext.tsx'
 import { KnowledgeBasePanelContainer } from '@/features/knowledge/components/KnowledgeBasePanel/KnowledgeBasePanelContainer.tsx'
 import { useToast } from '@/features/toast/hooks/useToast.ts'
 import { useMessages } from '@/features/messages/hooks/useMessages.ts'
+import { SendersProvider } from '@/features/messages/context/useSendersContext.tsx'
 import { getThreadScrollAnchorId } from '@/features/messages/utils/deriveThreadViewState.ts'
 import { ASSISTANT_DISPLAY_NAME, ASSISTANT_SENDER_ID, fullName } from '@/types/domain.ts'
 import { MessageComposer } from '../MessageComposer/MessageComposer.tsx'
@@ -15,15 +17,11 @@ import { MessageThreadEmpty } from './components/MessageThreadEmpty/MessageThrea
 import { MessageThreadHeader } from './components/MessageThreadHeader/MessageThreadHeader.tsx'
 import { MessageThreadPlaceholder } from './components/MessageThreadPlaceholder/MessageThreadPlaceholder.tsx'
 import { MessageThread } from './MessageThread.tsx'
-import type { MessageThreadContainerProps } from './MessageThread.types.ts'
-import type { SenderProfile } from '../MessageList/MessageList.types.ts'
+import type { SenderProfile } from '@/features/messages/context/senders.types.ts'
 
-export function MessageThreadContainer({
-  selectedConversationId,
-  conversations,
-  onMessageSendSuccess,
-}: MessageThreadContainerProps): React.ReactElement {
+export function MessageThreadContainer(): React.ReactElement {
   const { currentUser } = useAuth()
+  const { selectedConversationId, conversations, reloadConversations } = useChatLayout()
   const { showErrorToast } = useToast()
   const [messageDraft, setMessageDraft] = useState('')
 
@@ -31,6 +29,10 @@ export function MessageThreadContainer({
     (conversation) => conversation.id === selectedConversationId,
   )
   const currentUserId = currentUser?.id ?? ''
+
+  function onMessageSendSuccess(): void {
+    reloadConversations({ quiet: true })
+  }
 
   const sendersById = new Map<string, SenderProfile>()
   for (const participant of selectedConversation?.participants ?? []) {
@@ -116,11 +118,9 @@ export function MessageThreadContainer({
     ) : threadState.status === 'empty' ? (
       <MessageThreadEmpty />
     ) : (
-      <MessageListContainer
-        messages={threadMessages}
-        currentUserId={currentUserId}
-        senders={senders}
-      />
+      <SendersProvider senders={senders}>
+        <MessageListContainer messages={threadMessages} />
+      </SendersProvider>
     )
 
   return (
