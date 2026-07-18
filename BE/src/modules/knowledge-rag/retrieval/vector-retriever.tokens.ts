@@ -1,0 +1,1 @@
+export const VECTOR_RETRIEVER = Symbol('VECTOR_RETRIEVER')
