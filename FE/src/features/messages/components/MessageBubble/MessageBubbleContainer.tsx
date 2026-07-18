@@ -8,11 +8,13 @@ import {
   isPendingMessage,
   isStreamingMessage,
   messageBubbleClassName,
+  messageRowClassName,
 } from './MessageBubble.utils.ts'
 
 export function MessageBubbleContainer({
   message,
   isOwnMessage,
+  avatar,
 }: MessageBubbleContainerProps): React.ReactElement {
   const isPending = isPendingMessage(message)
   const streaming = isStreamingMessage(message) ? message : null
@@ -32,11 +34,13 @@ export function MessageBubbleContainer({
 
   return (
     <MessageBubble
+      rowClassName={messageRowClassName(isOwnMessage)}
       className={messageBubbleClassName(
         isOwnMessage,
         isPending,
         streaming !== null,
       )}
+      avatar={avatar}
       body={message.body}
       showCursor={streaming !== null}
       tools={toolsNode}

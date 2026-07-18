@@ -1,13 +1,24 @@
-.message-bubble {
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
   max-width: 75%;
-  padding: 0.625rem 0.875rem;
-  border-radius: 12px;
-  background: var(--code-bg);
   align-self: flex-start;
 }
 
-.message-bubble--own {
+.message-row--own {
   align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message-bubble {
+  padding: 0.625rem 0.875rem;
+  border-radius: 12px;
+  background: var(--code-bg);
+  min-width: 0;
+}
+
+.message-bubble--own {
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
 }

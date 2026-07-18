@@ -6,6 +6,7 @@ import { KnowledgeBasePanelContainer } from '@/features/knowledge/components/Kno
 import { useToast } from '@/features/toast/hooks/useToast.ts'
 import { useMessages } from '@/features/messages/hooks/useMessages.ts'
 import { getThreadScrollAnchorId } from '@/features/messages/utils/deriveThreadViewState.ts'
+import { ASSISTANT_DISPLAY_NAME, ASSISTANT_SENDER_ID, fullName } from '@/types/domain.ts'
 import { MessageComposer } from '../MessageComposer/MessageComposer.tsx'
 import { MessageListContainer } from '../MessageList/MessageListContainer.tsx'
 import { MessageThreadSkeletonContainer } from '../MessageThreadSkeleton/MessageThreadSkeletonContainer.tsx'
@@ -15,6 +16,7 @@ import { MessageThreadHeader } from './components/MessageThreadHeader/MessageThr
 import { MessageThreadPlaceholder } from './components/MessageThreadPlaceholder/MessageThreadPlaceholder.tsx'
 import { MessageThread } from './MessageThread.tsx'
 import type { MessageThreadContainerProps } from './MessageThread.types.ts'
+import type { SenderProfile } from '../MessageList/MessageList.types.ts'
 
 export function MessageThreadContainer({
   selectedConversationId,
@@ -29,6 +31,28 @@ export function MessageThreadContainer({
     (conversation) => conversation.id === selectedConversationId,
   )
   const currentUserId = currentUser?.id ?? ''
+
+  const sendersById = new Map<string, SenderProfile>()
+  for (const participant of selectedConversation?.participants ?? []) {
+    sendersById.set(participant.id, {
+      id: participant.id,
+      name: fullName(participant),
+      avatarUrl: participant.avatarUrl ?? null,
+    })
+  }
+  if (currentUser) {
+    sendersById.set(currentUser.id, {
+      id: currentUser.id,
+      name: fullName(currentUser),
+      avatarUrl: currentUser.avatarUrl ?? null,
+    })
+  }
+  sendersById.set(ASSISTANT_SENDER_ID, {
+    id: ASSISTANT_SENDER_ID,
+    name: ASSISTANT_DISPLAY_NAME,
+    avatarUrl: null,
+  })
+  const senders = [...sendersById.values()]
 
   const {
     threadState,
@@ -95,6 +119,7 @@ export function MessageThreadContainer({
       <MessageListContainer
         messages={threadMessages}
         currentUserId={currentUserId}
+        senders={senders}
       />
     )
 
