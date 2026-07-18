@@ -1,0 +1,1 @@
+export const SIMULATE_FAILURE_HEADER_VALUE = '1'

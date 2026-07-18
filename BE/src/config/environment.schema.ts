@@ -1,7 +1,7 @@
 import { Type, plainToInstance } from 'class-transformer'
 import { IsIn, IsInt, IsOptional, IsString, IsUrl, Matches, Max, Min, MinLength, validateSync } from 'class-validator'
 import type { ValidationError } from 'class-validator'
-import { DEFAULT_ATLAS_VECTOR_INDEX } from '../knowledge/atlas/vector-index.config.js'
+import { DEFAULT_ATLAS_VECTOR_INDEX } from '../modules/knowledge-rag/atlas/vector-index.config.js'
 import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
 
 const MIN_JWT_SECRET_LENGTH = 32
@@ -20,7 +20,6 @@ const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'p
 const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
 
 class EnvironmentVariablesSchema implements AppEnvironment {
-  // Optional at runtime (defaulted below); `!` satisfies the AppEnvironment shape.
   @IsOptional()
   @IsIn(NODE_ENVIRONMENTS)
   NODE_ENV!: NodeEnvironment
@@ -54,7 +53,6 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @MinLength(1)
   OPENAI_API_KEY!: string
 
-  // Optional at runtime (defaulted below).
   @IsOptional()
   @IsString()
   @MinLength(1)
@@ -67,15 +65,11 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @Max(MAX_ASSISTANT_MAX_TOKENS)
   ASSISTANT_MAX_TOKENS!: number
 
-  // Optional at runtime (defaulted below). OpenAI embedding model used for ingestion
-  // and query embedding; must match the Atlas index's numDimensions.
   @IsOptional()
   @IsString()
   @MinLength(1)
   EMBEDDINGS_MODEL!: string
 
-  // Optional at runtime (defaulted below). Name of the Atlas Vector Search index on
-  // the knowledge_chunks collection.
   @IsOptional()
   @IsString()
   @MinLength(1)

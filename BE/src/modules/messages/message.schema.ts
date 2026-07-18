@@ -1,0 +1,75 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import type { HydratedDocument } from 'mongoose'
+
+@Schema({ _id: false, versionKey: false })
+export class MessageCitationDocument {
+  @Prop({ type: String, required: true })
+  chunkId!: string
+
+  @Prop({ type: String, required: true })
+  documentId!: string
+
+  @Prop({ type: String, required: true })
+  documentName!: string
+
+  @Prop({ type: String, required: true })
+  text!: string
+
+  @Prop({ type: Number, required: true })
+  score!: number
+}
+
+const MessageCitationSchema = SchemaFactory.createForClass(MessageCitationDocument)
+
+@Schema({ _id: false, versionKey: false })
+export class MessageMetadataDocument {
+  @Prop({ type: String })
+  replyToMessageId?: string
+
+  @Prop({ type: [MessageCitationSchema] })
+  citations?: MessageCitationDocument[]
+}
+
+const MessageMetadataSchema = SchemaFactory.createForClass(MessageMetadataDocument)
+
+@Schema({ collection: 'messages', versionKey: false })
+export class MessageDocument {
+  @Prop({ type: String, required: true })
+  _id!: string
+
+  @Prop({ type: String, required: true })
+  conversationId!: string
+
+  @Prop({ type: String, required: true })
+  senderId!: string
+
+  @Prop({ type: String, required: true })
+  body!: string
+
+  @Prop({ type: Date, required: true })
+  createdAt!: Date
+
+  @Prop({ type: String })
+  clientMessageId?: string
+
+  @Prop({ type: MessageMetadataSchema, default: null })
+  metadata!: MessageMetadataDocument | null
+}
+
+export type MessageHydratedDocument = HydratedDocument<MessageDocument>
+
+export const MessageSchema = SchemaFactory.createForClass(MessageDocument)
+
+MessageSchema.index({ conversationId: 1, createdAt: -1, _id: -1 })
+
+MessageSchema.index({ senderId: 1, createdAt: -1, _id: -1 })
+
+MessageSchema.index(
+  { conversationId: 1, clientMessageId: 1 },
+  { unique: true, partialFilterExpression: { clientMessageId: { $exists: true } } },
+)
+
+MessageSchema.index(
+  { conversationId: 1, 'metadata.replyToMessageId': 1 },
+  { unique: true, partialFilterExpression: { 'metadata.replyToMessageId': { $exists: true } } },
+)
