@@ -1,0 +1,1 @@
+export const AVATAR_UPLOAD_URL_TTL_SECONDS = 300
