@@ -15,6 +15,7 @@ const MAX_ASSISTANT_MAX_TOKENS = 16_384
 const DEFAULT_ASSISTANT_MODEL = 'gpt-4o-mini'
 const DEFAULT_ASSISTANT_MAX_TOKENS = 1024
 const DEFAULT_EMBEDDINGS_MODEL = 'text-embedding-3-small'
+const DEFAULT_AWS_REGION = 'us-east-1'
 
 const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
 const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
@@ -74,6 +75,45 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @IsString()
   @MinLength(1)
   ATLAS_VECTOR_INDEX!: string
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  AWS_REGION!: string
+
+  @IsOptional()
+  @IsString()
+  S3_AVATAR_BUCKET!: string
+
+  @IsOptional()
+  @IsString()
+  AWS_ACCESS_KEY_ID!: string
+
+  @IsOptional()
+  @IsString()
+  AWS_SECRET_ACCESS_KEY!: string
+
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  AVATAR_CDN_BASE_URL!: string
+}
+
+const REQUIRED_STORAGE_KEYS: readonly (keyof AppEnvironment)[] = [
+  'S3_AVATAR_BUCKET',
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
+  'AVATAR_CDN_BASE_URL',
+]
+
+function assertStorageConfiguredInProduction(environment: AppEnvironment): void {
+  if (environment.NODE_ENV !== 'production') {
+    return
+  }
+
+  const missingKeys = REQUIRED_STORAGE_KEYS.filter((key) => environment[key] === '')
+  if (missingKeys.length > 0) {
+    throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
+  }
 }
 
 function formatValidationFailures(validationErrors: readonly ValidationError[]): string {
@@ -102,7 +142,7 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     )
   }
 
-  return {
+  const resolvedEnvironment: AppEnvironment = {
     NODE_ENV: candidateEnvironment.NODE_ENV ?? DEFAULT_NODE_ENV,
     PORT: candidateEnvironment.PORT,
     FRONTEND_ORIGIN: candidateEnvironment.FRONTEND_ORIGIN,
@@ -114,5 +154,14 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     ASSISTANT_MAX_TOKENS: candidateEnvironment.ASSISTANT_MAX_TOKENS ?? DEFAULT_ASSISTANT_MAX_TOKENS,
     EMBEDDINGS_MODEL: candidateEnvironment.EMBEDDINGS_MODEL ?? DEFAULT_EMBEDDINGS_MODEL,
     ATLAS_VECTOR_INDEX: candidateEnvironment.ATLAS_VECTOR_INDEX ?? DEFAULT_ATLAS_VECTOR_INDEX,
+    AWS_REGION: candidateEnvironment.AWS_REGION ?? DEFAULT_AWS_REGION,
+    S3_AVATAR_BUCKET: candidateEnvironment.S3_AVATAR_BUCKET ?? '',
+    AWS_ACCESS_KEY_ID: candidateEnvironment.AWS_ACCESS_KEY_ID ?? '',
+    AWS_SECRET_ACCESS_KEY: candidateEnvironment.AWS_SECRET_ACCESS_KEY ?? '',
+    AVATAR_CDN_BASE_URL: candidateEnvironment.AVATAR_CDN_BASE_URL ?? '',
   }
+
+  assertStorageConfiguredInProduction(resolvedEnvironment)
+
+  return resolvedEnvironment
 }
