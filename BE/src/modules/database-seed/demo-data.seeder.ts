@@ -46,7 +46,7 @@ export class DemoDataSeeder implements OnModuleInit {
         firstName: demoUser.firstName,
         lastName: demoUser.lastName,
         passwordHash,
-        avatarKey: null,
+        avatar: null,
       })
     }
     this.logger.log(`Seeded ${DEMO_USERS.length.toString()} demo users`)

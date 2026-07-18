@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
-import { AvatarUrlResolver } from './avatar-url.resolver.js'
 import { PasswordHasher } from './password-hasher.js'
 import { USER_REPOSITORY } from './user.repository.js'
 import { toPublicUser } from './user.mapper.js'
@@ -10,6 +9,7 @@ import { IncorrectCurrentPasswordError } from './errors/incorrect-current-passwo
 import { UnknownParticipantEmailsError } from './errors/unknown-participant-emails.error.js'
 import type { UserRepository } from './user.repository.js'
 import type { PublicUser } from './types/user-public-view.js'
+import type { StoredAvatar } from './types/stored-avatar.js'
 import type { UserRecord } from './types/user.entity.js'
 import type {
   CreateUserInput,
@@ -27,11 +27,10 @@ export class UsersService {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,
-    private readonly avatarUrlResolver: AvatarUrlResolver,
   ) {}
 
   toPublicView(userRecord: UserRecord): PublicUser {
-    return toPublicUser(userRecord, this.avatarUrlResolver.resolve(userRecord.avatarKey))
+    return toPublicUser(userRecord)
   }
 
   async createUser(createUserInput: CreateUserInput): Promise<UserRecord> {
@@ -49,7 +48,7 @@ export class UsersService {
       passwordHash,
       firstName: createUserInput.firstName,
       lastName: createUserInput.lastName,
-      avatarKey: null,
+      avatar: null,
     }
 
     return this.userRepository.insert(userRecord)
@@ -71,11 +70,11 @@ export class UsersService {
     if (existingUser === null) {
       throw new UserNotFoundError()
     }
-    return existingUser.avatarKey
+    return existingUser.avatar?.key ?? null
   }
 
-  async updateAvatar(userId: string, avatarKey: string): Promise<PublicUser> {
-    const updatedUser = await this.userRepository.update(userId, { avatarKey })
+  async updateAvatar(userId: string, avatar: StoredAvatar): Promise<PublicUser> {
+    const updatedUser = await this.userRepository.update(userId, { avatar })
     if (updatedUser === null) {
       throw new UserNotFoundError()
     }
@@ -83,7 +82,7 @@ export class UsersService {
   }
 
   async clearAvatar(userId: string): Promise<PublicUser> {
-    const updatedUser = await this.userRepository.update(userId, { avatarKey: null })
+    const updatedUser = await this.userRepository.update(userId, { avatar: null })
     if (updatedUser === null) {
       throw new UserNotFoundError()
     }

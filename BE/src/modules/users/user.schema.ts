@@ -1,5 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
+import type { StoredAvatar } from './types/stored-avatar.js'
 
 @Schema({ collection: 'users', versionKey: false })
 export class UserDocument {
@@ -18,8 +19,15 @@ export class UserDocument {
   @Prop({ type: String, required: true })
   lastName!: string
 
-  @Prop({ type: String, required: false, default: null })
-  avatarKey!: string | null
+  @Prop({
+    type: raw({
+      srcUrl: { type: String, required: false, default: null },
+      key: { type: String, required: true },
+    }),
+    required: false,
+    default: null,
+  })
+  avatar!: StoredAvatar | null
 
   @Prop({ type: Date, required: true })
   createdAt!: Date

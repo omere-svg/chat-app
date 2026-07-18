@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { OBJECT_STORAGE } from '../object-storage/object-storage.tokens.js'
 import { UsersService } from '../users/users.service.js'
+import { AvatarUrlResolver } from '../users/avatar-url.resolver.js'
 import { isAllowedAvatarContentType, isAvatarKeyOwnedBy } from '../users/avatar/avatar-key.js'
 import { MAX_AVATAR_BYTES } from '../users/avatar/constants.js'
 import { AvatarKeyForbiddenError } from '../users/avatar/errors/avatar-key-forbidden.error.js'
@@ -15,6 +16,7 @@ export class SetAvatarOrchestrator {
   constructor(
     @Inject(OBJECT_STORAGE) private readonly objectStorage: ObjectStorage,
     private readonly usersService: UsersService,
+    private readonly avatarUrlResolver: AvatarUrlResolver,
   ) {}
 
   async confirm(userId: string, key: string): Promise<PublicUser> {
@@ -24,14 +26,8 @@ export class SetAvatarOrchestrator {
 
     await this.assertUploadedObjectIsValid(key)
 
-    const previousKey = await this.usersService.getAvatarKey(userId)
-    const updatedUser = await this.usersService.updateAvatar(userId, key)
-
-    if (previousKey !== null && previousKey !== key) {
-      await this.objectStorage.deleteObject(previousKey)
-    }
-
-    return updatedUser
+    const srcUrl = this.avatarUrlResolver.resolve(key, Date.now().toString())
+    return this.usersService.updateAvatar(userId, { srcUrl, key })
   }
 
   private async assertUploadedObjectIsValid(key: string): Promise<void> {

@@ -18,10 +18,11 @@ export class AvatarUrlResolver {
     this.cdnBaseUrl = normalizeBaseUrl(configService.get('AVATAR_CDN_BASE_URL', { infer: true }))
   }
 
-  resolve(avatarKey: string | null): string | null {
+  resolve(avatarKey: string | null, cacheBustToken?: string): string | null {
     if (avatarKey === null || this.cdnBaseUrl === '') {
       return null
     }
-    return `${this.cdnBaseUrl}/${avatarKey}`
+    const url = `${this.cdnBaseUrl}/${avatarKey}`
+    return cacheBustToken === undefined ? url : `${url}?v=${cacheBustToken}`
   }
 }

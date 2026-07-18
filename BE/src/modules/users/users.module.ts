@@ -15,6 +15,6 @@ import { UsersService } from './users.service.js'
     AvatarUrlResolver,
     { provide: USER_REPOSITORY, useClass: MongoUserRepository },
   ],
-  exports: [UsersService, PasswordHasher, USER_REPOSITORY],
+  exports: [UsersService, PasswordHasher, AvatarUrlResolver, USER_REPOSITORY],
 })
 export class UsersModule {}
