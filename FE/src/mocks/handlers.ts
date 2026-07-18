@@ -3,12 +3,15 @@ import { endpoints } from '../api/endpoints.ts'
 import { isRecord } from '../api/parseApiResponse.ts'
 import {
   addMessage,
+  clearUserAvatar,
   createUser,
   findUserById,
   getUserConversations,
+  isOwnedAvatarKey,
   issueToken,
   paginateMessages,
   resolveUserId,
+  setUserAvatar,
   toPublicUser,
   updateUserEmail,
   updateUserName,
@@ -17,6 +20,14 @@ import {
 } from './db.ts'
 import { jsonApiError } from './jsonApiError.ts'
 import { MESSAGE_PAGE_LIMIT } from '../api/constants.ts'
+
+const MOCK_AVATAR_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+
+const MOCK_AVATAR_STORAGE_ORIGIN = 'https://mock-avatar-storage.local'
 
 function bearerToken(request: Request): string | null {
   const auth = request.headers.get('Authorization')
@@ -134,6 +145,54 @@ export const handlers = [
       return jsonApiError(409, 'EMAIL_ALREADY_REGISTERED', 'Email is already registered')
     }
     return HttpResponse.json(toPublicUser(result.user))
+  }),
+
+  http.post(endpoints.avatarUploadUrl, async ({ request }) => {
+    const userId = resolveUserId(bearerToken(request))
+    if (!userId) {
+      return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
+    }
+    const body = await request.json()
+    const contentType =
+      isRecord(body) && typeof body.contentType === 'string' ? body.contentType : ''
+    const extension = MOCK_AVATAR_EXTENSIONS[contentType]
+    if (extension === undefined) {
+      return jsonApiError(400, 'UNSUPPORTED_IMAGE_TYPE', 'Unsupported image type')
+    }
+    const key = `avatars/${userId}/${crypto.randomUUID()}.${extension}`
+    const uploadUrl = `${MOCK_AVATAR_STORAGE_ORIGIN}/${encodeURIComponent(key)}`
+    return HttpResponse.json({ uploadUrl, key, expiresInSeconds: 300 })
+  }),
+
+  http.put(`${MOCK_AVATAR_STORAGE_ORIGIN}/:encodedKey`, () => new HttpResponse(null, { status: 200 })),
+
+  http.put(endpoints.avatar, async ({ request }) => {
+    const userId = resolveUserId(bearerToken(request))
+    if (!userId) {
+      return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
+    }
+    const body = await request.json()
+    const key = isRecord(body) && typeof body.key === 'string' ? body.key : ''
+    if (!isOwnedAvatarKey(userId, key)) {
+      return jsonApiError(403, 'FORBIDDEN', 'Avatar key does not belong to this user')
+    }
+    const user = setUserAvatar(userId, key)
+    if (!user) {
+      return jsonApiError(404, 'USER_NOT_FOUND', 'User not found')
+    }
+    return HttpResponse.json(toPublicUser(user))
+  }),
+
+  http.delete(endpoints.avatar, ({ request }) => {
+    const userId = resolveUserId(bearerToken(request))
+    if (!userId) {
+      return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
+    }
+    const user = clearUserAvatar(userId)
+    if (!user) {
+      return jsonApiError(404, 'USER_NOT_FOUND', 'User not found')
+    }
+    return HttpResponse.json(toPublicUser(user))
   }),
 
   http.get(endpoints.conversations, ({ request }) => {

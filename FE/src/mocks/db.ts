@@ -1,6 +1,11 @@
 import type { ApiErrorPayload } from "../types/api.ts";
 import { fullName } from "../types/domain.ts";
-import type { ConversationPreview, Message, User } from "../types/domain.ts";
+import type {
+  ConversationParticipant,
+  ConversationPreview,
+  Message,
+  User,
+} from "../types/domain.ts";
 
 type StoredUser = {
   id: string;
@@ -8,9 +13,11 @@ type StoredUser = {
   password: string;
   firstName: string;
   lastName: string;
+  avatarKey: string | null;
 };
 
 const SHARED_DEMO_PASSWORD = "password123";
+const MOCK_AVATAR_CDN_BASE = "https://mock-cdn.local";
 
 function buildSeedUsers(): StoredUser[] {
   return [
@@ -20,6 +27,7 @@ function buildSeedUsers(): StoredUser[] {
       password: SHARED_DEMO_PASSWORD,
       firstName: "Alice",
       lastName: "Anderson",
+      avatarKey: null,
     },
     {
       id: "user-bob",
@@ -27,6 +35,7 @@ function buildSeedUsers(): StoredUser[] {
       password: SHARED_DEMO_PASSWORD,
       firstName: "Bob",
       lastName: "Brown",
+      avatarKey: null,
     },
     {
       id: "user-carol",
@@ -34,8 +43,13 @@ function buildSeedUsers(): StoredUser[] {
       password: SHARED_DEMO_PASSWORD,
       firstName: "Carol",
       lastName: "Clark",
+      avatarKey: null,
     },
   ];
+}
+
+function avatarUrlFor(user: StoredUser): string | null {
+  return user.avatarKey === null ? null : `${MOCK_AVATAR_CDN_BASE}/${user.avatarKey}`;
 }
 
 export function toPublicUser(user: StoredUser): User {
@@ -44,6 +58,16 @@ export function toPublicUser(user: StoredUser): User {
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    avatarUrl: avatarUrlFor(user),
+  };
+}
+
+function toParticipant(user: StoredUser): ConversationParticipant {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatarUrl: avatarUrlFor(user),
   };
 }
 
@@ -107,6 +131,7 @@ export function createMockDb(): MockDb {
       type: "direct",
       title: "Alice & Bob",
       participantIds: ["user-alice", "user-bob"],
+      participants: [],
       lastMessage: {
         body: last1.body,
         createdAt: last1.createdAt,
@@ -119,6 +144,7 @@ export function createMockDb(): MockDb {
       type: "direct",
       title: "Project sync",
       participantIds: ["user-alice", "user-carol"],
+      participants: [],
       lastMessage: {
         body: last2.body,
         createdAt: last2.createdAt,
@@ -131,6 +157,7 @@ export function createMockDb(): MockDb {
       type: "direct",
       title: "Weekend plans",
       participantIds: ["user-bob", "user-carol"],
+      participants: [],
       lastMessage: {
         body: last3.body,
         createdAt: last3.createdAt,
@@ -209,6 +236,7 @@ export function createUser(input: {
     password: input.password,
     firstName: input.firstName.trim(),
     lastName: input.lastName.trim(),
+    avatarKey: null,
   };
   db.users.push(user);
   return { user };
@@ -266,16 +294,45 @@ function deriveDirectTitle(conversation: ConversationPreview): string {
   return names.join(" & ");
 }
 
+function buildParticipants(
+  conversation: ConversationPreview,
+): ConversationParticipant[] {
+  return conversation.participantIds
+    .map((participantId) => findUserById(participantId))
+    .filter((user): user is StoredUser => user !== null)
+    .map(toParticipant);
+}
+
 export function getUserConversations(userId: string): ConversationPreview[] {
   return db.conversations
     .filter((c) => c.participantIds.includes(userId))
-    .map((c) =>
-      c.type === "direct" ? { ...c, title: deriveDirectTitle(c) } : c,
-    )
+    .map((c) => ({
+      ...c,
+      title: c.type === "direct" ? deriveDirectTitle(c) : c.title,
+      participants: buildParticipants(c),
+    }))
     .sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
+}
+
+export function isOwnedAvatarKey(userId: string, key: string): boolean {
+  return key.startsWith(`avatars/${userId}/`);
+}
+
+export function setUserAvatar(userId: string, key: string): StoredUser | null {
+  const user = findUserById(userId);
+  if (!user) return null;
+  user.avatarKey = key;
+  return user;
+}
+
+export function clearUserAvatar(userId: string): StoredUser | null {
+  const user = findUserById(userId);
+  if (!user) return null;
+  user.avatarKey = null;
+  return user;
 }
 
 export function userInConversation(
