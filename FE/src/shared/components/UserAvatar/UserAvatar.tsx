@@ -8,19 +8,19 @@ export function UserAvatar({
   fallback,
   size,
 }: UserAvatarProps): React.ReactElement {
-  if (imageUrl) {
-    return (
-      <span className={USER_AVATAR_ROOT_CLASS[size]}>
-        <img className={USER_AVATAR_CLASS.image} src={imageUrl} alt={label} />
-      </span>
-    )
-  }
-
   return (
-    <span className={USER_AVATAR_ROOT_CLASS[size]} role="img" aria-label={label}>
-      <span className={USER_AVATAR_CLASS.fallback} aria-hidden="true">
-        {fallback}
-      </span>
+    <span
+      className={USER_AVATAR_ROOT_CLASS[size]}
+      role={imageUrl ? undefined : 'img'}
+      aria-label={imageUrl ? undefined : label}
+    >
+      {imageUrl ? (
+        <img className={USER_AVATAR_CLASS.image} src={imageUrl} alt={label} />
+      ) : (
+        <span className={USER_AVATAR_CLASS.fallback} aria-hidden="true">
+          {fallback}
+        </span>
+      )}
     </span>
   )
 }
