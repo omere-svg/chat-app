@@ -2,17 +2,14 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { ASSISTANT_REPLY_STRATEGY } from '../agent/reply-strategy.port.js'
-import { FakeAssistantStrategy } from '../agent/fake-assistant.strategy.js'
-import { EMBEDDINGS_PROVIDER } from '../knowledge/ingestion/embeddings.port.js'
-import { applyGlobalApiContract } from '../app-http-contract.js'
-import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
+import { ASSISTANT_REPLY_STRATEGY } from '../../agent/agent.tokens.js'
+import { FakeAssistantStrategy } from '../../agent/fake-assistant.strategy.js'
+import { EMBEDDINGS_PROVIDER } from '../../embeddings/embeddings.tokens.js'
+import { applyGlobalApiContract } from '../../../app-http-contract.js'
+import type { EmbeddingsProvider } from '../../embeddings/types/embeddings-provider.js'
 import type { INestApplication } from '@nestjs/common'
 import type { Server } from 'node:http'
 
-// Deterministic embeddings so the e2e never calls OpenAI. Dimensionality is irrelevant
-// here — mongodb-memory-server stores the vectors but cannot run $vectorSearch, so the
-// upload/list/delete paths (which never query by vector) are fully exercisable.
 class FakeEmbeddingsProvider implements EmbeddingsProvider {
   embedDocuments(texts: string[]): Promise<number[][]> {
     return Promise.resolve(texts.map(() => [0.1, 0.2, 0.3]))
@@ -43,7 +40,7 @@ describe('Knowledge base (e2e)', () => {
     mongoServer = await MongoMemoryServer.create()
     process.env.MONGO_URI = mongoServer.getUri()
 
-    const { AppModule } = await import('../app.module.js')
+    const { AppModule } = await import('../../../app.module.js')
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(ASSISTANT_REPLY_STRATEGY)
       .useClass(FakeAssistantStrategy)
@@ -81,7 +78,6 @@ describe('Knowledge base (e2e)', () => {
     expect(response.status).toBe(201)
     expect(response.body.document).toMatchObject({ filename: 'space.md', status: 'ready' })
     expect(response.body.document.chunkCount).toBeGreaterThan(0)
-    // Internal fields never leak to the client.
     expect(response.body.document).not.toHaveProperty('userId')
     expect(response.body.document).not.toHaveProperty('contentHash')
   })
@@ -129,7 +125,6 @@ describe('Knowledge base (e2e)', () => {
     expect(response.status).toBe(404)
     expect(response.body.error.code).toBe('KNOWLEDGE_DOCUMENT_NOT_FOUND')
 
-    // The owner can still see it — B's failed delete changed nothing.
     const stillThere = await request(httpServer)
       .get('/api/knowledge/documents')
       .set('Authorization', `Bearer ${tokenA}`)

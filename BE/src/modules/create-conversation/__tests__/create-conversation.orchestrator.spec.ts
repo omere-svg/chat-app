@@ -1,12 +1,12 @@
-import { UnauthorizedException } from '@nestjs/common'
 import { describe, expect, it, vi } from 'vitest'
-import { CreateConversationOrchestrator } from '../chat/use-cases/create-conversation.orchestrator.js'
-import { ConversationParticipantsMapper } from '../chat/mapper/conversation-participants.mapper.js'
-import type { ConversationsService } from '../conversations/conversations.service.js'
-import type { UsersService } from '../users/users.service.js'
-import type { ConversationRecord } from '../conversations/conversation.entity.js'
-import type { CreateConversationDto } from '../conversations/dto/create-conversation.dto.js'
-import type { PublicUser } from '../users/user-public-view.js'
+import { CreateConversationOrchestrator } from '../create-conversation.orchestrator.js'
+import { CreatorNotFoundError } from '../errors/creator-not-found.error.js'
+import { ConversationParticipantsMapper } from '../../../shared/conversation-participants/conversation-participants.mapper.js'
+import type { ConversationsService } from '../../conversations/conversations.service.js'
+import type { UsersService } from '../../users/users.service.js'
+import type { ConversationRecord } from '../../conversations/types/conversation.entity.js'
+import type { CreateConversationDto } from '../../conversations/DTO/create-conversation.dto.js'
+import type { PublicUser } from '../../users/types/user-public-view.js'
 
 const creator: PublicUser = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One' }
 const invitee: PublicUser = { id: 'user-2', email: 'invitee@example.com', firstName: 'Invitee', lastName: 'Two' }
@@ -62,7 +62,7 @@ describe('CreateConversationOrchestrator', () => {
     const { orchestrator, create } = buildOrchestrator(null)
 
     await expect(orchestrator.create(creator.id, createDto)).rejects.toBeInstanceOf(
-      UnauthorizedException,
+      CreatorNotFoundError,
     )
     expect(create).not.toHaveBeenCalled()
   })

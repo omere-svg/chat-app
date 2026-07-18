@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deriveConversationTitleFromMessage } from '../conversations/derive-conversation-title.js'
+import { deriveConversationTitleFromMessage } from '../derive-conversation-title.js'
 
 describe('deriveConversationTitleFromMessage', () => {
   it('uses a short message verbatim', () => {
@@ -17,7 +17,6 @@ describe('deriveConversationTitleFromMessage', () => {
   it('truncates an overlong message with an ellipsis', () => {
     const title = deriveConversationTitleFromMessage('a'.repeat(200))
     expect(title.endsWith('…')).toBe(true)
-    // 60 characters plus the ellipsis.
     expect(title).toHaveLength(61)
   })
 
@@ -28,7 +27,6 @@ describe('deriveConversationTitleFromMessage', () => {
   it('truncates on code points so a multi-byte emoji is never split', () => {
     const title = deriveConversationTitleFromMessage('😀'.repeat(70))
     expect(title).toBe(`${'😀'.repeat(60)}…`)
-    // No stray replacement character from a severed surrogate pair.
     expect(title).not.toContain('�')
   })
 })

@@ -1,16 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
-import { StreamAssistantReplyOrchestrator } from '../chat/use-cases/stream-assistant-reply.orchestrator.js'
-import type { AssistantStreamEvent } from '../chat/assistant-stream-event.js'
+import { StreamAssistantReplyOrchestrator } from '../stream-assistant-reply.orchestrator.js'
+import type { AssistantStreamEvent } from '../types/assistant-stream-event.js'
 import type {
   AgentReplyChunk,
   ConversationReplyStrategy,
-} from '../agent/reply-strategy.port.js'
-import type { ReplyStrategyRegistry } from '../agent/reply-strategy.registry.js'
-import type { ConversationRecord } from '../conversations/conversation.entity.js'
-import type { ConversationsService } from '../conversations/conversations.service.js'
-import type { MessageRecord } from '../messages/message.entity.js'
-import type { MessagesService } from '../messages/messages.service.js'
-import type { SendMessageDto } from '../messages/dto/send-message.dto.js'
+} from '../../agent/types/reply-strategy.js'
+import type { ReplyStrategyRegistry } from '../../agent/reply-strategy.registry.js'
+import type { ConversationRecord } from '../../conversations/types/conversation.entity.js'
+import type { ConversationsService } from '../../conversations/conversations.service.js'
+import type { MessageRecord } from '../../messages/types/message.entity.js'
+import type { MessagesService } from '../../messages/messages.service.js'
+import type { SendMessageDto } from '../../messages/DTO/send-message.dto.js'
 
 const conversation: ConversationRecord = {
   id: 'conv-assistant',
@@ -120,7 +120,6 @@ describe('StreamAssistantReplyOrchestrator', () => {
       emit,
     })
 
-    // The chat is named from the first user message.
     expect(setTitleIfStillDefault).toHaveBeenCalledWith(conversation.id, userMessage.body)
     expect(generate).toHaveBeenCalledOnce()
     expect(generate.mock.calls[0]?.[0]).toMatchObject({
@@ -139,7 +138,6 @@ describe('StreamAssistantReplyOrchestrator', () => {
       body: 'Hi there',
       replyToMessageId: userMessage.id,
     })
-    // Advanced twice: once for the persisted user message, once for the assistant reply.
     expect(advanceLastMessageIfNewer).toHaveBeenCalledTimes(2)
     const doneEvent = events.at(-1)
     expect(doneEvent).toEqual({ event: 'done', data: { message: assistantReply } })
@@ -237,7 +235,6 @@ describe('StreamAssistantReplyOrchestrator', () => {
       emit,
     })
 
-    // Sources arrive before the answer text, then done.
     expect(events.map((event) => event.event)).toEqual([
       'user_message',
       'citations',

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { SearchMyMessagesTool } from '../agent/tools/search-my-messages.tool.js'
-import type { MessagesService } from '../messages/messages.service.js'
-import type { MessageRecord } from '../messages/message.entity.js'
+import { SearchMyMessagesTool } from '../search-my-messages.tool.js'
+import type { MessagesService } from '../../../../modules/messages/messages.service.js'
+import type { MessageRecord } from '../../../../modules/messages/types/message.entity.js'
 
 function messageFor(userId: string, body: string): MessageRecord {
   return {

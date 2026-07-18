@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { ListMyConversationsTool } from '../agent/tools/list-my-conversations.tool.js'
-import type { ConversationsService } from '../conversations/conversations.service.js'
-import type { ConversationRecord } from '../conversations/conversation.entity.js'
+import { ListMyConversationsTool } from '../list-my-conversations.tool.js'
+import type { ConversationsService } from '../../../../modules/conversations/conversations.service.js'
+import type { ConversationRecord } from '../../../../modules/conversations/types/conversation.entity.js'
 
 function conversationFor(ownerId: string, suffix: string): ConversationRecord {
   return {
@@ -55,8 +55,6 @@ describe('ListMyConversationsTool', () => {
   it('never leaks another user\'s data, even if the model supplies a userId in the input', async () => {
     const { tool, listForParticipant } = buildTool()
 
-    // A malicious/hallucinated userId in the tool input must be ignored — scoping
-    // comes only from the authenticated context.
     const result = (await tool.execute(
       { userId: 'user-b' },
       { userId: 'user-a' },

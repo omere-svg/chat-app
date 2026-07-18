@@ -3,30 +3,28 @@ import { AIMessage, AIMessageChunk } from '@langchain/core/messages'
 import { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { ChatGenerationChunk } from '@langchain/core/outputs'
 import { MemorySaver } from '@langchain/langgraph'
-import { buildAgentGraph } from '../agent/agent.graph.js'
-import { LangGraphAgentStrategy } from '../agent/langgraph-agent.strategy.js'
-import { AgentToolRegistry } from '../agent/tools/agent-tool.registry.js'
-import { RETRIEVE_KNOWLEDGE_DEFINITION, RETRIEVE_KNOWLEDGE_TOOL } from '../agent/agent.config.js'
+import { buildAgentGraph } from '../agent.graph.js'
+import { LangGraphAgentStrategy } from '../langgraph-agent.strategy.js'
+import { AgentToolRegistry } from '../tools/agent-tool.registry.js'
+import { RETRIEVE_KNOWLEDGE_DEFINITION, RETRIEVE_KNOWLEDGE_TOOL } from '../constants.js'
 import {
   TUTOR_NO_CONTEXT_REPLY,
   TUTOR_SYSTEM_PROMPT,
-} from '../knowledge/tutor/tutor-prompt.js'
+} from '../../knowledge-rag/tutor/tutor-prompt.js'
 import {
   TUTOR_RETRIEVAL_MIN_SCORE,
   TUTOR_RETRIEVAL_TOP_K,
-} from '../knowledge/tutor/tutor-retrieval.config.js'
+} from '../../knowledge-rag/tutor/tutor-retrieval.config.js'
 import type { ChatOpenAI } from '@langchain/openai'
 import type { BaseMessage, ToolCall } from '@langchain/core/messages'
 import type { ChatResult } from '@langchain/core/outputs'
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
-import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
-import type { VectorRetriever } from '../knowledge/retrieval/vector-retriever.port.js'
-import type { RetrievedChunk } from '../knowledge/knowledge-chunk.entity.js'
-import type { AgentTool } from '../agent/tools/agent-tool.port.js'
-import type { AgentReplyChunk } from '../agent/reply-strategy.port.js'
+import type { EmbeddingsProvider } from '../../embeddings/types/embeddings-provider.js'
+import type { VectorRetriever } from '../../knowledge-rag/types/vector-retriever.js'
+import type { RetrievedChunk } from '../../../modules/knowledge-chunk/types/knowledge-chunk.entity.js'
+import type { AgentTool } from '../types/agent-tool.js'
+import type { AgentReplyChunk } from '../types/reply-strategy.js'
 
-// A chat model whose replies are scripted, so the graph runs deterministically offline.
-// Each model call (route via invoke, answer via stream) pops the next scripted response.
 interface ScriptedResponse {
   content?: string
   toolCalls?: ToolCall[]
@@ -43,13 +41,10 @@ class ScriptedChatModel extends BaseChatModel {
     return 'scripted'
   }
 
-  // Ignore the bound tools; the script decides whether a tool call is emitted.
   override bindTools(): this {
     return this
   }
 
-  // Not used by the graph (invoke goes through the streaming path below) but required by
-  // the abstract base; kept consistent for safety.
   _generate(): Promise<ChatResult> {
     const next = this.script[this.index++] ?? { content: 'ok' }
     const message = new AIMessage({ content: next.content ?? '', tool_calls: next.toolCalls ?? [] })
@@ -199,7 +194,6 @@ describe('agent graph (tutor grounding)', () => {
         },
       ],
     })
-    // Citations precede the answer tokens.
     const citationIndex = chunks.findIndex((chunk) => chunk.type === 'citations')
     const firstTokenIndex = chunks.findIndex((chunk) => chunk.type === 'text-delta')
     expect(citationIndex).toBeLessThan(firstTokenIndex)
@@ -224,7 +218,6 @@ describe('agent graph (assistant tools)', () => {
     const registry = new AgentToolRegistry([listTool])
     const model = new ScriptedChatModel([
       { toolCalls: [{ name: 'list_my_conversations', args: {}, id: 'c1', type: 'tool_call' }] },
-      // Route's second pass: a plain (no-tool) reply signals "go to answer"; discarded.
       { content: 'thinking' },
       { content: 'You have one chat.' },
     ])
@@ -258,15 +251,11 @@ describe('agent graph (assistant tools)', () => {
     expect(chunks.some((chunk) => chunk.type === 'tool-result' && chunk.name === 'list_my_conversations')).toBe(true)
     expect(textOf(chunks)).toBe('You have one chat.')
 
-    // Checkpoint persisted for this thread, so an interrupted run could resume.
     const tuple = await checkpointer.getTuple({ configurable: { thread_id: 'conv-assistant-tool' } })
     expect(tuple).toBeDefined()
   })
 
   it('resets the per-turn tool budget so tools still run on later turns of one conversation', async () => {
-    // Regression: the per-turn working channels (toolRounds here) used to carry forward
-    // from the previous turn's checkpoint, so MAX_TOOL_ROUNDS capped the whole conversation
-    // instead of a single turn — after a few turns every tool went permanently dead.
     const executed: string[] = []
     const listTool: AgentTool = {
       definition: {
@@ -281,7 +270,6 @@ describe('agent graph (assistant tools)', () => {
     }
     const registry = new AgentToolRegistry([listTool])
 
-    // Four turns, each: a tool call, then a no-tool routing pass, then the answer text.
     const TURNS = 4
     const script: ScriptedResponse[] = []
     for (let turn = 0; turn < TURNS; turn++) {
@@ -319,7 +307,6 @@ describe('agent graph (assistant tools)', () => {
       )
     }
 
-    // A tool ran on every turn (including the last), not just the first MAX_TOOL_ROUNDS.
     expect(executed).toHaveLength(TURNS)
     expect(
       lastTurnChunks.some((chunk) => chunk.type === 'tool-invoked' && chunk.name === 'list_my_conversations'),

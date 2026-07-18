@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { compareMessagesByCreatedAtAscending } from '../messages/message-ordering.js'
-import type { MessageRecord } from '../messages/message.entity.js'
+import { compareMessagesByCreatedAtAscending } from '../message-ordering.js'
+import type { MessageRecord } from '../types/message.entity.js'
 
 function makeMessage(id: string, createdAt: string): MessageRecord {
   return { id, conversationId: 'conv-1', senderId: 'user-1', body: 'x', createdAt }

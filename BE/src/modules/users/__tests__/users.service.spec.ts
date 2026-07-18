@@ -1,9 +1,11 @@
-import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { UsersService } from '../users/users.service.js'
-import type { PasswordHasher } from '../users/password-hasher.js'
-import type { UserRepository, UserUpdate } from '../users/repository/user-repository.port.js'
-import type { UserRecord } from '../users/user.entity.js'
+import { UsersService } from '../users.service.js'
+import { UserNotFoundError } from '../errors/user-not-found.error.js'
+import { IncorrectCurrentPasswordError } from '../errors/incorrect-current-password.error.js'
+import { EmailAlreadyRegisteredError } from '../errors/email-already-registered.error.js'
+import type { PasswordHasher } from '../password-hasher.js'
+import type { UserRepository } from '../user.repository.js'
+import type { UserRecord, UserUpdate } from '../types/user.entity.js'
 
 const EXISTING_USER: UserRecord = {
   id: 'user-1',
@@ -13,8 +15,6 @@ const EXISTING_USER: UserRecord = {
   lastName: 'Name',
 }
 
-// In-memory repository seeded with EXISTING_USER plus a second account whose email is
-// already taken, so the conflict path can be exercised.
 function buildRepository(): UserRepository {
   const users = new Map<string, UserRecord>([
     [EXISTING_USER.id, { ...EXISTING_USER }],
@@ -54,8 +54,6 @@ function buildRepository(): UserRepository {
   }
 }
 
-// Deterministic stand-in for bcrypt: a hash is `hash:<password>` and verification is a
-// plain string comparison, keeping the spec fast and free of crypto flakiness.
 const passwordHasher: PasswordHasher = {
   hash: (plain: string) => Promise.resolve(`hash:${plain}`),
   verify: (plain: string, hash: string) => Promise.resolve(hash === `hash:${plain}`),
@@ -82,7 +80,7 @@ describe('UsersService profile updates', () => {
     it('throws NotFound for an unknown user', async () => {
       await expect(
         usersService.updateName('ghost', { firstName: 'No', lastName: 'One' }),
-      ).rejects.toBeInstanceOf(NotFoundException)
+      ).rejects.toBeInstanceOf(UserNotFoundError)
     })
   })
 
@@ -93,7 +91,6 @@ describe('UsersService profile updates', () => {
         currentPassword: 'correct-password',
       })
 
-      // Email is normalized to lowercase on save.
       expect(result.email).toBe('new@example.com')
     })
 
@@ -103,7 +100,7 @@ describe('UsersService profile updates', () => {
           email: 'new@example.com',
           currentPassword: 'wrong-password',
         }),
-      ).rejects.toBeInstanceOf(UnauthorizedException)
+      ).rejects.toBeInstanceOf(IncorrectCurrentPasswordError)
     })
 
     it('rejects an email already registered to another account with Conflict', async () => {
@@ -112,7 +109,7 @@ describe('UsersService profile updates', () => {
           email: 'taken@example.com',
           currentPassword: 'correct-password',
         }),
-      ).rejects.toBeInstanceOf(ConflictException)
+      ).rejects.toBeInstanceOf(EmailAlreadyRegisteredError)
     })
 
     it('is a no-op that returns the user when the email is unchanged', async () => {

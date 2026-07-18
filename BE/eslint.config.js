@@ -35,7 +35,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.test.ts', 'src/test/**/*.ts'],
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.e2e-spec.ts', '**/__tests__/**/*.ts'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

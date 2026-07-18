@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import { ListConversationsOrchestrator } from '../chat/use-cases/list-conversations.orchestrator.js'
-import { ConversationParticipantsMapper } from '../chat/mapper/conversation-participants.mapper.js'
-import type { ConversationsService } from '../conversations/conversations.service.js'
-import type { UsersService } from '../users/users.service.js'
-import type { ConversationRecord } from '../conversations/conversation.entity.js'
-import type { PublicUser } from '../users/user-public-view.js'
+import { ListConversationsOrchestrator } from '../list-conversations.orchestrator.js'
+import { ConversationParticipantsMapper } from '../../../shared/conversation-participants/conversation-participants.mapper.js'
+import type { ConversationsService } from '../../conversations/conversations.service.js'
+import type { UsersService } from '../../users/users.service.js'
+import type { ConversationRecord } from '../../conversations/types/conversation.entity.js'
+import type { PublicUser } from '../../users/types/user-public-view.js'
 
 const alice: PublicUser = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams' }
 const bob: PublicUser = { id: 'user-b', email: 'b@example.com', firstName: 'Bob', lastName: 'Brown' }
@@ -46,7 +46,6 @@ describe('ListConversationsOrchestrator', () => {
 
     const [preview] = await orchestrator.listForUser('user-a')
 
-    // The stored "Stale Snapshot" title is replaced by the live participant names.
     expect(preview?.title).toBe('Alice Adams & Bob Brown')
   })
 
@@ -60,7 +59,6 @@ describe('ListConversationsOrchestrator', () => {
   })
 
   it('keeps the stored title when a participant cannot be resolved', async () => {
-    // Only one of the two participants is returned (e.g. a deleted account).
     const orchestrator = buildOrchestrator([directConversation()], [alice])
 
     const [preview] = await orchestrator.listForUser('user-a')

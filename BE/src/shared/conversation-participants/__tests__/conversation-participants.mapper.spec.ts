@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { ConversationParticipantsMapper } from '../chat/mapper/conversation-participants.mapper.js'
-import type { PublicUser } from '../users/user-public-view.js'
+import { ConversationParticipantsMapper } from '../conversation-participants.mapper.js'
+import type { PublicUser } from '../../../modules/users/types/user-public-view.js'
 
 const creator: PublicUser = { id: 'user-b', email: 'b@example.com', firstName: 'Bea', lastName: 'Baxter' }
 const alice: PublicUser = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams' }

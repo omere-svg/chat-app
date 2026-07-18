@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { buildUserScopedVectorSearchPipeline } from '../knowledge/retrieval/atlas-vector-search.query.js'
+import { buildUserScopedVectorSearchPipeline } from '../atlas-vector-search.query.js'
 
-// The cross-user isolation guarantee lives in this pipeline: $vectorSearch is pre-
-// filtered to a single owner. mongodb-memory-server cannot run $vectorSearch, so we
-// pin the guarantee at the query-builder level instead, where it is fully provable.
 const baseParams = {
   indexName: 'knowledge_chunks_vector_index',
   userId: 'user-1',

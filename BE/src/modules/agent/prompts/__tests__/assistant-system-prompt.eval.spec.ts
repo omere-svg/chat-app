@@ -4,18 +4,16 @@ import { MemorySaver } from '@langchain/langgraph'
 import {
   ASSISTANT_SYSTEM_PROMPT,
   ASSISTANT_SYSTEM_PROMPT_VERSION,
-} from '../agent/prompts/assistant-system-prompt.js'
-import { ListMyConversationsTool } from '../agent/tools/list-my-conversations.tool.js'
-import { AgentToolRegistry } from '../agent/tools/agent-tool.registry.js'
-import { buildAgentGraph } from '../agent/agent.graph.js'
-import { LangGraphAgentStrategy } from '../agent/langgraph-agent.strategy.js'
-import type { ConversationsService } from '../conversations/conversations.service.js'
-import type { ConversationRecord } from '../conversations/conversation.entity.js'
-import type { EmbeddingsProvider } from '../knowledge/ingestion/embeddings.port.js'
-import type { VectorRetriever } from '../knowledge/retrieval/vector-retriever.port.js'
-import type { AgentReplyChunk } from '../agent/reply-strategy.port.js'
-
-// ---- Tier 1: deterministic checks (always run in CI; no network) ----
+} from '../assistant-system-prompt.js'
+import { ListMyConversationsTool } from '../../tools/list-my-conversations.tool.js'
+import { AgentToolRegistry } from '../../tools/agent-tool.registry.js'
+import { buildAgentGraph } from '../../agent.graph.js'
+import { LangGraphAgentStrategy } from '../../langgraph-agent.strategy.js'
+import type { ConversationsService } from '../../../../modules/conversations/conversations.service.js'
+import type { ConversationRecord } from '../../../../modules/conversations/types/conversation.entity.js'
+import type { EmbeddingsProvider } from '../../../embeddings/types/embeddings-provider.js'
+import type { VectorRetriever } from '../../../knowledge-rag/types/vector-retriever.js'
+import type { AgentReplyChunk } from '../../types/reply-strategy.js'
 
 describe('assistant prompt (deterministic)', () => {
   it('declares a version so prompt changes are reviewable', () => {
@@ -40,13 +38,8 @@ describe('assistant prompt (deterministic)', () => {
   })
 })
 
-// ---- Tier 2: real-API behavior (opt-in via RUN_LLM_EVALS=1; spends tokens) ----
-
 const runLlmEvals = process.env.RUN_LLM_EVALS === '1'
 
-// The assistant path of the shared agent graph, over an in-memory checkpoint saver so the
-// eval needs no MongoDB. Embeddings/retriever are never reached (assistant has no
-// retrieval tool), so no-op fakes suffice.
 function buildRealAssistantStrategy(): LangGraphAgentStrategy {
   const chatModel = new ChatOpenAI({
     apiKey: process.env.OPENAI_API_KEY,

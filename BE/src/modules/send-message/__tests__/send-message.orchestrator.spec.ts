@@ -1,12 +1,13 @@
-import { InternalServerErrorException } from '@nestjs/common'
 import { describe, expect, it, vi } from 'vitest'
-import { SendMessageOrchestrator } from '../chat/use-cases/send-message.orchestrator.js'
+import { SendMessageOrchestrator } from '../send-message.orchestrator.js'
+import { SimulatedSendFailureError } from '../errors/simulated-send-failure.error.js'
 import type { ConfigService } from '@nestjs/config'
-import type { AppEnvironment } from '../config/environment.types.js'
-import type { ConversationsService } from '../conversations/conversations.service.js'
-import type { MessageRecord } from '../messages/message.entity.js'
-import type { MessagesService } from '../messages/messages.service.js'
-import type { SendMessageDto } from '../messages/dto/send-message.dto.js'
+import type { AppEnvironment } from '../../../config/environment.types.js'
+import type { ConversationsService } from '../../conversations/conversations.service.js'
+import type { MessageRecord } from '../../messages/types/message.entity.js'
+import type { MessagesService } from '../../messages/messages.service.js'
+import type { SendMessageDto } from '../../messages/DTO/send-message.dto.js'
+import type { StreamAssistantReplyOrchestrator } from '../../stream-assistant-reply/stream-assistant-reply.orchestrator.js'
 
 const sendMessageDto = { body: 'hello' } as SendMessageDto
 const createdMessage: MessageRecord = {
@@ -26,12 +27,18 @@ function buildOrchestrator(nodeEnv: AppEnvironment['NODE_ENV']): {
   const advanceLastMessageIfNewer = vi.fn().mockResolvedValue(undefined)
   const messagesService = { createMessage } as unknown as MessagesService
   const conversationsService = { advanceLastMessageIfNewer } as unknown as ConversationsService
+  const streamAssistantReplyOrchestrator = {} as unknown as StreamAssistantReplyOrchestrator
   const configService = {
     get: vi.fn().mockReturnValue(nodeEnv),
   } as unknown as ConfigService<AppEnvironment, true>
 
   return {
-    orchestrator: new SendMessageOrchestrator(messagesService, conversationsService, configService),
+    orchestrator: new SendMessageOrchestrator(
+      messagesService,
+      conversationsService,
+      streamAssistantReplyOrchestrator,
+      configService,
+    ),
     createMessage,
     advanceLastMessageIfNewer,
   }
@@ -48,7 +55,7 @@ describe('SendMessageOrchestrator', () => {
         sendMessageDto,
         simulateFailureRequested: true,
       }),
-    ).rejects.toBeInstanceOf(InternalServerErrorException)
+    ).rejects.toBeInstanceOf(SimulatedSendFailureError)
     expect(createMessage).not.toHaveBeenCalled()
     expect(advanceLastMessageIfNewer).not.toHaveBeenCalled()
   })

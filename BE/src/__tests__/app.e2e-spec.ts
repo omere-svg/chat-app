@@ -2,8 +2,8 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { ASSISTANT_REPLY_STRATEGY } from '../agent/reply-strategy.port.js'
-import { FakeAssistantStrategy } from '../agent/fake-assistant.strategy.js'
+import { ASSISTANT_REPLY_STRATEGY } from '../modules/agent/agent.tokens.js'
+import { FakeAssistantStrategy } from '../modules/agent/fake-assistant.strategy.js'
 import type { INestApplication } from '@nestjs/common'
 import type { Server } from 'node:http'
 import { applyGlobalApiContract } from '../app-http-contract.js'
@@ -15,7 +15,6 @@ interface SseEvent {
   data: unknown
 }
 
-// Parses a buffered text/event-stream body into its events.
 function parseSseEvents(body: string): SseEvent[] {
   return body
     .split('\n\n')
@@ -34,9 +33,6 @@ describe('Chat API (e2e)', () => {
   let mongoServer: MongoMemoryServer
 
   beforeAll(async () => {
-    // Run the real Mongo DAOs against an ephemeral in-process MongoDB. MONGO_URI
-    // must be set before AppModule is imported, because ConfigModule.forRoot
-    // validates the environment at module-evaluation time — hence the dynamic import.
     mongoServer = await MongoMemoryServer.create()
     process.env.MONGO_URI = mongoServer.getUri()
 
@@ -44,7 +40,6 @@ describe('Chat API (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     })
-      // Keep e2e offline and deterministic: never call the real OpenAI API.
       .overrideProvider(ASSISTANT_REPLY_STRATEGY)
       .useClass(FakeAssistantStrategy)
       .compile()
@@ -202,7 +197,6 @@ describe('Chat API (e2e)', () => {
       const conversation = listResponse.body.conversations.find(
         (candidate: { id: string }) => candidate.id === conversationId,
       )
-      // The title now shows the current name, not the snapshot from creation time.
       expect(conversation.title).toContain('Maximus')
       expect(conversation.title).not.toContain('Rex')
     })
@@ -345,7 +339,6 @@ describe('Chat API (e2e)', () => {
       expect(doneEvent.message.senderId).toBe('assistant')
       expect(doneEvent.message.body).toContain('Echo: hello there')
 
-      // The exchange is persisted: history shows the user message then the assistant reply.
       const historyResponse = await request(httpServer)
         .get(`/api/conversations/${conversationId}/messages`)
         .set('Authorization', `Bearer ${token}`)
@@ -413,7 +406,6 @@ describe('Chat API (e2e)', () => {
         message: { id: string }
       }
 
-      // Same reply replayed — not a second generated message.
       expect(secondDone.message.id).toBe(firstDone.message.id)
 
       const historyResponse = await request(httpServer)
@@ -458,7 +450,6 @@ describe('Chat API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .send({ body: `message ${index.toString()}` })
         expect(sendResponse.status).toBe(201)
-        // DAO/DTO separation: Mongo internals never leak into the response.
         expect(sendResponse.body.message).toHaveProperty('id')
         expect(sendResponse.body.message).not.toHaveProperty('_id')
         expect(sendResponse.body.message).not.toHaveProperty('__v')
@@ -479,7 +470,6 @@ describe('Chat API (e2e)', () => {
         expect(pageResponse.status).toBe(200)
 
         const pageIds = pageResponse.body.messages.map((message: { id: string }) => message.id)
-        // Older messages are prepended so the running list stays oldest-first.
         collectedIds.unshift(...pageIds)
         cursor = pageResponse.body.nextCursor
         pageCount += 1
@@ -522,7 +512,6 @@ describe('Chat API (e2e)', () => {
       )
       expect(preview.lastMessage.body).toBe('latest activity wins')
       expect(preview.updatedAt).toBe(preview.lastMessage.createdAt)
-      // The most recently active conversation sorts to the front.
       expect(listResponse.body.conversations[0].id).toBe(conversationId)
     })
   })
