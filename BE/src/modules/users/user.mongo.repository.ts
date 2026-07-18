@@ -47,6 +47,7 @@ export class MongoUserRepository implements UserRepository {
       passwordHash: userRecord.passwordHash,
       firstName: userRecord.firstName,
       lastName: userRecord.lastName,
+      avatarKey: userRecord.avatarKey,
       createdAt: new Date(),
     })
     return toUserRecord(created.toObject())

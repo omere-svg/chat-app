@@ -4,6 +4,7 @@ export interface UserRecord {
   passwordHash: string
   firstName: string
   lastName: string
+  avatarKey: string | null
 }
 
-export type UserUpdate = Partial<Pick<UserRecord, 'firstName' | 'lastName' | 'email'>>
+export type UserUpdate = Partial<Pick<UserRecord, 'firstName' | 'lastName' | 'email' | 'avatarKey'>>

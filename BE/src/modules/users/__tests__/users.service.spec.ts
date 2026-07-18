@@ -3,6 +3,7 @@ import { UsersService } from '../users.service.js'
 import { UserNotFoundError } from '../errors/user-not-found.error.js'
 import { IncorrectCurrentPasswordError } from '../errors/incorrect-current-password.error.js'
 import { EmailAlreadyRegisteredError } from '../errors/email-already-registered.error.js'
+import type { AvatarUrlResolver } from '../avatar-url.resolver.js'
 import type { PasswordHasher } from '../password-hasher.js'
 import type { UserRepository } from '../user.repository.js'
 import type { UserRecord, UserUpdate } from '../types/user.entity.js'
@@ -13,6 +14,7 @@ const EXISTING_USER: UserRecord = {
   passwordHash: 'hash:correct-password',
   firstName: 'Old',
   lastName: 'Name',
+  avatarKey: null,
 }
 
 function buildRepository(): UserRepository {
@@ -26,6 +28,7 @@ function buildRepository(): UserRepository {
         passwordHash: 'hash:other',
         firstName: 'Taken',
         lastName: 'Owner',
+        avatarKey: null,
       },
     ],
   ])
@@ -59,11 +62,15 @@ const passwordHasher: PasswordHasher = {
   verify: (plain: string, hash: string) => Promise.resolve(hash === `hash:${plain}`),
 }
 
+const avatarUrlResolver = {
+  resolve: (avatarKey: string | null) => avatarKey,
+} as unknown as AvatarUrlResolver
+
 describe('UsersService profile updates', () => {
   let usersService: UsersService
 
   beforeEach(() => {
-    usersService = new UsersService(buildRepository(), passwordHasher)
+    usersService = new UsersService(buildRepository(), passwordHasher, avatarUrlResolver)
   })
 
   describe('updateName', () => {

@@ -9,15 +9,17 @@ export function toUserRecord(document: UserDocument): UserRecord {
     passwordHash: document.passwordHash,
     firstName: document.firstName,
     lastName: document.lastName,
+    avatarKey: document.avatarKey ?? null,
   }
 }
 
-export function toPublicUser(userRecord: UserRecord): PublicUser {
+export function toPublicUser(userRecord: UserRecord, avatarUrl: string | null): PublicUser {
   return {
     id: userRecord.id,
     email: userRecord.email,
     firstName: userRecord.firstName,
     lastName: userRecord.lastName,
+    avatarUrl,
   }
 }
 

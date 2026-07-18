@@ -3,4 +3,5 @@ export interface PublicUser {
   email: string
   firstName: string
   lastName: string
+  avatarUrl: string | null
 }

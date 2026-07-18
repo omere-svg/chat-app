@@ -18,6 +18,9 @@ export class UserDocument {
   @Prop({ type: String, required: true })
   lastName!: string
 
+  @Prop({ type: String, required: false, default: null })
+  avatarKey!: string | null
+
   @Prop({ type: Date, required: true })
   createdAt!: Date
 }
