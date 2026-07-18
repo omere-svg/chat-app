@@ -39,6 +39,16 @@ export type UpdateEmailRequest = {
   currentPassword: string
 }
 
+export type RequestAvatarUploadRequest = {
+  contentType: string
+}
+
+export type AvatarUploadTicket = {
+  uploadUrl: string
+  key: string
+  expiresInSeconds: number
+}
+
 export type AuthResponse = {
   token: string
   user: User

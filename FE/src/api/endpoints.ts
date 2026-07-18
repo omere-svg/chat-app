@@ -6,6 +6,8 @@ export const endpoints = {
   currentUser: `${API_BASE}/me`,
   updateProfile: `${API_BASE}/me/profile`,
   updateEmail: `${API_BASE}/me/email`,
+  avatarUploadUrl: `${API_BASE}/me/avatar/upload-url`,
+  avatar: `${API_BASE}/me/avatar`,
   conversations: `${API_BASE}/conversations`,
   conversationMessages: (id: string): string =>
     `${API_BASE}/conversations/${id}/messages`,
