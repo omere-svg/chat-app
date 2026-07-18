@@ -6,8 +6,8 @@ import type { UsersService } from '../../users/users.service.js'
 import type { ConversationRecord } from '../../conversations/types/conversation.entity.js'
 import type { PublicUser } from '../../users/types/user-public-view.js'
 
-const alice: PublicUser = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams' }
-const bob: PublicUser = { id: 'user-b', email: 'b@example.com', firstName: 'Bob', lastName: 'Brown' }
+const alice: PublicUser = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams', avatarUrl: null }
+const bob: PublicUser = { id: 'user-b', email: 'b@example.com', firstName: 'Bob', lastName: 'Brown', avatarUrl: null }
 
 function directConversation(overrides: Partial<ConversationRecord> = {}): ConversationRecord {
   return {
