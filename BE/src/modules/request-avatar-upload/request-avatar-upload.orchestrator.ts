@@ -1,9 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { OBJECT_STORAGE } from '../object-storage/object-storage.tokens.js'
-import {
-  buildAvatarKey,
-  isAllowedAvatarContentType,
-} from '../users/avatar/avatar-key.js'
+import { buildAvatarKey, isAllowedAvatarContentType } from '../users/avatar/avatar-key.js'
+import { MAX_AVATAR_BYTES } from '../users/avatar/constants.js'
 import { UnsupportedImageTypeError } from '../users/avatar/errors/unsupported-image-type.error.js'
 import type { ObjectStorage } from '../object-storage/types/object-storage.js'
 import type { AvatarUploadTicket } from './types/avatar-upload-ticket.js'
@@ -17,12 +15,13 @@ export class RequestAvatarUploadOrchestrator {
       throw new UnsupportedImageTypeError()
     }
 
-    const key = buildAvatarKey(userId, contentType)
-    const { uploadUrl, expiresInSeconds } = await this.objectStorage.createUploadUrl({
+    const key = buildAvatarKey(userId)
+    const { url, fields, expiresInSeconds } = await this.objectStorage.createUploadUrl({
       key,
       contentType,
+      maxBytes: MAX_AVATAR_BYTES,
     })
 
-    return { uploadUrl, key, expiresInSeconds }
+    return { url, fields, key, expiresInSeconds }
   }
 }

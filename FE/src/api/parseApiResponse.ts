@@ -257,12 +257,27 @@ export function parseUserResponse(value: unknown): User {
   return parseUser(value)
 }
 
+function parseUploadFields(value: unknown): Record<string, string> {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('avatarUploadTicket.fields')
+  }
+  const fields: Record<string, string> = {}
+  for (const [fieldName, fieldValue] of Object.entries(value)) {
+    if (typeof fieldValue !== 'string') {
+      throw new MalformedResponseError(`avatarUploadTicket.fields.${fieldName}`)
+    }
+    fields[fieldName] = fieldValue
+  }
+  return fields
+}
+
 export function parseAvatarUploadTicket(value: unknown): AvatarUploadTicket {
   if (!isRecord(value)) {
     throw new MalformedResponseError('avatarUploadTicket')
   }
   return {
-    uploadUrl: readString(value, 'uploadUrl', 'avatarUploadTicket'),
+    url: readString(value, 'url', 'avatarUploadTicket'),
+    fields: parseUploadFields(value.fields),
     key: readString(value, 'key', 'avatarUploadTicket'),
     expiresInSeconds: readNumber(value, 'expiresInSeconds', 'avatarUploadTicket'),
   }

@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import {
-  DeleteObjectCommand,
-  HeadObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { DeleteObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import { AVATAR_UPLOAD_URL_TTL_SECONDS } from './constants.js'
 import type { AppEnvironment } from '../../config/environment.types.js'
 import type {
@@ -44,16 +39,18 @@ export class S3ObjectStorage implements ObjectStorage {
     })
   }
 
-  async createUploadUrl({ key, contentType }: CreateUploadUrlInput): Promise<UploadUrl> {
-    const command = new PutObjectCommand({
+  async createUploadUrl({ key, contentType, maxBytes }: CreateUploadUrlInput): Promise<UploadUrl> {
+    const { url, fields } = await createPresignedPost(this.client, {
       Bucket: this.bucket,
       Key: key,
-      ContentType: contentType,
+      Conditions: [
+        ['content-length-range', 1, maxBytes],
+        ['eq', '$Content-Type', contentType],
+      ],
+      Fields: { 'Content-Type': contentType },
+      Expires: AVATAR_UPLOAD_URL_TTL_SECONDS,
     })
-    const uploadUrl = await getSignedUrl(this.client, command, {
-      expiresIn: AVATAR_UPLOAD_URL_TTL_SECONDS,
-    })
-    return { uploadUrl, expiresInSeconds: AVATAR_UPLOAD_URL_TTL_SECONDS }
+    return { url, fields, expiresInSeconds: AVATAR_UPLOAD_URL_TTL_SECONDS }
   }
 
   async headObject(key: string): Promise<StoredObject | null> {

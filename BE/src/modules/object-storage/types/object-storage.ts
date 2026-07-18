@@ -1,10 +1,12 @@
 export interface CreateUploadUrlInput {
   key: string
   contentType: string
+  maxBytes: number
 }
 
 export interface UploadUrl {
-  uploadUrl: string
+  url: string
+  fields: Record<string, string>
   expiresInSeconds: number
 }
 

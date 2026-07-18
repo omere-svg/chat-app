@@ -21,7 +21,11 @@ class FakeObjectStorage implements ObjectStorage {
   readonly objects = new Map<string, StoredObject>()
 
   createUploadUrl({ key }: CreateUploadUrlInput): Promise<UploadUrl> {
-    return Promise.resolve({ uploadUrl: `https://fake-storage.local/${key}`, expiresInSeconds: 300 })
+    return Promise.resolve({
+      url: 'https://fake-storage.local',
+      fields: { key },
+      expiresInSeconds: 300,
+    })
   }
 
   headObject(key: string): Promise<StoredObject | null> {
@@ -125,13 +129,14 @@ describe('Avatar API (e2e)', () => {
       .send({ key })
 
     expect(setResponse.status).toBe(200)
-    expect(setResponse.body.avatarUrl).toBe(`${CDN_BASE_URL}/${key}`)
+    const avatarUrl = setResponse.body.avatarUrl as string
+    expect(avatarUrl.startsWith(`${CDN_BASE_URL}/${key}?v=`)).toBe(true)
 
     const meResponse = await request(httpServer)
       .get('/api/me')
       .set('Authorization', `Bearer ${token}`)
 
-    expect(meResponse.body.avatarUrl).toBe(`${CDN_BASE_URL}/${key}`)
+    expect(meResponse.body.avatarUrl).toBe(avatarUrl)
   })
 
   it('removes the avatar and deletes the stored object', async () => {

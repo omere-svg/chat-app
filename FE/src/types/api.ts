@@ -44,7 +44,8 @@ export type RequestAvatarUploadRequest = {
 }
 
 export type AvatarUploadTicket = {
-  uploadUrl: string
+  url: string
+  fields: Record<string, string>
   key: string
   expiresInSeconds: number
 }

@@ -1,5 +1,6 @@
 export interface AvatarUploadTicket {
-  uploadUrl: string
+  url: string
+  fields: Record<string, string>
   key: string
   expiresInSeconds: number
 }

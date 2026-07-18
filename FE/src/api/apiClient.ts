@@ -106,12 +106,14 @@ class ApiClient {
     })
   }
 
-  async uploadAvatarToStorage(uploadUrl: string, file: File): Promise<void> {
-    const response = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type },
-      body: file,
-    })
+  async uploadAvatarToStorage(ticket: AvatarUploadTicket, file: File): Promise<void> {
+    const formData = new FormData()
+    for (const [fieldName, fieldValue] of Object.entries(ticket.fields)) {
+      formData.append(fieldName, fieldValue)
+    }
+    formData.append('file', file)
+
+    const response = await fetch(ticket.url, { method: 'POST', body: formData })
     if (!response.ok) {
       throw new ApiError(response.status, {
         code: 'AVATAR_UPLOAD_FAILED',

@@ -21,11 +21,7 @@ import {
 import { jsonApiError } from './jsonApiError.ts'
 import { MESSAGE_PAGE_LIMIT } from '../api/constants.ts'
 
-const MOCK_AVATAR_EXTENSIONS: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
-}
+const MOCK_ALLOWED_AVATAR_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 const MOCK_AVATAR_STORAGE_ORIGIN = 'https://mock-avatar-storage.local'
 
@@ -155,16 +151,19 @@ export const handlers = [
     const body = await request.json()
     const contentType =
       isRecord(body) && typeof body.contentType === 'string' ? body.contentType : ''
-    const extension = MOCK_AVATAR_EXTENSIONS[contentType]
-    if (extension === undefined) {
+    if (!MOCK_ALLOWED_AVATAR_CONTENT_TYPES.includes(contentType)) {
       return jsonApiError(400, 'UNSUPPORTED_IMAGE_TYPE', 'Unsupported image type')
     }
-    const key = `avatars/${userId}/${crypto.randomUUID()}.${extension}`
-    const uploadUrl = `${MOCK_AVATAR_STORAGE_ORIGIN}/${encodeURIComponent(key)}`
-    return HttpResponse.json({ uploadUrl, key, expiresInSeconds: 300 })
+    const key = `avatars/${userId}`
+    return HttpResponse.json({
+      url: MOCK_AVATAR_STORAGE_ORIGIN,
+      fields: { key, 'Content-Type': contentType },
+      key,
+      expiresInSeconds: 300,
+    })
   }),
 
-  http.put(`${MOCK_AVATAR_STORAGE_ORIGIN}/:encodedKey`, () => new HttpResponse(null, { status: 200 })),
+  http.post(MOCK_AVATAR_STORAGE_ORIGIN, () => new HttpResponse(null, { status: 204 })),
 
   http.put(endpoints.avatar, async ({ request }) => {
     const userId = resolveUserId(bearerToken(request))
