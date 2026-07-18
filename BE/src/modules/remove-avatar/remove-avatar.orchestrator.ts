@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { OBJECT_STORAGE } from '../object-storage/object-storage.tokens.js'
+import { deleteObjectBestEffort } from '../object-storage/best-effort-delete.js'
 import { UsersService } from '../users/users.service.js'
 import type { ObjectStorage } from '../object-storage/types/object-storage.js'
 import type { PublicUser } from '../users/types/user-public-view.js'
@@ -16,7 +17,7 @@ export class RemoveAvatarOrchestrator {
     const updatedUser = await this.usersService.clearAvatar(userId)
 
     if (previousKey !== null) {
-      await this.objectStorage.deleteObject(previousKey)
+      await deleteObjectBestEffort(this.objectStorage, previousKey)
     }
 
     return updatedUser

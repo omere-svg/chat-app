@@ -35,14 +35,12 @@ function buildOrchestrator(previousKey: string | null): {
 
 describe('RemoveAvatarOrchestrator', () => {
   it('clears the avatar and deletes the stored object when one exists', async () => {
-    const { orchestrator, deleteObject, clearAvatar } = buildOrchestrator(
-      'avatars/user-1/old.png',
-    )
+    const { orchestrator, deleteObject, clearAvatar } = buildOrchestrator('avatars/user-1')
 
     const result = await orchestrator.remove('user-1')
 
     expect(clearAvatar).toHaveBeenCalledWith('user-1')
-    expect(deleteObject).toHaveBeenCalledWith('avatars/user-1/old.png')
+    expect(deleteObject).toHaveBeenCalledWith('avatars/user-1')
     expect(result).toEqual(CLEARED_USER)
   })
 
@@ -53,5 +51,14 @@ describe('RemoveAvatarOrchestrator', () => {
 
     expect(clearAvatar).toHaveBeenCalledWith('user-1')
     expect(deleteObject).not.toHaveBeenCalled()
+  })
+
+  it('still returns the cleared user when the best-effort delete fails', async () => {
+    const { orchestrator, deleteObject } = buildOrchestrator('avatars/user-1')
+    deleteObject.mockRejectedValue(new Error('storage unavailable'))
+
+    const result = await orchestrator.remove('user-1')
+
+    expect(result).toEqual(CLEARED_USER)
   })
 })
