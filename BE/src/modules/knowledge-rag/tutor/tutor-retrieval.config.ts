@@ -1,0 +1,2 @@
+export const TUTOR_RETRIEVAL_TOP_K = 5
+export const TUTOR_RETRIEVAL_MIN_SCORE = 0.5

@@ -1,6 +1,7 @@
 import { Catch, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
 import type { Response } from 'express'
+import { AppException } from './app.exception.js'
 import { ERROR_CODES } from './error-codes.constant.js'
 import type { ErrorCode } from './error-codes.constant.js'
 
@@ -54,6 +55,16 @@ export class StructuredExceptionFilter implements ExceptionFilter {
     status: number
     body: StructuredErrorResponse
   } {
+    if (exception instanceof AppException) {
+      const { code, message, details } = exception
+      return {
+        status: exception.getStatus(),
+        body: {
+          error: details === undefined ? { code, message } : { code, message, details },
+        },
+      }
+    }
+
     if (exception instanceof HttpException) {
       const status = exception.getStatus()
       const exceptionResponse = exception.getResponse()

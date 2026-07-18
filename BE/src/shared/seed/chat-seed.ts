@@ -1,10 +1,7 @@
-// Demo seed data used by the DemoDataSeeder to populate an empty database.
-// Keep in sync with the FE mock seed at FE/src/mocks/db.ts (same ids, formulas,
-// and message bodies) — the two are separate runtimes and cannot share a module.
-import { compareMessagesByCreatedAtAscending } from '../../messages/message-ordering.js'
-import { toLastMessageSnapshot } from '../../conversations/conversation.entity.js'
-import type { ConversationRecord } from '../../conversations/conversation.entity.js'
-import type { MessageRecord } from '../../messages/message.entity.js'
+import { compareMessagesByCreatedAtAscending } from '../../modules/messages/message-ordering.js'
+import { toLastMessageSnapshot } from '../../modules/conversations/conversation.mapper.js'
+import type { ConversationRecord } from '../../modules/conversations/types/conversation.entity.js'
+import type { MessageRecord } from '../../modules/messages/types/message.entity.js'
 
 export interface DemoUserSeed {
   id: string
@@ -26,8 +23,6 @@ interface SeedConversationSpec {
   title: string
   participantIds: string[]
   messageCount: number
-  // Minutes ago for the newest message — distinct per conversation so the seeded
-  // list visibly sorts by last activity, not just by the id tiebreaker.
   lastActivityMinutesAgo: number
 }
 
@@ -68,7 +63,6 @@ function buildSeedMessages(spec: SeedConversationSpec): MessageRecord[] {
       continue
     }
 
-    // Newest message lands at lastActivityMinutesAgo; older ones step back 1 min each.
     const minutesAgo = spec.lastActivityMinutesAgo + (spec.messageCount - 1 - index)
     messages.push({
       id: `${spec.id}-msg-${(index + 1).toString()}`,
