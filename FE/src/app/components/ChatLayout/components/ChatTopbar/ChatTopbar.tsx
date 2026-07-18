@@ -9,13 +9,17 @@ import './ChatTopbar.css'
 
 export function ChatTopbar({
   userName,
+  avatar,
   onLogout,
 }: ChatTopbarProps): React.ReactElement {
   return (
     <header className={CHAT_TOPBAR_CLASS.topbar}>
-      <span className={CHAT_TOPBAR_CLASS.user}>
-        {CHAT_TOPBAR_TEXT.signedInPrefix} {userName}
-      </span>
+      <div className={CHAT_TOPBAR_CLASS.identity}>
+        {avatar}
+        <span className={CHAT_TOPBAR_CLASS.user}>
+          {CHAT_TOPBAR_TEXT.signedInPrefix} {userName}
+        </span>
+      </div>
       <div className={CHAT_TOPBAR_CLASS.actions}>
         <Link to={CHAT_TOPBAR_ROUTE.profile} className={CHAT_TOPBAR_CLASS.action}>
           {CHAT_TOPBAR_TEXT.profile}

@@ -7,10 +7,16 @@
   flex-wrap: wrap;
 }
 
+.chat-layout__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-right: auto;
+}
+
 .chat-layout__user {
   font-weight: 500;
   color: var(--text-h);
-  margin-right: auto;
 }
 
 .chat-layout__topbar-actions {

@@ -4,9 +4,11 @@ import { NewConversationFormContainer } from '@/features/conversations/component
 import { useConversations } from '@/features/conversations/hooks/useConversations.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import { MessageThreadContainer } from '@/features/messages/components/MessageThread/MessageThreadContainer.tsx'
+import { UserAvatarContainer } from '@/shared/components/UserAvatar/UserAvatarContainer.tsx'
 import { fullName } from '@/types/domain.ts'
 import { ChatLayout } from './ChatLayout.tsx'
 import { ChatSidebar } from './components/ChatSidebar/ChatSidebar.tsx'
+import { SidebarUserChipContainer } from './components/ChatSidebar/components/SidebarUserChip/SidebarUserChipContainer.tsx'
 import { ChatTopbar } from './components/ChatTopbar/ChatTopbar.tsx'
 
 export function ChatLayoutContainer(): React.ReactElement {
@@ -39,6 +41,15 @@ export function ChatLayoutContainer(): React.ReactElement {
       topbar={
         <ChatTopbar
           userName={currentUser ? fullName(currentUser) : ''}
+          avatar={
+            currentUser ? (
+              <UserAvatarContainer
+                name={fullName(currentUser)}
+                imageUrl={currentUser.avatarUrl}
+                size="sm"
+              />
+            ) : null
+          }
           onLogout={logout}
         />
       }
@@ -57,6 +68,7 @@ export function ChatLayoutContainer(): React.ReactElement {
               onRetryLoad={reloadConversations}
             />
           }
+          userChip={<SidebarUserChipContainer />}
         />
       }
       main={
