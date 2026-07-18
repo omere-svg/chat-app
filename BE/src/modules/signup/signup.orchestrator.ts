@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { UsersService } from '../users/users.service.js'
 import { AuthTokenService } from '../auth/auth-token.service.js'
-import { toPublicUser } from '../users/user.mapper.js'
 import type { AuthenticationResult } from '../auth/types/authentication-result.js'
 import type { SignupDto } from '../auth/DTO/signup.dto.js'
 
@@ -21,6 +20,6 @@ export class SignupOrchestrator {
     })
 
     const token = await this.authTokenService.issue(userRecord)
-    return { token, user: toPublicUser(userRecord) }
+    return { token, user: this.usersService.toPublicView(userRecord) }
   }
 }

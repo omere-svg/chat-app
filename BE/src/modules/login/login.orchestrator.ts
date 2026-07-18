@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { UsersService } from '../users/users.service.js'
 import { AuthTokenService } from '../auth/auth-token.service.js'
-import { toPublicUser } from '../users/user.mapper.js'
 import { InvalidCredentialsError } from '../auth/errors/invalid-credentials.error.js'
 import type { AuthenticationResult } from '../auth/types/authentication-result.js'
 import type { LoginDto } from '../auth/DTO/login.dto.js'
@@ -24,6 +23,6 @@ export class LoginOrchestrator {
     }
 
     const token = await this.authTokenService.issue(userRecord)
-    return { token, user: toPublicUser(userRecord) }
+    return { token, user: this.usersService.toPublicView(userRecord) }
   }
 }
