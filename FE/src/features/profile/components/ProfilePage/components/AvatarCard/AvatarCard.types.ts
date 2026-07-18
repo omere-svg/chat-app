@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { FormStatus } from '@/features/profile/types/formStatus.ts'
+import type { useProfileAvatar } from './hooks/useProfileAvatar.ts'
 
 export type AvatarCardProps = {
   name: string
@@ -13,14 +13,4 @@ export type AvatarCardProps = {
   statusMessage: ReactNode
 }
 
-export type UseProfileAvatarValue = {
-  name: string
-  avatarUrl: string | null
-  uploadFile: (file: File) => void
-  removeAvatar: () => void
-  isBusy: boolean
-  canRemove: boolean
-  uploadLabel: string
-  removeLabel: string
-  status: FormStatus
-}
+export type UseProfileAvatarValue = ReturnType<typeof useProfileAvatar>
