@@ -318,7 +318,7 @@ export function getUserConversations(userId: string): ConversationPreview[] {
 }
 
 export function isOwnedAvatarKey(userId: string, key: string): boolean {
-  return key.startsWith(`avatars/${userId}/`);
+  return key === `avatars/${userId}`;
 }
 
 export function setUserAvatar(userId: string, key: string): StoredUser | null {

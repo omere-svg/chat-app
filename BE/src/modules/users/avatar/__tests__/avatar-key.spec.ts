@@ -17,22 +17,18 @@ describe('avatar-key helpers', () => {
     expect(isAllowedAvatarContentType('application/pdf')).toBe(false)
   })
 
-  it('builds a namespaced key with the extension mapped from content type', () => {
-    const key = buildAvatarKey('user-1', 'image/png')
-
-    expect(key.startsWith('avatars/user-1/')).toBe(true)
-    expect(key.endsWith('.png')).toBe(true)
+  it('builds a fixed, server-derived key scoped to the user', () => {
+    expect(buildAvatarKey('user-1')).toBe('avatars/user-1')
   })
 
-  it('generates a unique key per invocation', () => {
-    expect(buildAvatarKey('user-1', 'image/jpeg')).not.toBe(
-      buildAvatarKey('user-1', 'image/jpeg'),
-    )
+  it('returns the same key on every invocation for a user', () => {
+    expect(buildAvatarKey('user-1')).toBe(buildAvatarKey('user-1'))
   })
 
-  it('recognizes keys owned by the given user only', () => {
-    expect(isAvatarKeyOwnedBy('user-1', 'avatars/user-1/photo.png')).toBe(true)
-    expect(isAvatarKeyOwnedBy('user-1', 'avatars/user-2/photo.png')).toBe(false)
-    expect(isAvatarKeyOwnedBy('user-1', 'documents/user-1/photo.png')).toBe(false)
+  it('recognizes the fixed key owned by the given user only', () => {
+    expect(isAvatarKeyOwnedBy('user-1', 'avatars/user-1')).toBe(true)
+    expect(isAvatarKeyOwnedBy('user-1', 'avatars/user-2')).toBe(false)
+    expect(isAvatarKeyOwnedBy('user-1', 'avatars/user-1/photo.png')).toBe(false)
+    expect(isAvatarKeyOwnedBy('user-1', 'documents/user-1')).toBe(false)
   })
 })
