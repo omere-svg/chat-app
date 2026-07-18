@@ -11,8 +11,12 @@ import { SendMessageModule } from '../send-message/send-message.module.js'
 import { UploadDocumentModule } from '../upload-document/upload-document.module.js'
 import { ListDocumentsModule } from '../list-documents/list-documents.module.js'
 import { DeleteDocumentModule } from '../delete-document/delete-document.module.js'
+import { RequestAvatarUploadModule } from '../request-avatar-upload/request-avatar-upload.module.js'
+import { SetAvatarModule } from '../set-avatar/set-avatar.module.js'
+import { RemoveAvatarModule } from '../remove-avatar/remove-avatar.module.js'
 import { AuthController } from './auth.controller.js'
 import { CurrentUserController } from './current-user.controller.js'
+import { AvatarController } from './avatar.controller.js'
 import { ConversationsController } from './conversations.controller.js'
 import { MessagesController } from './messages.controller.js'
 import { KnowledgeDocumentsController } from './knowledge-documents.controller.js'
@@ -32,10 +36,14 @@ import { ConversationParticipantGuard } from './guard/conversation-participant.g
     UploadDocumentModule,
     ListDocumentsModule,
     DeleteDocumentModule,
+    RequestAvatarUploadModule,
+    SetAvatarModule,
+    RemoveAvatarModule,
   ],
   controllers: [
     AuthController,
     CurrentUserController,
+    AvatarController,
     ConversationsController,
     MessagesController,
     KnowledgeDocumentsController,
