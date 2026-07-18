@@ -7,9 +7,8 @@ export function AvatarCardContainer(): React.ReactElement {
   const {
     name,
     avatarUrl,
-    handleSubmit,
-    handleSelectFile,
-    handleRemove,
+    uploadFile,
+    removeAvatar,
     isBusy,
     canRemove,
     uploadLabel,
@@ -25,9 +24,8 @@ export function AvatarCardContainer(): React.ReactElement {
     <AvatarCard
       name={name}
       avatarUrl={avatarUrl}
-      onSubmit={handleSubmit}
-      onSelectFile={handleSelectFile}
-      onRemove={handleRemove}
+      onUploadFile={uploadFile}
+      onRemove={removeAvatar}
       isBusy={isBusy}
       canRemove={canRemove}
       uploadLabel={uploadLabel}

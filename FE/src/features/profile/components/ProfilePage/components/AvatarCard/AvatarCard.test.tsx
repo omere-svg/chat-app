@@ -41,14 +41,16 @@ afterEach(() => {
 describe('AvatarCardContainer', () => {
   it('requests a URL, uploads to storage, confirms, and reports success', async () => {
     const user = userEvent.setup()
-    const updated: User = { ...authState.currentUser, avatarUrl: 'https://cdn/avatars/user-1/a.png' }
+    const updated: User = { ...authState.currentUser, avatarUrl: 'https://cdn/avatars/user-1?v=1' }
+    const ticket = {
+      url: 'https://storage.local',
+      fields: { key: 'avatars/user-1', 'Content-Type': 'image/png' },
+      key: 'avatars/user-1',
+      expiresInSeconds: 300,
+    }
     const requestUrl = vi
       .spyOn(apiClient, 'requestAvatarUploadUrl')
-      .mockResolvedValue({
-        uploadUrl: 'https://storage/avatars/user-1/a.png',
-        key: 'avatars/user-1/a.png',
-        expiresInSeconds: 300,
-      })
+      .mockResolvedValue(ticket)
     const upload = vi.spyOn(apiClient, 'uploadAvatarToStorage').mockResolvedValue(undefined)
     const setAvatar = vi.spyOn(apiClient, 'setAvatar').mockResolvedValue(updated)
 
@@ -59,8 +61,8 @@ describe('AvatarCardContainer', () => {
 
     expect(await screen.findByText('Profile photo updated.')).toBeInTheDocument()
     expect(requestUrl).toHaveBeenCalledWith('image/png')
-    expect(upload).toHaveBeenCalledWith('https://storage/avatars/user-1/a.png', file)
-    expect(setAvatar).toHaveBeenCalledWith('avatars/user-1/a.png')
+    expect(upload).toHaveBeenCalledWith(ticket, file)
+    expect(setAvatar).toHaveBeenCalledWith('avatars/user-1')
     expect(mockUpdateCurrentUser).toHaveBeenCalledWith(updated)
   })
 

@@ -1,3 +1,4 @@
+import type { ChangeEvent } from 'react'
 import { Button } from '@/shared/components/Button/Button.tsx'
 import { UserAvatarContainer } from '@/shared/components/UserAvatar/UserAvatarContainer.tsx'
 import { ProfileCard } from '../ProfileCard/ProfileCard.tsx'
@@ -14,8 +15,7 @@ import './AvatarCard.css'
 export function AvatarCard({
   name,
   avatarUrl,
-  onSubmit,
-  onSelectFile,
+  onUploadFile,
   onRemove,
   isBusy,
   canRemove,
@@ -23,11 +23,18 @@ export function AvatarCard({
   removeLabel,
   statusMessage,
 }: AvatarCardProps): React.ReactElement {
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file !== undefined) {
+      onUploadFile(file)
+    }
+  }
+
   return (
     <ProfileCard
       title={AVATAR_CARD_TEXT.title}
       headingId={AVATAR_CARD_HEADING_ID}
-      onSubmit={onSubmit}
       actions={
         <Button
           type="button"
@@ -48,7 +55,7 @@ export function AvatarCard({
             type="file"
             accept={AVATAR_ACCEPT}
             disabled={isBusy}
-            onChange={onSelectFile}
+            onChange={handleFileChange}
           />
           <label htmlFor={AVATAR_CARD_INPUT_ID} className={AVATAR_CARD_CLASS.uploadLabel}>
             {uploadLabel}

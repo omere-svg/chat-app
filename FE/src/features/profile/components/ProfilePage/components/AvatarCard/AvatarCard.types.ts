@@ -1,11 +1,10 @@
-import type { ChangeEvent, FormEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { FormStatus } from '@/features/profile/types/formStatus.ts'
 
 export type AvatarCardProps = {
   name: string
   avatarUrl: string | null
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
-  onSelectFile: (event: ChangeEvent<HTMLInputElement>) => void
+  onUploadFile: (file: File) => void
   onRemove: () => void
   isBusy: boolean
   canRemove: boolean
@@ -17,9 +16,8 @@ export type AvatarCardProps = {
 export type UseProfileAvatarValue = {
   name: string
   avatarUrl: string | null
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
-  handleSelectFile: (event: ChangeEvent<HTMLInputElement>) => void
-  handleRemove: () => void
+  uploadFile: (file: File) => void
+  removeAvatar: () => void
   isBusy: boolean
   canRemove: boolean
   uploadLabel: string

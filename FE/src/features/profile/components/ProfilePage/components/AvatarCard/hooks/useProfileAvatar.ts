@@ -1,4 +1,3 @@
-import type { ChangeEvent, FormEvent } from 'react'
 import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import { useProfileForm } from '@/features/profile/components/ProfilePage/hooks/useProfileForm.ts'
@@ -8,27 +7,20 @@ import {
   AVATAR_CARD_TEXT,
   MAX_AVATAR_BYTES,
 } from '../AvatarCard.constants.ts'
-import type { UseProfileAvatarValue } from '../AvatarCard.types.ts'
 
 function isAllowedContentType(contentType: string): boolean {
   return (ALLOWED_AVATAR_CONTENT_TYPES as readonly string[]).includes(contentType)
 }
 
-export function useProfileAvatar(): UseProfileAvatarValue {
+export function useProfileAvatar() {
   const { currentUser, updateCurrentUser } = useAuth()
   const { isSaving, status, runSave } = useProfileForm()
 
   const name = currentUser ? fullName(currentUser) : ''
   const avatarUrl = currentUser?.avatarUrl ?? null
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault()
-  }
-
-  function handleSelectFile(event: ChangeEvent<HTMLInputElement>): void {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (file === undefined || isSaving) {
+  function uploadFile(file: File): void {
+    if (isSaving) {
       return
     }
     void runSave(async () => {
@@ -45,14 +37,14 @@ export function useProfileAvatar(): UseProfileAvatarValue {
         })
       }
       const ticket = await apiClient.requestAvatarUploadUrl(file.type)
-      await apiClient.uploadAvatarToStorage(ticket.uploadUrl, file)
+      await apiClient.uploadAvatarToStorage(ticket, file)
       const updatedUser = await apiClient.setAvatar(ticket.key)
       updateCurrentUser(updatedUser)
       return AVATAR_CARD_TEXT.uploadSuccess
     })
   }
 
-  function handleRemove(): void {
+  function removeAvatar(): void {
     if (isSaving || avatarUrl === null) {
       return
     }
@@ -66,9 +58,8 @@ export function useProfileAvatar(): UseProfileAvatarValue {
   return {
     name,
     avatarUrl,
-    handleSubmit,
-    handleSelectFile,
-    handleRemove,
+    uploadFile,
+    removeAvatar,
     isBusy: isSaving,
     canRemove: avatarUrl !== null,
     uploadLabel: isSaving ? AVATAR_CARD_TEXT.uploading : AVATAR_CARD_TEXT.upload,
