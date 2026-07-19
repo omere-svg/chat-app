@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { OBJECT_STORAGE } from '../object-storage/object-storage.tokens.js'
-import { deleteObjectBestEffort } from '../object-storage/best-effort-delete.js'
 import { UsersService } from '../users/users.service.js'
 import { AvatarUrlResolver } from '../users/avatar-url.resolver.js'
 import { isAllowedAvatarContentType, isAvatarKeyOwnedBy } from '../users/avatar/avatar-key.js'
@@ -39,12 +38,12 @@ export class SetAvatarOrchestrator {
     }
 
     if (storedObject.byteSize > MAX_AVATAR_BYTES) {
-      await deleteObjectBestEffort(this.objectStorage, key)
+      await this.objectStorage.deleteObjectQuietly(key)
       throw new AvatarTooLargeError()
     }
 
     if (storedObject.contentType !== null && !isAllowedAvatarContentType(storedObject.contentType)) {
-      await deleteObjectBestEffort(this.objectStorage, key)
+      await this.objectStorage.deleteObjectQuietly(key)
       throw new UnsupportedImageTypeError()
     }
   }

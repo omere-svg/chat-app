@@ -18,5 +18,5 @@ export interface StoredObject {
 export interface ObjectStorage {
   createUploadUrl(input: CreateUploadUrlInput): Promise<UploadUrl>
   headObject(key: string): Promise<StoredObject | null>
-  deleteObject(key: string): Promise<void>
+  deleteObjectQuietly(key: string): Promise<void>
 }

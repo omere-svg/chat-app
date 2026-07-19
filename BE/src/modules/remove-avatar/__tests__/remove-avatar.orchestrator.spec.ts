@@ -26,11 +26,11 @@ function buildUserRecord(previousKey: string | null): UserRecord {
 
 function buildOrchestrator(previousKey: string | null): {
   orchestrator: RemoveAvatarOrchestrator
-  deleteObject: ReturnType<typeof vi.fn>
+  deleteObjectQuietly: ReturnType<typeof vi.fn>
   clearAvatar: ReturnType<typeof vi.fn>
 } {
-  const deleteObject = vi.fn().mockResolvedValue(undefined)
-  const objectStorage = { deleteObject } as unknown as ObjectStorage
+  const deleteObjectQuietly = vi.fn().mockResolvedValue(undefined)
+  const objectStorage = { deleteObjectQuietly } as unknown as ObjectStorage
 
   const clearAvatar = vi.fn().mockResolvedValue(CLEARED_USER)
   const usersService = {
@@ -40,37 +40,28 @@ function buildOrchestrator(previousKey: string | null): {
 
   return {
     orchestrator: new RemoveAvatarOrchestrator(objectStorage, usersService),
-    deleteObject,
+    deleteObjectQuietly,
     clearAvatar,
   }
 }
 
 describe('RemoveAvatarOrchestrator', () => {
   it('clears the avatar and deletes the stored object when one exists', async () => {
-    const { orchestrator, deleteObject, clearAvatar } = buildOrchestrator('avatars/user-1')
+    const { orchestrator, deleteObjectQuietly, clearAvatar } = buildOrchestrator('avatars/user-1')
 
     const result = await orchestrator.remove('user-1')
 
     expect(clearAvatar).toHaveBeenCalledWith('user-1')
-    expect(deleteObject).toHaveBeenCalledWith('avatars/user-1')
+    expect(deleteObjectQuietly).toHaveBeenCalledWith('avatars/user-1')
     expect(result).toEqual({ avatarUrl: null })
   })
 
   it('is a no-op on storage when the user has no avatar', async () => {
-    const { orchestrator, deleteObject, clearAvatar } = buildOrchestrator(null)
+    const { orchestrator, deleteObjectQuietly, clearAvatar } = buildOrchestrator(null)
 
     await orchestrator.remove('user-1')
 
     expect(clearAvatar).toHaveBeenCalledWith('user-1')
-    expect(deleteObject).not.toHaveBeenCalled()
-  })
-
-  it('still returns the cleared result when the best-effort delete fails', async () => {
-    const { orchestrator, deleteObject } = buildOrchestrator('avatars/user-1')
-    deleteObject.mockRejectedValue(new Error('storage unavailable'))
-
-    const result = await orchestrator.remove('user-1')
-
-    expect(result).toEqual({ avatarUrl: null })
+    expect(deleteObjectQuietly).not.toHaveBeenCalled()
   })
 })
