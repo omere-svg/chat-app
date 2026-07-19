@@ -1,0 +1,16 @@
+.sidebar-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-user-chip__name {
+  font-weight: 500;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

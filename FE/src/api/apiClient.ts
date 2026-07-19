@@ -3,6 +3,7 @@ import { consumeAssistantStream } from './assistantStream.ts'
 import {
   isRecord,
   parseAuthResponse,
+  parseAvatarUploadTicket,
   parseConversationsResponse,
   parseCreateConversationResponse,
   parseKnowledgeDocumentsResponse,
@@ -15,6 +16,7 @@ import type { AssistantStreamHandlers } from './assistantStream.ts'
 import type {
   ApiErrorPayload,
   AuthResponse,
+  AvatarUploadTicket,
   ConversationsResponse,
   CreateConversationRequest,
   CreateConversationResponse,
@@ -45,7 +47,7 @@ export class ApiError extends Error {
 }
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
   body?: unknown
 }
 
@@ -94,6 +96,42 @@ class ApiClient {
     return this.request(endpoints.updateEmail, parseUserResponse, {
       method: 'PATCH',
       body: request,
+    })
+  }
+
+  async requestAvatarUploadUrl(contentType: string): Promise<AvatarUploadTicket> {
+    return this.request(endpoints.avatarUploadUrl, parseAvatarUploadTicket, {
+      method: 'POST',
+      body: { contentType },
+    })
+  }
+
+  async uploadAvatarToStorage(ticket: AvatarUploadTicket, file: File): Promise<void> {
+    const formData = new FormData()
+    for (const [fieldName, fieldValue] of Object.entries(ticket.fields)) {
+      formData.append(fieldName, fieldValue)
+    }
+    formData.append('file', file)
+
+    const response = await fetch(ticket.url, { method: 'POST', body: formData })
+    if (!response.ok) {
+      throw new ApiError(response.status, {
+        code: 'AVATAR_UPLOAD_FAILED',
+        message: 'Failed to upload the image to storage',
+      })
+    }
+  }
+
+  async setAvatar(key: string): Promise<User> {
+    return this.request(endpoints.avatar, parseUserResponse, {
+      method: 'PUT',
+      body: { key },
+    })
+  }
+
+  async removeAvatar(): Promise<User> {
+    return this.request(endpoints.avatar, parseUserResponse, {
+      method: 'DELETE',
     })
   }
 

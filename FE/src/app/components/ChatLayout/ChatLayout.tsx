@@ -1,18 +1,18 @@
+import { MessageThreadContainer } from '@/features/messages/components/MessageThread/MessageThreadContainer.tsx'
 import { CHAT_LAYOUT_CLASS } from './ChatLayout.constants.ts'
-import type { ChatLayoutProps } from './ChatLayout.types.ts'
+import { ChatSidebarContainer } from './components/ChatSidebar/ChatSidebarContainer.tsx'
+import { ChatTopbarContainer } from './components/ChatTopbar/ChatTopbarContainer.tsx'
 import './ChatLayout.css'
 
-export function ChatLayout({
-  topbar,
-  sidebar,
-  main,
-}: ChatLayoutProps): React.ReactElement {
+export function ChatLayout(): React.ReactElement {
   return (
     <div className={CHAT_LAYOUT_CLASS.layout}>
-      {topbar}
+      <ChatTopbarContainer />
       <div className={CHAT_LAYOUT_CLASS.panels}>
-        {sidebar}
-        <main className={CHAT_LAYOUT_CLASS.main}>{main}</main>
+        <ChatSidebarContainer />
+        <main className={CHAT_LAYOUT_CLASS.main}>
+          <MessageThreadContainer />
+        </main>
       </div>
     </div>
   )

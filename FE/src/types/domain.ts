@@ -3,6 +3,14 @@ export type User = {
   email?: string
   firstName: string
   lastName: string
+  avatarUrl?: string | null
+}
+
+export type ConversationParticipant = {
+  id: string
+  firstName: string
+  lastName: string
+  avatarUrl?: string | null
 }
 
 export function fullName(user: Pick<User, 'firstName' | 'lastName'>): string {
@@ -12,6 +20,8 @@ export function fullName(user: Pick<User, 'firstName' | 'lastName'>): string {
 export type ConversationType = 'direct' | 'assistant' | 'tutor'
 
 export const ASSISTANT_SENDER_ID = 'assistant'
+
+export const ASSISTANT_DISPLAY_NAME = 'Assistant'
 
 export type Citation = {
   chunkId: string
@@ -40,6 +50,7 @@ export type ConversationPreview = {
   type: ConversationType
   title: string
   participantIds: string[]
+  participants: ConversationParticipant[]
   lastMessage: Pick<Message, 'body' | 'createdAt' | 'senderId'> | null
   updatedAt: string
 }

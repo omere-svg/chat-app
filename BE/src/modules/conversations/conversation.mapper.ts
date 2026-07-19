@@ -6,6 +6,8 @@ import type {
   ConversationType,
 } from './types/conversation.entity.js'
 import type { ConversationPreview } from './types/conversation-preview.js'
+import type { ConversationParticipantView } from './types/conversation-participant-view.js'
+import type { PublicUser } from '../users/types/user-public-view.js'
 import type { MessageRecord } from '../messages/types/message.entity.js'
 
 export function isAssistantReplyType(type: ConversationType): boolean {
@@ -16,12 +18,25 @@ export function toLastMessageSnapshot(message: MessageRecord): ConversationLastM
   return { body: message.body, senderId: message.senderId, createdAt: message.createdAt }
 }
 
-export function toConversationPreview(conversation: ConversationRecord): ConversationPreview {
+export function toConversationParticipantView(user: PublicUser): ConversationParticipantView {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatarUrl: user.avatarUrl,
+  }
+}
+
+export function toConversationPreview(
+  conversation: ConversationRecord,
+  participants: ConversationParticipantView[],
+): ConversationPreview {
   return {
     id: conversation.id,
     type: conversation.type,
     title: conversation.title,
     participantIds: [...conversation.participantIds],
+    participants,
     lastMessage: conversation.lastMessage,
     updatedAt: conversation.lastActivityAt,
   }

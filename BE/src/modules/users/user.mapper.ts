@@ -9,6 +9,7 @@ export function toUserRecord(document: UserDocument): UserRecord {
     passwordHash: document.passwordHash,
     firstName: document.firstName,
     lastName: document.lastName,
+    avatar: document.avatar ?? null,
   }
 }
 
@@ -18,6 +19,7 @@ export function toPublicUser(userRecord: UserRecord): PublicUser {
     email: userRecord.email,
     firstName: userRecord.firstName,
     lastName: userRecord.lastName,
+    avatarUrl: userRecord.avatar?.srcUrl ?? null,
   }
 }
 

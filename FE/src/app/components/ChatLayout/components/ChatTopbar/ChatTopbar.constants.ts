@@ -1,5 +1,6 @@
 export const CHAT_TOPBAR_CLASS = {
   topbar: 'chat-layout__topbar',
+  identity: 'chat-layout__identity',
   user: 'chat-layout__user',
   actions: 'chat-layout__topbar-actions',
   action: 'btn btn--ghost',

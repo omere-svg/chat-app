@@ -4,12 +4,14 @@ import { ProfileHeader } from './components/ProfileHeader/ProfileHeader.tsx'
 import './ProfilePage.css'
 
 export function ProfilePage({
+  avatarCard,
   nameCard,
   emailCard,
 }: ProfilePageProps): React.ReactElement {
   return (
     <div className={PROFILE_PAGE_CLASS.page}>
       <ProfileHeader />
+      {avatarCard}
       {nameCard}
       {emailCard}
     </div>

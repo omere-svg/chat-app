@@ -4,7 +4,7 @@ import type {
   StreamingMessage,
   ThreadMessage,
 } from '@/types/domain.ts'
-import { MESSAGE_BUBBLE_CLASS } from './MessageBubble.constants.ts'
+import { MESSAGE_BUBBLE_CLASS, MESSAGE_ROW_CLASS } from './MessageBubble.constants.ts'
 
 export function isPendingMessage(
   message: ThreadMessage,
@@ -16,6 +16,10 @@ export function isStreamingMessage(
   message: ThreadMessage,
 ): message is StreamingMessage {
   return 'status' in message
+}
+
+export function messageRowClassName(isOwnMessage: boolean): string {
+  return isOwnMessage ? MESSAGE_ROW_CLASS.own : MESSAGE_ROW_CLASS.base
 }
 
 export function messageBubbleClassName(

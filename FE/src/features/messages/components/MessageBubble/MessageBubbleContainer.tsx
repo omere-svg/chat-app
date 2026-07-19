@@ -1,3 +1,7 @@
+import { useAuth } from '@/features/auth/hooks/useAuth.ts'
+import { UserAvatarContainer } from '@/shared/components/UserAvatar/UserAvatarContainer.tsx'
+import { useSenders } from '@/features/messages/context/useSendersContext.tsx'
+import { UNKNOWN_SENDER_NAME } from '@/features/messages/context/senders.constants.ts'
 import { MessageCitationsContainer } from '../MessageCitations/MessageCitationsContainer.tsx'
 import { MessageMetaContainer } from './components/MessageMeta/MessageMetaContainer.tsx'
 import { MessageToolsContainer } from './components/MessageTools/MessageToolsContainer.tsx'
@@ -8,12 +12,19 @@ import {
   isPendingMessage,
   isStreamingMessage,
   messageBubbleClassName,
+  messageRowClassName,
 } from './MessageBubble.utils.ts'
 
 export function MessageBubbleContainer({
   message,
-  isOwnMessage,
 }: MessageBubbleContainerProps): React.ReactElement {
+  const { currentUser } = useAuth()
+  const { getSender } = useSenders()
+
+  const sender = getSender(message.senderId)
+  const senderName = sender?.name ?? UNKNOWN_SENDER_NAME
+  const isOwnMessage = message.senderId === (currentUser?.id ?? '')
+
   const isPending = isPendingMessage(message)
   const streaming = isStreamingMessage(message) ? message : null
   const tools = streaming?.annotations?.tools ?? []
@@ -32,11 +43,19 @@ export function MessageBubbleContainer({
 
   return (
     <MessageBubble
+      rowClassName={messageRowClassName(isOwnMessage)}
       className={messageBubbleClassName(
         isOwnMessage,
         isPending,
         streaming !== null,
       )}
+      avatar={
+        <UserAvatarContainer
+          name={senderName}
+          imageUrl={sender?.avatarUrl ?? null}
+          size="sm"
+        />
+      }
       body={message.body}
       showCursor={streaming !== null}
       tools={toolsNode}

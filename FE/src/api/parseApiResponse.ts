@@ -1,5 +1,6 @@
 import type {
   AuthResponse,
+  AvatarUploadTicket,
   ConversationsResponse,
   CreateConversationResponse,
   KnowledgeDocument,
@@ -10,6 +11,7 @@ import type {
 } from '../types/api.ts'
 import type {
   Citation,
+  ConversationParticipant,
   ConversationPreview,
   ConversationType,
   Message,
@@ -57,6 +59,21 @@ function readOptionalString(
   return value
 }
 
+function readNullableString(
+  record: Record<string, unknown>,
+  field: string,
+  context: string,
+): string | null {
+  const value = record[field]
+  if (value === undefined || value === null) {
+    return null
+  }
+  if (typeof value !== 'string') {
+    throw new MalformedResponseError(`${context}.${field}`)
+  }
+  return value
+}
+
 function readNumber(
   record: Record<string, unknown>,
   field: string,
@@ -95,7 +112,32 @@ function parseUser(value: unknown): User {
     firstName: readString(value, 'firstName', 'user'),
     lastName: readString(value, 'lastName', 'user'),
     email: readOptionalString(value, 'email', 'user'),
+    avatarUrl: readNullableString(value, 'avatarUrl', 'user'),
   }
+}
+
+function parseParticipant(value: unknown, context: string): ConversationParticipant {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError(context)
+  }
+  return {
+    id: readString(value, 'id', context),
+    firstName: readString(value, 'firstName', context),
+    lastName: readString(value, 'lastName', context),
+    avatarUrl: readNullableString(value, 'avatarUrl', context),
+  }
+}
+
+function parseParticipants(value: unknown): ConversationParticipant[] {
+  if (value === undefined) {
+    return []
+  }
+  if (!Array.isArray(value)) {
+    throw new MalformedResponseError('conversation.participants')
+  }
+  return value.map((entry, index) =>
+    parseParticipant(entry, `conversation.participants[${index}]`),
+  )
 }
 
 export function parseCitation(value: unknown, context: string): Citation {
@@ -195,6 +237,7 @@ function parseConversationPreview(value: unknown): ConversationPreview {
     type: readConversationType(value),
     title: readString(value, 'title', 'conversation'),
     participantIds: readStringArray(value, 'participantIds', 'conversation'),
+    participants: parseParticipants(value.participants),
     lastMessage: parseConversationLastMessage(value.lastMessage),
     updatedAt: readString(value, 'updatedAt', 'conversation'),
   }
@@ -212,6 +255,32 @@ export function parseAuthResponse(value: unknown): AuthResponse {
 
 export function parseUserResponse(value: unknown): User {
   return parseUser(value)
+}
+
+function parseUploadFields(value: unknown): Record<string, string> {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('avatarUploadTicket.fields')
+  }
+  const fields: Record<string, string> = {}
+  for (const [fieldName, fieldValue] of Object.entries(value)) {
+    if (typeof fieldValue !== 'string') {
+      throw new MalformedResponseError(`avatarUploadTicket.fields.${fieldName}`)
+    }
+    fields[fieldName] = fieldValue
+  }
+  return fields
+}
+
+export function parseAvatarUploadTicket(value: unknown): AvatarUploadTicket {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('avatarUploadTicket')
+  }
+  return {
+    url: readString(value, 'url', 'avatarUploadTicket'),
+    fields: parseUploadFields(value.fields),
+    key: readString(value, 'key', 'avatarUploadTicket'),
+    expiresInSeconds: readNumber(value, 'expiresInSeconds', 'avatarUploadTicket'),
+  }
 }
 
 export function parseConversationsResponse(

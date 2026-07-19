@@ -7,5 +7,4 @@ export type MessageListProps = {
 
 export type MessageListContainerProps = {
   messages: ThreadMessage[]
-  currentUserId: string
 }

@@ -26,6 +26,7 @@ describe('ConversationListContainer', () => {
               type: 'direct',
               title: 'Team chat',
               participantIds: ['user-alice'],
+              participants: [],
               lastMessage: null,
               updatedAt: '2026-01-01T12:00:00.000Z',
             },

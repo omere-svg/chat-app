@@ -6,3 +6,8 @@ export const MESSAGE_BUBBLE_CLASS = {
   body: 'message-bubble__body',
   cursor: 'message-bubble__cursor',
 } as const
+
+export const MESSAGE_ROW_CLASS = {
+  base: 'message-row',
+  own: 'message-row message-row--own',
+} as const

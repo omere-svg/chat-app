@@ -8,8 +8,8 @@ import type { ConversationRecord } from '../../conversations/types/conversation.
 import type { CreateConversationDto } from '../../conversations/DTO/create-conversation.dto.js'
 import type { PublicUser } from '../../users/types/user-public-view.js'
 
-const creator: PublicUser = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One' }
-const invitee: PublicUser = { id: 'user-2', email: 'invitee@example.com', firstName: 'Invitee', lastName: 'Two' }
+const creator: PublicUser = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One', avatarUrl: null }
+const invitee: PublicUser = { id: 'user-2', email: 'invitee@example.com', firstName: 'Invitee', lastName: 'Two', avatarUrl: null }
 const createDto = { participantEmails: ['invitee@example.com'] } as CreateConversationDto
 
 function buildOrchestrator(creatorLookup: PublicUser | null): {

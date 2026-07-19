@@ -13,6 +13,7 @@ const EXISTING_USER: UserRecord = {
   passwordHash: 'hash:correct-password',
   firstName: 'Old',
   lastName: 'Name',
+  avatar: null,
 }
 
 function buildRepository(): UserRepository {
@@ -26,6 +27,7 @@ function buildRepository(): UserRepository {
         passwordHash: 'hash:other',
         firstName: 'Taken',
         lastName: 'Owner',
+        avatar: null,
       },
     ],
   ])

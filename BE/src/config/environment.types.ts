@@ -12,4 +12,9 @@ export interface AppEnvironment {
   ASSISTANT_MAX_TOKENS: number
   EMBEDDINGS_MODEL: string
   ATLAS_VECTOR_INDEX: string
+  AWS_REGION: string
+  S3_AVATAR_BUCKET: string
+  AWS_ACCESS_KEY_ID: string
+  AWS_SECRET_ACCESS_KEY: string
+  AVATAR_CDN_BASE_URL: string
 }
