@@ -1,0 +1,66 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'15px','primaryColor':'#eef2ff','primaryBorderColor':'#4f46e5','lineColor':'#6b7280','clusterBkg':'#f8fafc','clusterBorder':'#cbd5e1'}}}%%
+flowchart TB
+    classDef cont fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef view fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef hook fill:#ede9fe,stroke:#7c3aed,color:#4c1d95;
+    classDef api fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+    classDef store fill:#fae8ff,stroke:#c026d3,color:#701a75;
+    classDef shared fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+    classDef ext fill:#f1f5f9,stroke:#475569,color:#0f172a;
+
+    subgraph Profile["profile feature - AvatarCard"]
+        PPC["ProfilePageContainer<br/>injects card slots"]:::cont
+        ACC["AvatarCardContainer (thin)<br/>DOM->domain adapter (onFileChange)<br/>labels + statusMessage mapping"]:::cont
+        AV["AvatarCard (render only)<br/>preview + file input + remove btn + status"]:::view
+        UPA["useProfileAvatar (domain hook = all logic)<br/>returns: name, avatarUrl, isSaving,<br/>canRemove, uploadFile, removeAvatar, status"]:::hook
+        UPF["useProfileForm<br/>isSaving / status / runSave"]:::hook
+        TYP["AvatarCard.types.ts<br/>AvatarCardProps = Pick<UseProfileAvatarValue>"]:::shared
+    end
+
+    subgraph Api["api/ layer"]
+        CL["apiClient<br/>requestAvatarUploadUrl / uploadAvatarToStorage<br/>setAvatar -> AvatarResult / removeAvatar -> AvatarResult"]:::api
+        EP["endpoints.ts"]:::api
+        PR["parseApiResponse<br/>parseAvatarResult / parseAvatarUploadTicket"]:::api
+    end
+
+    subgraph State["global state (Redux)"]
+        AS["auth slice<br/>currentUser.avatarUrl"]:::store
+        UA["useAuth()<br/>currentUser + updateCurrentUser"]:::store
+    end
+
+    subgraph Shared["shared/components/UserAvatar"]
+        UAC["UserAvatarContainer<br/>deriveInitials, image-vs-fallback"]:::shared
+        UAV["UserAvatar<br/>renders <img> or initials circle"]:::view
+    end
+
+    subgraph Surfaces["display surfaces"]
+        TB["ChatTopbar"]:::view
+        SC["SidebarUserChip"]:::view
+        MB["MessageBubble (senders)"]:::view
+    end
+
+    API[["NestJS API /api/me/avatar*"]]:::ext
+    Storage[("Object storage (presigned POST)")]:::ext
+    CDN[("CloudFront CDN")]:::ext
+
+    PPC --> ACC
+    ACC --> AV
+    ACC --> UPA
+    ACC -. types .-> TYP
+    UPA --> UPF
+    UPA --> UA
+    UPA --> CL
+    CL --> EP
+    CL --> PR
+    CL --> API
+    CL --> Storage
+    UPA -. updateCurrentUser .-> UA
+    UA --> AS
+
+    AV --> UAC
+    UAC --> UAV
+    TB --> UAC
+    SC --> UAC
+    MB --> UAC
+    AS -. avatarUrl .-> UAC
+    UAV -. img src .-> CDN

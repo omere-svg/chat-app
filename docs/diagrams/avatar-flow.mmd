@@ -1,0 +1,44 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'14px'}}}%%
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant FE as AvatarCard + useProfileAvatar (browser)
+    participant API as NestJS API (JWT guard)
+    participant S3 as Object storage (private)
+    participant DB as MongoDB (users)
+    participant CDN as CloudFront CDN
+
+    rect rgb(237,233,254)
+    Note over U,CDN: UPLOAD a new photo
+    U->>FE: choose file
+    FE->>FE: validate type (jpeg/png/webp) + size (<=5MB)
+    FE->>API: POST /api/me/avatar/upload-url {contentType}
+    API->>API: request-avatar-upload.prepare<br/>buildAvatarKey = avatars/{userId} + presign POST (size cap)
+    API-->>FE: AvatarUploadTicket {url, fields, key, expiresInSeconds}
+    FE->>S3: POST file (form fields + file) to presigned URL
+    S3-->>FE: 204 No Content
+    FE->>API: PUT /api/me/avatar {key}
+    API->>API: set-avatar.confirm<br/>owns key? headObject exists? size+type ok?
+    API->>API: resolve srcUrl (CDN url + ?v= cache-bust)
+    API->>DB: updateAvatar { srcUrl, key }
+    API-->>FE: AvatarResult { avatarUrl }
+    FE->>FE: updateCurrentUser({...currentUser, avatarUrl}) -> Redux
+    end
+
+    rect rgb(219,234,254)
+    Note over U,CDN: READ everywhere (topbar, sidebar, messages)
+    U->>CDN: GET avatarUrl (https cdn/avatars/{userId}?v=...)
+    CDN->>S3: origin fetch via OAC (cache miss only)
+    CDN-->>U: image bytes, cached at edge
+    end
+
+    rect rgb(254,226,226)
+    Note over U,CDN: REMOVE the photo
+    U->>API: DELETE /api/me/avatar
+    API->>API: remove-avatar.remove
+    API->>DB: getUserRecord (read previous key)
+    API->>DB: clearAvatar (avatar = null)
+    API->>S3: deleteObjectBestEffort(previousKey)
+    API-->>FE: AvatarResult { avatarUrl: null }
+    FE->>FE: updateCurrentUser -> initials fallback
+    end
