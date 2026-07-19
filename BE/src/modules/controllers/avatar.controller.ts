@@ -6,7 +6,8 @@ import { SetAvatarOrchestrator } from '../set-avatar/set-avatar.orchestrator.js'
 import { RemoveAvatarOrchestrator } from '../remove-avatar/remove-avatar.orchestrator.js'
 import { RequestAvatarUploadDto } from '../users/DTO/request-avatar-upload.dto.js'
 import { SetAvatarDto } from '../users/DTO/set-avatar.dto.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
+import type { AvatarResult } from '../users/types/avatar-result.js'
 import type { AvatarUploadTicket } from '../request-avatar-upload/types/avatar-upload-ticket.js'
 
 @Controller('me/avatar')
@@ -20,7 +21,7 @@ export class AvatarController {
 
   @Post('upload-url')
   requestUploadUrl(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
     @Body() requestAvatarUploadDto: RequestAvatarUploadDto,
   ): Promise<AvatarUploadTicket> {
     return this.requestAvatarUploadOrchestrator.prepare(
@@ -31,14 +32,14 @@ export class AvatarController {
 
   @Put()
   setAvatar(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
     @Body() setAvatarDto: SetAvatarDto,
-  ): Promise<PublicUser> {
+  ): Promise<AvatarResult> {
     return this.setAvatarOrchestrator.confirm(currentUser.id, setAvatarDto.key)
   }
 
   @Delete()
-  removeAvatar(@CurrentUser() currentUser: PublicUser): Promise<PublicUser> {
+  removeAvatar(@CurrentUser() currentUser: User): Promise<AvatarResult> {
     return this.removeAvatarOrchestrator.remove(currentUser.id)
   }
 }

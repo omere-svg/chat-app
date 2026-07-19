@@ -2,14 +2,26 @@ import { describe, expect, it, vi } from 'vitest'
 import { RemoveAvatarOrchestrator } from '../remove-avatar.orchestrator.js'
 import type { ObjectStorage } from '../../object-storage/types/object-storage.js'
 import type { UsersService } from '../../users/users.service.js'
-import type { PublicUser } from '../../users/types/user-public-view.js'
+import type { User } from '../../users/types/user.js'
+import type { UserRecord } from '../../users/types/user.entity.js'
 
-const CLEARED_USER: PublicUser = {
+const CLEARED_USER: User = {
   id: 'user-1',
   email: 'user@example.com',
   firstName: 'Ada',
   lastName: 'Lovelace',
   avatarUrl: null,
+}
+
+function buildUserRecord(previousKey: string | null): UserRecord {
+  return {
+    id: 'user-1',
+    email: 'user@example.com',
+    passwordHash: 'hashed',
+    firstName: 'Ada',
+    lastName: 'Lovelace',
+    avatar: previousKey === null ? null : { srcUrl: null, key: previousKey },
+  }
 }
 
 function buildOrchestrator(previousKey: string | null): {
@@ -22,7 +34,7 @@ function buildOrchestrator(previousKey: string | null): {
 
   const clearAvatar = vi.fn().mockResolvedValue(CLEARED_USER)
   const usersService = {
-    getAvatarKey: vi.fn().mockResolvedValue(previousKey),
+    getUserRecord: vi.fn().mockResolvedValue(buildUserRecord(previousKey)),
     clearAvatar,
   } as unknown as UsersService
 
@@ -41,7 +53,7 @@ describe('RemoveAvatarOrchestrator', () => {
 
     expect(clearAvatar).toHaveBeenCalledWith('user-1')
     expect(deleteObject).toHaveBeenCalledWith('avatars/user-1')
-    expect(result).toEqual(CLEARED_USER)
+    expect(result).toEqual({ avatarUrl: null })
   })
 
   it('is a no-op on storage when the user has no avatar', async () => {
@@ -53,12 +65,12 @@ describe('RemoveAvatarOrchestrator', () => {
     expect(deleteObject).not.toHaveBeenCalled()
   })
 
-  it('still returns the cleared user when the best-effort delete fails', async () => {
+  it('still returns the cleared result when the best-effort delete fails', async () => {
     const { orchestrator, deleteObject } = buildOrchestrator('avatars/user-1')
     deleteObject.mockRejectedValue(new Error('storage unavailable'))
 
     const result = await orchestrator.remove('user-1')
 
-    expect(result).toEqual(CLEARED_USER)
+    expect(result).toEqual({ avatarUrl: null })
   })
 })

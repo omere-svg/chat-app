@@ -8,12 +8,12 @@ import { UnsupportedImageTypeError } from '../../users/avatar/errors/unsupported
 import type { AvatarUrlResolver } from '../../users/avatar-url.resolver.js'
 import type { ObjectStorage, StoredObject } from '../../object-storage/types/object-storage.js'
 import type { UsersService } from '../../users/users.service.js'
-import type { PublicUser } from '../../users/types/user-public-view.js'
+import type { User } from '../../users/types/user.js'
 
 const OWNED_KEY = 'avatars/user-1'
 const RESOLVED_URL = 'https://cdn.example/avatars/user-1?v=1'
 
-const UPDATED_USER: PublicUser = {
+const UPDATED_USER: User = {
   id: 'user-1',
   email: 'user@example.com',
   firstName: 'Ada',
@@ -105,6 +105,6 @@ describe('SetAvatarOrchestrator', () => {
     expect(resolve).toHaveBeenCalledWith(OWNED_KEY, expect.any(String))
     expect(updateAvatar).toHaveBeenCalledWith('user-1', { srcUrl: RESOLVED_URL, key: OWNED_KEY })
     expect(deleteObject).not.toHaveBeenCalled()
-    expect(result).toEqual(UPDATED_USER)
+    expect(result).toEqual({ avatarUrl: RESOLVED_URL })
   })
 })

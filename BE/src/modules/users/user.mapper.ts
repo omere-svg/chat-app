@@ -1,6 +1,6 @@
 import type { UserDocument } from './user.schema.js'
 import type { UserRecord } from './types/user.entity.js'
-import type { PublicUser } from './types/user-public-view.js'
+import type { User } from './types/user.js'
 
 export function toUserRecord(document: UserDocument): UserRecord {
   return {
@@ -13,7 +13,7 @@ export function toUserRecord(document: UserDocument): UserRecord {
   }
 }
 
-export function toPublicUser(userRecord: UserRecord): PublicUser {
+export function toUser(userRecord: UserRecord): User {
   return {
     id: userRecord.id,
     email: userRecord.email,
@@ -23,6 +23,6 @@ export function toPublicUser(userRecord: UserRecord): PublicUser {
   }
 }
 
-export function formatFullName(user: Pick<PublicUser, 'firstName' | 'lastName'>): string {
+export function formatFullName(user: Pick<User, 'firstName' | 'lastName'>): string {
   return `${user.firstName} ${user.lastName}`.trim().replace(/\s+/g, ' ')
 }

@@ -20,6 +20,6 @@ export class SignupOrchestrator {
     })
 
     const token = await this.authTokenService.issue(userRecord)
-    return { token, user: this.usersService.toPublicView(userRecord) }
+    return { token, user: this.usersService.toUser(userRecord) }
   }
 }

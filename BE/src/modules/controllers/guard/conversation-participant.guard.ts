@@ -4,10 +4,10 @@ import { AuthenticationRequiredError } from '../../auth/errors/authentication-re
 import { ConversationNotFoundError } from '../../conversations/errors/conversation-not-found.error.js'
 import { ConversationsService } from '../../conversations/conversations.service.js'
 import type { ConversationRequest } from '../decorator/current-conversation.decorator.js'
-import type { PublicUser } from '../../users/types/user-public-view.js'
+import type { User } from '../../users/types/user.js'
 
 interface ParticipantGuardRequest extends ConversationRequest {
-  user?: PublicUser
+  user?: User
 }
 
 @Injectable()
