@@ -50,6 +50,10 @@ export type AvatarUploadTicket = {
   expiresInSeconds: number
 }
 
+export type AvatarResult = {
+  avatarUrl: string | null
+}
+
 export type AuthResponse = {
   token: string
   user: User

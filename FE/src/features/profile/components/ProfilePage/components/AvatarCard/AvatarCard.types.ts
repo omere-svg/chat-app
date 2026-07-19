@@ -1,16 +1,15 @@
-import type { ReactNode } from 'react'
+import type { ChangeEvent, ReactNode } from 'react'
 import type { useProfileAvatar } from './hooks/useProfileAvatar.ts'
 
-export type AvatarCardProps = {
-  name: string
-  avatarUrl: string | null
-  onUploadFile: (file: File) => void
-  onRemove: () => void
-  isBusy: boolean
-  canRemove: boolean
+export type UseProfileAvatarValue = ReturnType<typeof useProfileAvatar>
+
+export type AvatarCardProps = Pick<
+  UseProfileAvatarValue,
+  'name' | 'avatarUrl' | 'isSaving' | 'canRemove'
+> & {
   uploadLabel: string
   removeLabel: string
+  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onRemove: () => void
   statusMessage: ReactNode
 }
-
-export type UseProfileAvatarValue = ReturnType<typeof useProfileAvatar>

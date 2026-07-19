@@ -179,7 +179,7 @@ export const handlers = [
     if (!user) {
       return jsonApiError(404, 'USER_NOT_FOUND', 'User not found')
     }
-    return HttpResponse.json(toPublicUser(user))
+    return HttpResponse.json({ avatarUrl: toPublicUser(user).avatarUrl })
   }),
 
   http.delete(endpoints.avatar, ({ request }) => {
@@ -191,7 +191,7 @@ export const handlers = [
     if (!user) {
       return jsonApiError(404, 'USER_NOT_FOUND', 'User not found')
     }
-    return HttpResponse.json(toPublicUser(user))
+    return HttpResponse.json({ avatarUrl: toPublicUser(user).avatarUrl })
   }),
 
   http.get(endpoints.conversations, ({ request }) => {

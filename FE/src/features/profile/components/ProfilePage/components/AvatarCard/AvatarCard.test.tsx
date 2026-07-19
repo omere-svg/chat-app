@@ -41,7 +41,8 @@ afterEach(() => {
 describe('AvatarCardContainer', () => {
   it('requests a URL, uploads to storage, confirms, and reports success', async () => {
     const user = userEvent.setup()
-    const updated: User = { ...authState.currentUser, avatarUrl: 'https://cdn/avatars/user-1?v=1' }
+    const uploadedAvatarUrl = 'https://cdn/avatars/user-1?v=1'
+    const updated: User = { ...authState.currentUser, avatarUrl: uploadedAvatarUrl }
     const ticket = {
       url: 'https://storage.local',
       fields: { key: 'avatars/user-1', 'Content-Type': 'image/png' },
@@ -52,7 +53,9 @@ describe('AvatarCardContainer', () => {
       .spyOn(apiClient, 'requestAvatarUploadUrl')
       .mockResolvedValue(ticket)
     const upload = vi.spyOn(apiClient, 'uploadAvatarToStorage').mockResolvedValue(undefined)
-    const setAvatar = vi.spyOn(apiClient, 'setAvatar').mockResolvedValue(updated)
+    const setAvatar = vi
+      .spyOn(apiClient, 'setAvatar')
+      .mockResolvedValue({ avatarUrl: uploadedAvatarUrl })
 
     render(<AvatarCardContainer />)
 
@@ -106,7 +109,9 @@ describe('AvatarCardContainer', () => {
       avatarUrl: 'https://cdn/avatars/user-1/a.png',
     }
     const cleared: User = { ...authState.currentUser, avatarUrl: null }
-    const removeAvatar = vi.spyOn(apiClient, 'removeAvatar').mockResolvedValue(cleared)
+    const removeAvatar = vi
+      .spyOn(apiClient, 'removeAvatar')
+      .mockResolvedValue({ avatarUrl: null })
 
     render(<AvatarCardContainer />)
 

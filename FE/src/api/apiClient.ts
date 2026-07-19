@@ -3,6 +3,7 @@ import { consumeAssistantStream } from './assistantStream.ts'
 import {
   isRecord,
   parseAuthResponse,
+  parseAvatarResult,
   parseAvatarUploadTicket,
   parseConversationsResponse,
   parseCreateConversationResponse,
@@ -16,6 +17,7 @@ import type { AssistantStreamHandlers } from './assistantStream.ts'
 import type {
   ApiErrorPayload,
   AuthResponse,
+  AvatarResult,
   AvatarUploadTicket,
   ConversationsResponse,
   CreateConversationRequest,
@@ -122,15 +124,15 @@ class ApiClient {
     }
   }
 
-  async setAvatar(key: string): Promise<User> {
-    return this.request(endpoints.avatar, parseUserResponse, {
+  async setAvatar(key: string): Promise<AvatarResult> {
+    return this.request(endpoints.avatar, parseAvatarResult, {
       method: 'PUT',
       body: { key },
     })
   }
 
-  async removeAvatar(): Promise<User> {
-    return this.request(endpoints.avatar, parseUserResponse, {
+  async removeAvatar(): Promise<AvatarResult> {
+    return this.request(endpoints.avatar, parseAvatarResult, {
       method: 'DELETE',
     })
   }
