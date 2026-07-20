@@ -1,3 +1,5 @@
+import { CHAT_ROUTE } from '@/app/constants/routes.ts'
+
 export const PROFILE_HEADER_CLASS = {
   header: 'profile-header',
   title: 'profile-header__title',
@@ -8,4 +10,4 @@ export const PROFILE_HEADER_TEXT = {
   backLabel: 'Back to chat',
 } as const
 
-export const PROFILE_BACK_LINK_TO = '/chat'
+export const PROFILE_BACK_LINK_TO = CHAT_ROUTE

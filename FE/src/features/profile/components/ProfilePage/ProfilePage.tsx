@@ -6,14 +6,16 @@ import './ProfilePage.css'
 export function ProfilePage({
   avatarCard,
   nameCard,
-  emailCard,
+  emailChangeCard,
+  previousEmailsCard,
 }: ProfilePageProps): React.ReactElement {
   return (
     <div className={PROFILE_PAGE_CLASS.page}>
       <ProfileHeader />
       {avatarCard}
       {nameCard}
-      {emailCard}
+      {emailChangeCard}
+      {previousEmailsCard}
     </div>
   )
 }

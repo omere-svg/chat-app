@@ -1,0 +1,42 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { apiClient } from '@/api/apiClient.ts'
+import { useAuth } from '@/features/auth/hooks/useAuth.ts'
+import { isValidEmail } from '@/shared/validation/isValidEmail.ts'
+import { useProfileForm } from '../../../hooks/useProfileForm.ts'
+import { EMAIL_CHANGE_REQUEST_CARD_TEXT } from '../EmailChangeRequestCard.constants.ts'
+
+export function useRequestEmailChange() {
+  const { currentUser } = useAuth()
+  const { isSaving, status, runSave } = useProfileForm()
+
+  const [newEmail, setNewEmail] = useState('')
+
+  const currentEmail = currentUser?.email ?? ''
+  const trimmedNewEmail = newEmail.trim()
+  const canSubmit =
+    isValidEmail(trimmedNewEmail) &&
+    trimmedNewEmail.toLowerCase() !== currentEmail.toLowerCase()
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault()
+    if (!canSubmit || isSaving) {
+      return
+    }
+    void runSave(async () => {
+      await apiClient.requestEmailChange({ newEmail: trimmedNewEmail })
+      setNewEmail('')
+      return EMAIL_CHANGE_REQUEST_CARD_TEXT.success
+    })
+  }
+
+  return {
+    newEmail,
+    currentEmail,
+    setNewEmail,
+    isSubmitting: isSaving,
+    canSubmit,
+    status,
+    handleSubmit,
+  }
+}
