@@ -1,0 +1,25 @@
+.email-change-confirm-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.email-change-confirm-screen__card {
+  max-width: 420px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+}
+
+.email-change-confirm-screen__heading {
+  margin: 0;
+  font-size: 1.35rem;
+}

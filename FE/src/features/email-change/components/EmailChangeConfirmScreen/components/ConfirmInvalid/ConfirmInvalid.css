@@ -1,0 +1,9 @@
+.confirm-invalid__message {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.confirm-invalid__link {
+  color: var(--accent);
+  font-weight: 600;
+}
