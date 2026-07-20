@@ -247,15 +247,69 @@ Update the current user's first and last name.
 | 400 | Blank first/last name (`VALIDATION_ERROR`) |
 | 401 | Unauthorized |
 
-### `PATCH /api/me/email`
+### `GET /api/me/previous-emails`
 
-Change the current user's email. Requires re-entering the account password, since email
-is the login identifier.
+Return the current user's previous-email history (read-only, newest last). A moving
+window of up to 10 addresses. Kept off the shared `User` object so it is never exposed
+for other users (e.g. conversation participants) and never bloats auth/`/me` payloads.
+
+**Response `200`**
+
+```ts
+{ previousEmails: string[] }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 401 | Unauthorized |
+
+---
+
+## Change email (confirmation flow)
+
+Email changes are confirmed via a link sent to the **new** address. The request endpoint
+issues a short-lived signed JWT (`{ userId, newEmail }`, ~30 min) carried in the link;
+no server-side state is stored. The confirm endpoint verifies the token, re-checks the
+address is still free, and atomically swaps the email — pushing the old one onto the
+previous-emails list. A case-insensitive unique index on email is the final authority.
+
+### `POST /api/me/email-change/request`
+
+Start an email change. Validates the new email (format, not the current email, not already
+taken) and emails a confirmation link to it.
 
 **Request**
 
 ```ts
-{ email: string; currentPassword: string }
+{ newEmail: string }
+```
+
+**Response `202`**
+
+```ts
+{ status: 'confirmation_sent' }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid email, or same as the current email (`VALIDATION_ERROR`) |
+| 401 | Unauthorized |
+| 409 | Email already registered to another account (`EMAIL_ALREADY_REGISTERED`) |
+
+### `POST /api/email-change/confirm`
+
+Public (the token is the authority; opened from the user's inbox). Verifies the token,
+re-checks the address is free, and applies the change. Idempotent: replays/double-submits
+are no-ops that return the already-updated user.
+
+**Request**
+
+```ts
+{ token: string }
 ```
 
 **Response `200`**: the updated `User`.
@@ -264,9 +318,8 @@ is the login identifier.
 
 | Status | When |
 |--------|------|
-| 400 | Invalid email or missing password (`VALIDATION_ERROR`) |
-| 401 | Unauthorized, or wrong current password (`INVALID_CREDENTIALS`) |
-| 409 | Email already registered to another account (`EMAIL_ALREADY_REGISTERED`) |
+| 400 | Missing token, or invalid/expired token (`EMAIL_CHANGE_TOKEN_INVALID`) |
+| 409 | The address was taken before confirmation (`EMAIL_ALREADY_REGISTERED`) |
 
 ---
 
@@ -388,3 +441,4 @@ Remove a document and all of its chunks. Scoped to the owner.
 | 2026-06-25 | Week 6: `ConversationType`; assistant conversations; SSE streaming reply with tool calls; optional `Message.metadata` |
 | 2026-06-29 | Week 7: tutor (RAG) conversations; `/knowledge/documents` upload/list/delete; `Citation` + `Message.metadata.citations`; `citations` SSE event |
 | 2026-07-16 | Profile: `User` now uses `firstName`/`lastName` (replaces `displayName`); added `PATCH /me/profile` and `PATCH /me/email` (password-confirmed); signup takes first/last name |
+| 2026-07-20 | Week 8: replaced password-confirmed `PATCH /me/email` with the confirmation flow (`POST /me/email-change/request` + public `POST /email-change/confirm`); added `GET /me/previous-emails`; `User` shape unchanged |
