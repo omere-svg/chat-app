@@ -1,3 +1,5 @@
+import { PROFILE_ROUTE } from '@/app/constants/routes.ts'
+
 export const CHAT_TOPBAR_CLASS = {
   topbar: 'chat-layout__topbar',
   identity: 'chat-layout__identity',
@@ -13,5 +15,5 @@ export const CHAT_TOPBAR_TEXT = {
 } as const
 
 export const CHAT_TOPBAR_ROUTE = {
-  profile: '/profile',
+  profile: PROFILE_ROUTE,
 } as const
