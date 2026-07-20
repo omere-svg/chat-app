@@ -4,22 +4,28 @@ import { isRecord } from '../api/parseApiResponse.ts'
 import {
   addMessage,
   clearUserAvatar,
+  confirmEmailChange,
   createUser,
   findUserById,
+  getPreviousEmails,
   getUserConversations,
   isOwnedAvatarKey,
   issueToken,
   paginateMessages,
+  requestEmailChange,
   resolveUserId,
   setUserAvatar,
   toPublicUser,
-  updateUserEmail,
   updateUserName,
   userInConversation,
   verifyCredentials,
 } from './db.ts'
 import { jsonApiError } from './jsonApiError.ts'
-import { MESSAGE_PAGE_LIMIT } from '../api/constants.ts'
+import {
+  EMAIL_CHANGE_REQUEST_STATUS,
+  MESSAGE_PAGE_LIMIT,
+} from '../api/constants.ts'
+import { isValidEmail } from '../shared/validation/isValidEmail.ts'
 
 const MOCK_ALLOWED_AVATAR_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
@@ -119,7 +125,19 @@ export const handlers = [
     return HttpResponse.json(toPublicUser(user))
   }),
 
-  http.patch(endpoints.updateEmail, async ({ request }) => {
+  http.get(endpoints.previousEmails, ({ request }) => {
+    const userId = resolveUserId(bearerToken(request))
+    if (!userId) {
+      return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
+    }
+    const previousEmails = getPreviousEmails(userId)
+    if (previousEmails === null) {
+      return jsonApiError(404, 'USER_NOT_FOUND', 'User not found')
+    }
+    return HttpResponse.json({ previousEmails })
+  }),
+
+  http.post(endpoints.emailChangeRequest, async ({ request }) => {
     const userId = resolveUserId(bearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
@@ -127,16 +145,33 @@ export const handlers = [
     const body = await request.json()
     if (
       !isRecord(body) ||
-      typeof body.email !== 'string' ||
-      typeof body.currentPassword !== 'string' ||
-      body.currentPassword.length === 0
+      typeof body.newEmail !== 'string' ||
+      !isValidEmail(body.newEmail)
     ) {
-      return jsonApiError(400, 'VALIDATION_ERROR', 'Invalid email update request')
+      return jsonApiError(400, 'VALIDATION_ERROR', 'Invalid email change request')
     }
-    const result = updateUserEmail(userId, body.email, body.currentPassword)
+    const result = requestEmailChange(userId, body.newEmail)
     if ('error' in result) {
-      if (result.error === 'INVALID_CREDENTIALS') {
-        return jsonApiError(401, 'INVALID_CREDENTIALS', 'Current password is incorrect')
+      if (result.error === 'VALIDATION_ERROR') {
+        return jsonApiError(400, 'VALIDATION_ERROR', 'The new email must be different')
+      }
+      return jsonApiError(409, 'EMAIL_ALREADY_REGISTERED', 'Email is already registered')
+    }
+    return HttpResponse.json(
+      { status: EMAIL_CHANGE_REQUEST_STATUS },
+      { status: 202 },
+    )
+  }),
+
+  http.post(endpoints.emailChangeConfirm, async ({ request }) => {
+    const body = await request.json()
+    if (!isRecord(body) || typeof body.token !== 'string' || body.token.length === 0) {
+      return jsonApiError(400, 'EMAIL_CHANGE_TOKEN_INVALID', 'Invalid confirmation token')
+    }
+    const result = confirmEmailChange(body.token)
+    if ('error' in result) {
+      if (result.error === 'EMAIL_CHANGE_TOKEN_INVALID') {
+        return jsonApiError(400, 'EMAIL_CHANGE_TOKEN_INVALID', 'Invalid or expired token')
       }
       return jsonApiError(409, 'EMAIL_ALREADY_REGISTERED', 'Email is already registered')
     }
