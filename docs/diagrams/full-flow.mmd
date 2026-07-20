@@ -1,0 +1,42 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'14px'}}}%%
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant FE as AvatarCard + useProfileAvatar (browser)
+    participant API as NestJS API (JWT guard)
+    participant S3 as AWS S3 (private bucket)
+    participant DB as MongoDB (users)
+    participant CDN as CloudFront CDN
+
+    rect rgb(237,233,254)
+    Note over U,CDN: UPLOAD a new photo
+    U->>FE: choose file
+    FE->>FE: validate type (jpeg/png/webp) + size (<=5MB)
+    FE->>API: POST /api/me/avatar/upload-url {contentType}
+    API->>API: RequestAvatarUploadOrchestrator<br/>build key avatars/userId/uuid.ext + presign PUT
+    API-->>FE: {uploadUrl, key, expiresInSeconds=300}
+    FE->>S3: PUT file bytes directly to presigned URL
+    S3-->>FE: 200 OK
+    FE->>API: PUT /api/me/avatar {key}
+    API->>API: SetAvatarOrchestrator<br/>owns key? headObject exists? size+type ok?
+    API->>DB: save avatarKey (read previous first)
+    API->>S3: deleteObject(previousKey) if replaced
+    API-->>FE: PublicUser {avatarUrl = https CDN url}
+    FE->>FE: updateCurrentUser -> Redux store
+    end
+
+    rect rgb(219,234,254)
+    Note over U,CDN: READ everywhere (topbar, sidebar, messages)
+    U->>CDN: GET https://cdn/avatars/userId/uuid.png
+    CDN->>S3: origin fetch via OAC (cache miss only)
+    CDN-->>U: image, cached at edge
+    end
+
+    rect rgb(254,226,226)
+    Note over U,CDN: REMOVE the photo
+    U->>API: DELETE /api/me/avatar
+    API->>API: RemoveAvatarOrchestrator
+    API->>DB: clear avatarKey
+    API->>S3: deleteObject(key)
+    API-->>U: PublicUser {avatarUrl = null} -> initials fallback
+    end

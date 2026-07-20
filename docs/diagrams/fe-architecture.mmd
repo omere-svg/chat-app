@@ -1,0 +1,63 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'15px','primaryColor':'#eef2ff','primaryBorderColor':'#4f46e5','lineColor':'#6b7280','clusterBkg':'#f8fafc','clusterBorder':'#cbd5e1'}}}%%
+flowchart TB
+    classDef pres fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef cont fill:#ede9fe,stroke:#7c3aed,color:#4c1d95;
+    classDef hook fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef api fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+    classDef state fill:#fae8ff,stroke:#c026d3,color:#701a75;
+    classDef ext fill:#f1f5f9,stroke:#475569,color:#0f172a;
+
+    subgraph Profile["features/profile - AvatarCard"]
+        ACC["AvatarCardContainer"]:::cont
+        ACARD["AvatarCard (render only)"]:::pres
+        UPA["useProfileAvatar (hook = all logic)<br/>validate / request / upload / confirm / remove"]:::hook
+    end
+
+    subgraph Shared["shared/components/UserAvatar"]
+        UAC["UserAvatarContainer<br/>deriveInitials"]:::cont
+        UA["UserAvatar<br/>image OR initials fallback"]:::pres
+    end
+
+    subgraph Surfaces["display surfaces"]
+        TB["ChatTopbar"]:::pres
+        CHIP["SidebarUserChip"]:::cont
+        ML["MessageList senders map"]:::cont
+    end
+
+    subgraph ApiLayer["api/"]
+        CLIENT["apiClient<br/>requestAvatarUploadUrl / uploadAvatarToStorage<br/>setAvatar / removeAvatar"]:::api
+        EP["endpoints.ts"]:::api
+        PARSE["parseApiResponse<br/>parseUser / parseAvatarUploadTicket"]:::api
+    end
+
+    subgraph StateLayer["global state"]
+        AUTH["Redux auth slice<br/>currentUser.avatarUrl"]:::state
+        USEAUTH["useAuth().updateCurrentUser"]:::state
+    end
+
+    BE[["NestJS API /api/me/avatar/*"]]:::ext
+    S3[["AWS S3 (presigned PUT)"]]:::ext
+    CDN[["CloudFront CDN (image reads)"]]:::ext
+
+    ACC --> ACARD
+    ACC --> UPA
+    ACARD --> UAC
+
+    UPA --> CLIENT
+    CLIENT --> EP
+    CLIENT --> PARSE
+    CLIENT --> BE
+    CLIENT --> S3
+    UPA --> USEAUTH
+    USEAUTH --> AUTH
+
+    AUTH --> TB
+    AUTH --> CHIP
+    AUTH --> ACC
+    AUTH --> ML
+
+    TB --> UAC
+    CHIP --> UAC
+    ML --> UAC
+    UAC --> UA
+    UA -. img src .-> CDN

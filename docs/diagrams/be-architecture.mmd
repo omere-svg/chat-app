@@ -1,0 +1,62 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'15px','primaryColor':'#eef2ff','primaryBorderColor':'#4f46e5','lineColor':'#6b7280','clusterBkg':'#f8fafc','clusterBorder':'#cbd5e1'}}}%%
+flowchart TB
+    classDef ctrl fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef orch fill:#ede9fe,stroke:#7c3aed,color:#4c1d95;
+    classDef svc fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef repo fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+    classDef port fill:#fae8ff,stroke:#c026d3,color:#701a75;
+    classDef ext fill:#f1f5f9,stroke:#475569,color:#0f172a;
+    classDef help fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+
+    Client[["HTTP client (JWT)"]]:::ext
+
+    subgraph Controllers["controllers module"]
+        AC["AvatarController<br/>POST /me/avatar/upload-url<br/>PUT /me/avatar<br/>DELETE /me/avatar"]:::ctrl
+    end
+
+    subgraph Orchestrators["orchestrator modules (one per action)"]
+        RU["request-avatar-upload"]:::orch
+        SA["set-avatar"]:::orch
+        RA["remove-avatar"]:::orch
+    end
+
+    subgraph ObjStore["object-storage module (infra port)"]
+        OSP{{"ObjectStorage port<br/>OBJECT_STORAGE token"}}:::port
+        S3I["S3ObjectStorage impl<br/>createUploadUrl / headObject / deleteObject"]:::svc
+    end
+
+    subgraph Users["users entity module"]
+        US["UsersService<br/>updateAvatar / clearAvatar / getAvatarKey / toPublicView"]:::svc
+        AUR["AvatarUrlResolver<br/>key -> https CDN url"]:::help
+        AH["avatar/ helpers<br/>avatar-key.ts, constants.ts, types/"]:::help
+        AE["avatar/errors/*<br/>Forbidden / NotFound / TooLarge / UnsupportedType"]:::help
+        URP{{"UserRepository port<br/>USER_REPOSITORY token"}}:::port
+        UMR["user.mongo.repository<br/>(+ avatarKey field)"]:::repo
+    end
+
+    Env[["config: AVATAR_CDN_BASE_URL,<br/>S3_AVATAR_BUCKET, AWS creds/region"]]:::ext
+    S3[("AWS S3 (private bucket)")]:::ext
+    Mongo[("MongoDB - users.avatarKey")]:::ext
+
+    Client --> AC
+    AC --> RU
+    AC --> SA
+    AC --> RA
+
+    RU --> OSP
+    SA --> OSP
+    SA --> US
+    RA --> OSP
+    RA --> US
+
+    OSP -. bound to .-> S3I
+    S3I --> S3
+
+    US --> AUR
+    US --> AH
+    US --> URP
+    US -. throws .-> AE
+    URP -. bound to .-> UMR
+    UMR --> Mongo
+    AUR -. reads .-> Env
+    S3I -. reads .-> Env

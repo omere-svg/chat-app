@@ -38,8 +38,10 @@ export function useProfileAvatar() {
       }
       const ticket = await apiClient.requestAvatarUploadUrl(file.type)
       await apiClient.uploadAvatarToStorage(ticket, file)
-      const updatedUser = await apiClient.setAvatar(ticket.key)
-      updateCurrentUser(updatedUser)
+      const { avatarUrl: uploadedAvatarUrl } = await apiClient.setAvatar(ticket.key)
+      if (currentUser) {
+        updateCurrentUser({ ...currentUser, avatarUrl: uploadedAvatarUrl })
+      }
       return AVATAR_CARD_TEXT.uploadSuccess
     })
   }
@@ -49,8 +51,10 @@ export function useProfileAvatar() {
       return
     }
     void runSave(async () => {
-      const updatedUser = await apiClient.removeAvatar()
-      updateCurrentUser(updatedUser)
+      const { avatarUrl: clearedAvatarUrl } = await apiClient.removeAvatar()
+      if (currentUser) {
+        updateCurrentUser({ ...currentUser, avatarUrl: clearedAvatarUrl })
+      }
       return AVATAR_CARD_TEXT.removeSuccess
     })
   }
@@ -58,12 +62,10 @@ export function useProfileAvatar() {
   return {
     name,
     avatarUrl,
+    isSaving,
+    canRemove: avatarUrl !== null,
     uploadFile,
     removeAvatar,
-    isBusy: isSaving,
-    canRemove: avatarUrl !== null,
-    uploadLabel: isSaving ? AVATAR_CARD_TEXT.uploading : AVATAR_CARD_TEXT.upload,
-    removeLabel: isSaving ? AVATAR_CARD_TEXT.removing : AVATAR_CARD_TEXT.remove,
     status,
   }
 }

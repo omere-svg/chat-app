@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { OBJECT_STORAGE } from '../object-storage/object-storage.tokens.js'
-import { deleteObjectBestEffort } from '../object-storage/best-effort-delete.js'
 import { UsersService } from '../users/users.service.js'
 import { AvatarUrlResolver } from '../users/avatar-url.resolver.js'
 import { isAllowedAvatarContentType, isAvatarKeyOwnedBy } from '../users/avatar/avatar-key.js'
@@ -10,7 +9,7 @@ import { AvatarObjectNotFoundError } from '../users/avatar/errors/avatar-object-
 import { AvatarTooLargeError } from '../users/avatar/errors/avatar-too-large.error.js'
 import { UnsupportedImageTypeError } from '../users/avatar/errors/unsupported-image-type.error.js'
 import type { ObjectStorage } from '../object-storage/types/object-storage.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { AvatarResult } from '../users/types/avatar-result.js'
 
 @Injectable()
 export class SetAvatarOrchestrator {
@@ -20,7 +19,7 @@ export class SetAvatarOrchestrator {
     private readonly avatarUrlResolver: AvatarUrlResolver,
   ) {}
 
-  async confirm(userId: string, key: string): Promise<PublicUser> {
+  async confirm(userId: string, key: string): Promise<AvatarResult> {
     if (!isAvatarKeyOwnedBy(userId, key)) {
       throw new AvatarKeyForbiddenError()
     }
@@ -28,7 +27,8 @@ export class SetAvatarOrchestrator {
     await this.assertUploadedObjectIsValid(key)
 
     const srcUrl = this.avatarUrlResolver.resolve(key, Date.now().toString())
-    return this.usersService.updateAvatar(userId, { srcUrl, key })
+    const updatedUser = await this.usersService.updateAvatar(userId, { srcUrl, key })
+    return { avatarUrl: updatedUser.avatarUrl }
   }
 
   private async assertUploadedObjectIsValid(key: string): Promise<void> {
@@ -38,12 +38,12 @@ export class SetAvatarOrchestrator {
     }
 
     if (storedObject.byteSize > MAX_AVATAR_BYTES) {
-      await deleteObjectBestEffort(this.objectStorage, key)
+      await this.objectStorage.deleteObjectQuietly(key)
       throw new AvatarTooLargeError()
     }
 
     if (storedObject.contentType !== null && !isAllowedAvatarContentType(storedObject.contentType)) {
-      await deleteObjectBestEffort(this.objectStorage, key)
+      await this.objectStorage.deleteObjectQuietly(key)
       throw new UnsupportedImageTypeError()
     }
   }

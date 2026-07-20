@@ -2,13 +2,13 @@ import { Inject, Injectable } from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
 import { PasswordHasher } from './password-hasher.js'
 import { USER_REPOSITORY } from './user.repository.js'
-import { toPublicUser } from './user.mapper.js'
+import { toUser } from './user.mapper.js'
 import { EmailAlreadyRegisteredError } from './errors/email-already-registered.error.js'
 import { UserNotFoundError } from './errors/user-not-found.error.js'
 import { IncorrectCurrentPasswordError } from './errors/incorrect-current-password.error.js'
 import { UnknownParticipantEmailsError } from './errors/unknown-participant-emails.error.js'
 import type { UserRepository } from './user.repository.js'
-import type { PublicUser } from './types/user-public-view.js'
+import type { User } from './types/user.js'
 import type { StoredAvatar } from './types/stored-avatar.js'
 import type { UserRecord } from './types/user.entity.js'
 import type {
@@ -29,8 +29,8 @@ export class UsersService {
     private readonly passwordHasher: PasswordHasher,
   ) {}
 
-  toPublicView(userRecord: UserRecord): PublicUser {
-    return toPublicUser(userRecord)
+  toUser(userRecord: UserRecord): User {
+    return toUser(userRecord)
   }
 
   async createUser(createUserInput: CreateUserInput): Promise<UserRecord> {
@@ -54,7 +54,7 @@ export class UsersService {
     return this.userRepository.insert(userRecord)
   }
 
-  async updateName(userId: string, { firstName, lastName }: UpdateNameInput): Promise<PublicUser> {
+  async updateName(userId: string, { firstName, lastName }: UpdateNameInput): Promise<User> {
     const updatedUser = await this.userRepository.update(userId, {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -62,34 +62,34 @@ export class UsersService {
     if (updatedUser === null) {
       throw new UserNotFoundError()
     }
-    return this.toPublicView(updatedUser)
+    return this.toUser(updatedUser)
   }
 
-  async getAvatarKey(userId: string): Promise<string | null> {
+  async getUserRecord(userId: string): Promise<UserRecord> {
     const existingUser = await this.userRepository.findById(userId)
     if (existingUser === null) {
       throw new UserNotFoundError()
     }
-    return existingUser.avatar?.key ?? null
+    return existingUser
   }
 
-  async updateAvatar(userId: string, avatar: StoredAvatar): Promise<PublicUser> {
+  async updateAvatar(userId: string, avatar: StoredAvatar): Promise<User> {
     const updatedUser = await this.userRepository.update(userId, { avatar })
     if (updatedUser === null) {
       throw new UserNotFoundError()
     }
-    return this.toPublicView(updatedUser)
+    return this.toUser(updatedUser)
   }
 
-  async clearAvatar(userId: string): Promise<PublicUser> {
+  async clearAvatar(userId: string): Promise<User> {
     const updatedUser = await this.userRepository.update(userId, { avatar: null })
     if (updatedUser === null) {
       throw new UserNotFoundError()
     }
-    return this.toPublicView(updatedUser)
+    return this.toUser(updatedUser)
   }
 
-  async updateEmail(userId: string, { email, currentPassword }: UpdateEmailInput): Promise<PublicUser> {
+  async updateEmail(userId: string, { email, currentPassword }: UpdateEmailInput): Promise<User> {
     const existingUser = await this.userRepository.findById(userId)
     if (existingUser === null) {
       throw new UserNotFoundError()
@@ -105,7 +105,7 @@ export class UsersService {
 
     const normalizedEmail = normalizeEmail(email)
     if (normalizedEmail === existingUser.email) {
-      return this.toPublicView(existingUser)
+      return this.toUser(existingUser)
     }
 
     const emailOwner = await this.userRepository.findByEmail(normalizedEmail)
@@ -117,7 +117,7 @@ export class UsersService {
     if (updatedUser === null) {
       throw new UserNotFoundError()
     }
-    return this.toPublicView(updatedUser)
+    return this.toUser(updatedUser)
   }
 
   async verifyCredentials({ email, password }: VerifyCredentialsInput): Promise<UserRecord | null> {
@@ -130,17 +130,17 @@ export class UsersService {
     return passwordMatches ? userRecord : null
   }
 
-  async findPublicUserById(userId: string): Promise<PublicUser | null> {
+  async findUserById(userId: string): Promise<User | null> {
     const userRecord = await this.userRepository.findById(userId)
-    return userRecord === null ? null : this.toPublicView(userRecord)
+    return userRecord === null ? null : this.toUser(userRecord)
   }
 
-  async findPublicUsersByIds(userIds: readonly string[]): Promise<PublicUser[]> {
+  async findUsersByIds(userIds: readonly string[]): Promise<User[]> {
     const userRecords = await this.userRepository.findByIds(userIds)
-    return userRecords.map((userRecord) => this.toPublicView(userRecord))
+    return userRecords.map((userRecord) => this.toUser(userRecord))
   }
 
-  async resolveExistingUsersByEmails(emails: readonly string[]): Promise<PublicUser[]> {
+  async resolveExistingUsersByEmails(emails: readonly string[]): Promise<User[]> {
     const normalizedByOriginal = emails.map((email) => ({
       original: email,
       normalized: normalizeEmail(email),
@@ -158,6 +158,6 @@ export class UsersService {
       throw new UnknownParticipantEmailsError(unknownEmails)
     }
 
-    return foundUsers.map((foundUser) => this.toPublicView(foundUser))
+    return foundUsers.map((foundUser) => this.toUser(foundUser))
   }
 }

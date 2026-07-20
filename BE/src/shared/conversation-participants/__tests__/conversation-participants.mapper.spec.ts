@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { ConversationParticipantsMapper } from '../conversation-participants.mapper.js'
-import type { PublicUser } from '../../../modules/users/types/user-public-view.js'
+import type { User } from '../../../modules/users/types/user.js'
 
-const creator: PublicUser = { id: 'user-b', email: 'b@example.com', firstName: 'Bea', lastName: 'Baxter', avatarUrl: null }
-const alice: PublicUser = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams', avatarUrl: null }
-const cleo: PublicUser = { id: 'user-c', email: 'c@example.com', firstName: 'Cleo', lastName: 'Cole', avatarUrl: null }
+const creator: User = { id: 'user-b', email: 'b@example.com', firstName: 'Bea', lastName: 'Baxter', avatarUrl: null }
+const alice: User = { id: 'user-a', email: 'a@example.com', firstName: 'Alice', lastName: 'Adams', avatarUrl: null }
+const cleo: User = { id: 'user-c', email: 'c@example.com', firstName: 'Cleo', lastName: 'Cole', avatarUrl: null }
 
 const mapper = new ConversationParticipantsMapper()
 

@@ -1,5 +1,6 @@
 import type {
   AuthResponse,
+  AvatarResult,
   AvatarUploadTicket,
   ConversationsResponse,
   CreateConversationResponse,
@@ -269,6 +270,15 @@ function parseUploadFields(value: unknown): Record<string, string> {
     fields[fieldName] = fieldValue
   }
   return fields
+}
+
+export function parseAvatarResult(value: unknown): AvatarResult {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('avatarResult')
+  }
+  return {
+    avatarUrl: readNullableString(value, 'avatarUrl', 'avatarResult'),
+  }
 }
 
 export function parseAvatarUploadTicket(value: unknown): AvatarUploadTicket {

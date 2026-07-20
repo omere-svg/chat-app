@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { DeleteObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
@@ -22,6 +22,7 @@ function isNotFound(error: unknown): boolean {
 
 @Injectable()
 export class S3ObjectStorage implements ObjectStorage {
+  private readonly logger = new Logger(S3ObjectStorage.name)
   private readonly client: S3Client
   private readonly bucket: string
 
@@ -70,7 +71,11 @@ export class S3ObjectStorage implements ObjectStorage {
     }
   }
 
-  async deleteObject(key: string): Promise<void> {
-    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
+  async deleteObjectQuietly(key: string): Promise<void> {
+    try {
+      await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
+    } catch (error) {
+      this.logger.warn(`Failed to delete object ${key}: ${String(error)}`)
+    }
   }
 }

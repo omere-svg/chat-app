@@ -8,7 +8,7 @@ import type {
   ConversationCreatedResponse,
   ConversationListResponse,
 } from './types/conversation-responses.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
 
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)
@@ -20,7 +20,7 @@ export class ConversationsController {
 
   @Get()
   async listConversations(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
   ): Promise<ConversationListResponse> {
     const conversations = await this.listConversationsOrchestrator.listForUser(currentUser.id)
     return { conversations }
@@ -29,7 +29,7 @@ export class ConversationsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createConversation(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
     @Body() createConversationDto: CreateConversationDto,
   ): Promise<ConversationCreatedResponse> {
     const conversation = await this.createConversationOrchestrator.createFromDto(

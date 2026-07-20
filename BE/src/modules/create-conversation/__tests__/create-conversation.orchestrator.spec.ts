@@ -6,13 +6,13 @@ import type { ConversationsService } from '../../conversations/conversations.ser
 import type { UsersService } from '../../users/users.service.js'
 import type { ConversationRecord } from '../../conversations/types/conversation.entity.js'
 import type { CreateConversationDto } from '../../conversations/DTO/create-conversation.dto.js'
-import type { PublicUser } from '../../users/types/user-public-view.js'
+import type { User } from '../../users/types/user.js'
 
-const creator: PublicUser = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One', avatarUrl: null }
-const invitee: PublicUser = { id: 'user-2', email: 'invitee@example.com', firstName: 'Invitee', lastName: 'Two', avatarUrl: null }
+const creator: User = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One', avatarUrl: null }
+const invitee: User = { id: 'user-2', email: 'invitee@example.com', firstName: 'Invitee', lastName: 'Two', avatarUrl: null }
 const createDto = { participantEmails: ['invitee@example.com'] } as CreateConversationDto
 
-function buildOrchestrator(creatorLookup: PublicUser | null): {
+function buildOrchestrator(creatorLookup: User | null): {
   orchestrator: CreateConversationOrchestrator
   create: ReturnType<typeof vi.fn>
 } {
@@ -31,7 +31,7 @@ function buildOrchestrator(creatorLookup: PublicUser | null): {
   const conversationsService = { create } as unknown as ConversationsService
   const usersService = {
     resolveExistingUsersByEmails: vi.fn().mockResolvedValue([invitee]),
-    findPublicUserById: vi.fn().mockResolvedValue(creatorLookup),
+    findUserById: vi.fn().mockResolvedValue(creatorLookup),
   } as unknown as UsersService
 
   return {

@@ -8,7 +8,7 @@ import {
 } from '../conversations/conversation.mapper.js'
 import type { ConversationPreview } from '../conversations/types/conversation-preview.js'
 import type { ConversationRecord } from '../conversations/types/conversation.entity.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
 
 @Injectable()
 export class ListConversationsOrchestrator {
@@ -29,11 +29,11 @@ export class ListConversationsOrchestrator {
 
   private buildPreview(
     conversation: ConversationRecord,
-    usersById: Map<string, PublicUser>,
+    usersById: Map<string, User>,
   ): ConversationPreview {
     const participants = conversation.participantIds
       .map((participantId) => usersById.get(participantId))
-      .filter((participant): participant is PublicUser => participant !== undefined)
+      .filter((participant): participant is User => participant !== undefined)
 
     const preview = toConversationPreview(
       conversation,
@@ -51,7 +51,7 @@ export class ListConversationsOrchestrator {
 
   private async resolveParticipants(
     conversations: readonly ConversationRecord[],
-  ): Promise<Map<string, PublicUser>> {
+  ): Promise<Map<string, User>> {
     const participantIds = new Set<string>()
     for (const conversation of conversations) {
       for (const participantId of conversation.participantIds) {
@@ -59,12 +59,12 @@ export class ListConversationsOrchestrator {
       }
     }
 
-    const usersById = new Map<string, PublicUser>()
+    const usersById = new Map<string, User>()
     if (participantIds.size === 0) {
       return usersById
     }
 
-    const users = await this.usersService.findPublicUsersByIds([...participantIds])
+    const users = await this.usersService.findUsersByIds([...participantIds])
     for (const user of users) {
       usersById.set(user.id, user)
     }

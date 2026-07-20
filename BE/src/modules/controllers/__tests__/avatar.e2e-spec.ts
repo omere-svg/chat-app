@@ -32,7 +32,7 @@ class FakeObjectStorage implements ObjectStorage {
     return Promise.resolve(this.objects.get(key) ?? null)
   }
 
-  deleteObject(key: string): Promise<void> {
+  deleteObjectQuietly(key: string): Promise<void> {
     this.objects.delete(key)
     return Promise.resolve()
   }

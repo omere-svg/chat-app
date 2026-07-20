@@ -22,7 +22,7 @@ import type {
   KnowledgeDocumentListResponse,
   KnowledgeDocumentResponse,
 } from './types/knowledge-document-responses.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
 
 @Controller('knowledge/documents')
 @UseGuards(JwtAuthGuard)
@@ -37,7 +37,7 @@ export class KnowledgeDocumentsController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: UPLOAD_BUFFER_LIMIT_BYTES } }))
   async uploadDocument(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
     @UploadedFile() file: UploadedKnowledgeFile | undefined,
   ): Promise<KnowledgeDocumentResponse> {
     const document = await this.uploadDocumentOrchestrator.upload(currentUser.id, file)
@@ -46,7 +46,7 @@ export class KnowledgeDocumentsController {
 
   @Get()
   async listDocuments(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
   ): Promise<KnowledgeDocumentListResponse> {
     const documents = await this.listDocumentsOrchestrator.list(currentUser.id)
     return { documents }
@@ -55,7 +55,7 @@ export class KnowledgeDocumentsController {
   @Delete(':documentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteDocument(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
     @Param('documentId') documentId: string,
   ): Promise<void> {
     await this.deleteDocumentOrchestrator.delete(currentUser.id, documentId)

@@ -5,7 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { UsersService } from '../users/users.service.js'
 import { TokenOwnerNotFoundError } from './errors/token-owner-not-found.error.js'
 import type { AppEnvironment } from '../../config/environment.types.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
 import type { AccessTokenClaims } from './types/access-token-claims.js'
 
 @Injectable()
@@ -21,13 +21,13 @@ export class JwtAccessTokenStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate(claims: AccessTokenClaims): Promise<PublicUser> {
-    const publicUser = await this.usersService.findPublicUserById(claims.sub)
+  async validate(claims: AccessTokenClaims): Promise<User> {
+    const user = await this.usersService.findUserById(claims.sub)
 
-    if (publicUser === null) {
+    if (user === null) {
       throw new TokenOwnerNotFoundError()
     }
 
-    return publicUser
+    return user
   }
 }

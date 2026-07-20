@@ -10,7 +10,7 @@ import { SendMessageDto } from '../messages/DTO/send-message.dto.js'
 import type { Response } from 'express'
 import type { ConversationRecord } from '../conversations/types/conversation.entity.js'
 import type { MessagePageResponse } from '../messages/types/message-service.types.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
 
 @Controller('conversations/:conversationId/messages')
 @UseGuards(JwtAuthGuard, ConversationParticipantGuard)
@@ -30,7 +30,7 @@ export class MessagesController {
 
   @Post()
   sendMessage(
-    @CurrentUser() currentUser: PublicUser,
+    @CurrentUser() currentUser: User,
     @CurrentConversation() conversation: ConversationRecord,
     @Body() sendMessageDto: SendMessageDto,
     @Headers('x-simulate-failure') simulateFailureHeader: string | undefined,

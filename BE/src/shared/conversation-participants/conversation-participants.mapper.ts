@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { formatFullName } from '../../modules/users/user.mapper.js'
-import type { PublicUser } from '../../modules/users/types/user-public-view.js'
+import type { User } from '../../modules/users/types/user.js'
 import type { ShapedConversationParticipants } from './types/shaped-conversation-participants.js'
 
-function compareByIdAscending(first: PublicUser, second: PublicUser): number {
+function compareByIdAscending(first: User, second: User): number {
   if (first.id < second.id) {
     return -1
   }
@@ -16,11 +16,11 @@ function compareByIdAscending(first: PublicUser, second: PublicUser): number {
 @Injectable()
 export class ConversationParticipantsMapper {
   shape(
-    creator: PublicUser,
-    invitedParticipants: PublicUser[],
+    creator: User,
+    invitedParticipants: User[],
     requestedTitle: string | undefined,
   ): ShapedConversationParticipants {
-    const participantsById = new Map<string, PublicUser>()
+    const participantsById = new Map<string, User>()
     for (const participant of [creator, ...invitedParticipants]) {
       participantsById.set(participant.id, participant)
     }
@@ -37,7 +37,7 @@ export class ConversationParticipantsMapper {
     }
   }
 
-  deriveTitle(participants: PublicUser[]): string {
+  deriveTitle(participants: User[]): string {
     return [...participants]
       .sort(compareByIdAscending)
       .map((participant) => formatFullName(participant))

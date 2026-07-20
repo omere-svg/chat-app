@@ -14,7 +14,7 @@ import {
 import type { ConversationRecord } from '../conversations/types/conversation.entity.js'
 import type { ConversationPreview } from '../conversations/types/conversation-preview.js'
 import type { CreateConversationDto } from '../conversations/DTO/create-conversation.dto.js'
-import type { PublicUser } from '../users/types/user-public-view.js'
+import type { User } from '../users/types/user.js'
 
 @Injectable()
 export class CreateConversationOrchestrator {
@@ -46,7 +46,7 @@ export class CreateConversationOrchestrator {
       createConversationDto.participantEmails,
     )
 
-    const creator = await this.usersService.findPublicUserById(creatorUserId)
+    const creator = await this.usersService.findUserById(creatorUserId)
     if (creator === null) {
       throw new CreatorNotFoundError()
     }
@@ -95,7 +95,7 @@ export class CreateConversationOrchestrator {
     requestedTitle: string | undefined,
     defaultTitle: string,
   ): Promise<ConversationPreview> {
-    const creator = await this.usersService.findPublicUserById(creatorUserId)
+    const creator = await this.usersService.findUserById(creatorUserId)
     if (creator === null) {
       throw new CreatorNotFoundError()
     }
@@ -112,16 +112,16 @@ export class CreateConversationOrchestrator {
 
   private buildPreview(
     conversation: ConversationRecord,
-    knownUsers: readonly PublicUser[],
+    knownUsers: readonly User[],
   ): ConversationPreview {
-    const usersById = new Map<string, PublicUser>()
+    const usersById = new Map<string, User>()
     for (const user of knownUsers) {
       usersById.set(user.id, user)
     }
 
     const participants = conversation.participantIds
       .map((participantId) => usersById.get(participantId))
-      .filter((participant): participant is PublicUser => participant !== undefined)
+      .filter((participant): participant is User => participant !== undefined)
       .map(toConversationParticipantView)
 
     return toConversationPreview(conversation, participants)
