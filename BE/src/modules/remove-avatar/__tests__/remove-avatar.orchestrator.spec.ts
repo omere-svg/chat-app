@@ -21,6 +21,7 @@ function buildUserRecord(previousKey: string | null): UserRecord {
     firstName: 'Ada',
     lastName: 'Lovelace',
     avatar: previousKey === null ? null : { srcUrl: null, key: previousKey },
+    previousEmails: [],
   }
 }
 
