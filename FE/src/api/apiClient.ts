@@ -5,10 +5,13 @@ import {
   parseAuthResponse,
   parseAvatarResult,
   parseAvatarUploadTicket,
+  parseConfirmEmailChangeResponse,
   parseConversationsResponse,
   parseCreateConversationResponse,
   parseKnowledgeDocumentsResponse,
   parseMessagesResponse,
+  parsePreviousEmailsResponse,
+  parseRequestEmailChangeResult,
   parseSendMessageResponse,
   parseUploadKnowledgeDocumentResponse,
   parseUserResponse,
@@ -19,16 +22,19 @@ import type {
   AuthResponse,
   AvatarResult,
   AvatarUploadTicket,
+  ConfirmEmailChangeRequest,
+  ConfirmEmailChangeResponse,
   ConversationsResponse,
   CreateConversationRequest,
   CreateConversationResponse,
   KnowledgeDocumentsResponse,
   LoginRequest,
   MessagesResponse,
+  RequestEmailChangeRequest,
+  RequestEmailChangeResult,
   SendMessageRequest,
   SendMessageResponse,
   SignupRequest,
-  UpdateEmailRequest,
   UpdateProfileRequest,
   UploadKnowledgeDocumentResponse,
 } from '../types/api.ts'
@@ -94,9 +100,25 @@ class ApiClient {
     })
   }
 
-  async updateEmail(request: UpdateEmailRequest): Promise<User> {
-    return this.request(endpoints.updateEmail, parseUserResponse, {
-      method: 'PATCH',
+  async getPreviousEmails(): Promise<string[]> {
+    const response = await this.request(endpoints.previousEmails, parsePreviousEmailsResponse)
+    return response.previousEmails
+  }
+
+  async requestEmailChange(
+    request: RequestEmailChangeRequest,
+  ): Promise<RequestEmailChangeResult> {
+    return this.request(endpoints.emailChangeRequest, parseRequestEmailChangeResult, {
+      method: 'POST',
+      body: request,
+    })
+  }
+
+  async confirmEmailChange(
+    request: ConfirmEmailChangeRequest,
+  ): Promise<ConfirmEmailChangeResponse> {
+    return this.request(endpoints.emailChangeConfirm, parseConfirmEmailChangeResponse, {
+      method: 'POST',
       body: request,
     })
   }

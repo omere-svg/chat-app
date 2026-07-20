@@ -2,14 +2,18 @@ import type {
   AuthResponse,
   AvatarResult,
   AvatarUploadTicket,
+  ConfirmEmailChangeResponse,
   ConversationsResponse,
   CreateConversationResponse,
   KnowledgeDocument,
   KnowledgeDocumentsResponse,
   MessagesResponse,
+  PreviousEmailsResponse,
+  RequestEmailChangeResult,
   SendMessageResponse,
   UploadKnowledgeDocumentResponse,
 } from '../types/api.ts'
+import { EMAIL_CHANGE_REQUEST_STATUS } from './constants.ts'
 import type {
   Citation,
   ConversationParticipant,
@@ -256,6 +260,32 @@ export function parseAuthResponse(value: unknown): AuthResponse {
 
 export function parseUserResponse(value: unknown): User {
   return parseUser(value)
+}
+
+export function parsePreviousEmailsResponse(value: unknown): PreviousEmailsResponse {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('previousEmailsResponse')
+  }
+  return { previousEmails: readStringArray(value, 'previousEmails', 'previousEmailsResponse') }
+}
+
+export function parseRequestEmailChangeResult(value: unknown): RequestEmailChangeResult {
+  if (!isRecord(value) || value.status !== EMAIL_CHANGE_REQUEST_STATUS) {
+    throw new MalformedResponseError('requestEmailChangeResult.status')
+  }
+  return { status: EMAIL_CHANGE_REQUEST_STATUS }
+}
+
+export function parseConfirmEmailChangeResponse(
+  value: unknown,
+): ConfirmEmailChangeResponse {
+  if (!isRecord(value)) {
+    throw new MalformedResponseError('user')
+  }
+  return {
+    ...parseUser(value),
+    email: readString(value, 'email', 'user'),
+  }
 }
 
 function parseUploadFields(value: unknown): Record<string, string> {
