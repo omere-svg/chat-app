@@ -1,4 +1,5 @@
-import type { UserRecord, UserUpdate } from './types/user.entity.js'
+import type { ConfirmedEmailChange, UserRecord, UserUpdate } from './types/user.entity.js'
+import type { ConfirmedEmailChangeResult } from './types/confirmed-email-change-result.js'
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY')
 
@@ -10,4 +11,5 @@ export interface UserRepository {
   findByIds(userIds: readonly string[]): Promise<UserRecord[]>
   insert(userRecord: UserRecord): Promise<UserRecord>
   update(userId: string, patch: UserUpdate): Promise<UserRecord | null>
+  applyConfirmedEmailChange(change: ConfirmedEmailChange): Promise<ConfirmedEmailChangeResult>
 }

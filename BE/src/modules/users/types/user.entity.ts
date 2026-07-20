@@ -7,6 +7,12 @@ export interface UserRecord {
   firstName: string
   lastName: string
   avatar: StoredAvatar | null
+  previousEmails: string[]
 }
 
-export type UserUpdate = Partial<Pick<UserRecord, 'firstName' | 'lastName' | 'email' | 'avatar'>>
+export type UserUpdate = Partial<Pick<UserRecord, 'firstName' | 'lastName' | 'avatar'>>
+
+export interface ConfirmedEmailChange {
+  userId: string
+  newEmail: string
+}

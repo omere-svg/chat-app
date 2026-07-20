@@ -14,8 +14,3 @@ export interface UpdateNameInput {
   firstName: string
   lastName: string
 }
-
-export interface UpdateEmailInput {
-  email: string
-  currentPassword: string
-}

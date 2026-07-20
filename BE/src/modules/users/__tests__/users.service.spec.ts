@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { UsersService } from '../users.service.js'
 import { UserNotFoundError } from '../errors/user-not-found.error.js'
-import { IncorrectCurrentPasswordError } from '../errors/incorrect-current-password.error.js'
 import { EmailAlreadyRegisteredError } from '../errors/email-already-registered.error.js'
+import { MAX_PREVIOUS_EMAILS } from '../constants.js'
 import type { PasswordHasher } from '../password-hasher.js'
 import type { UserRepository } from '../user.repository.js'
-import type { UserRecord, UserUpdate } from '../types/user.entity.js'
+import type { ConfirmedEmailChange, UserRecord, UserUpdate } from '../types/user.entity.js'
 
 const EXISTING_USER: UserRecord = {
   id: 'user-1',
@@ -14,6 +14,7 @@ const EXISTING_USER: UserRecord = {
   firstName: 'Old',
   lastName: 'Name',
   avatar: null,
+  previousEmails: [],
 }
 
 function buildRepository(): UserRepository {
@@ -28,6 +29,7 @@ function buildRepository(): UserRepository {
         firstName: 'Taken',
         lastName: 'Owner',
         avatar: null,
+        previousEmails: [],
       },
     ],
   ])
@@ -53,6 +55,27 @@ function buildRepository(): UserRepository {
       users.set(userId, updated)
       return Promise.resolve(updated)
     },
+    applyConfirmedEmailChange: ({ userId, newEmail }: ConfirmedEmailChange) => {
+      const existing = users.get(userId)
+      if (existing === undefined) {
+        return Promise.resolve({ outcome: 'not-found' })
+      }
+      if (existing.email === newEmail) {
+        return Promise.resolve({ outcome: 'user', user: existing })
+      }
+      const owner = [...users.values()].find(
+        (user) => user.email === newEmail && user.id !== userId,
+      )
+      if (owner !== undefined) {
+        return Promise.resolve({ outcome: 'email-taken' })
+      }
+      const previousEmails = [...existing.previousEmails, existing.email].slice(
+        -MAX_PREVIOUS_EMAILS,
+      )
+      const updated = { ...existing, email: newEmail, previousEmails }
+      users.set(userId, updated)
+      return Promise.resolve({ outcome: 'user', user: updated })
+    },
   }
 }
 
@@ -61,7 +84,7 @@ const passwordHasher: PasswordHasher = {
   verify: (plain: string, hash: string) => Promise.resolve(hash === `hash:${plain}`),
 }
 
-describe('UsersService profile updates', () => {
+describe('UsersService', () => {
   let usersService: UsersService
 
   beforeEach(() => {
@@ -86,41 +109,86 @@ describe('UsersService profile updates', () => {
     })
   })
 
-  describe('updateEmail', () => {
-    it('changes the email when the current password is correct and the email is free', async () => {
-      const result = await usersService.updateEmail('user-1', {
-        email: 'New@Example.com',
-        currentPassword: 'correct-password',
-      })
+  describe('applyConfirmedEmailChange', () => {
+    it('sets the new email and pushes the old one onto previousEmails', async () => {
+      const result = await usersService.applyConfirmedEmailChange('user-1', 'New@Example.com')
 
       expect(result.email).toBe('new@example.com')
+      expect(await usersService.getPreviousEmails('user-1')).toEqual(['old@example.com'])
     })
 
-    it('rejects a wrong current password with Unauthorized', async () => {
-      await expect(
-        usersService.updateEmail('user-1', {
-          email: 'new@example.com',
-          currentPassword: 'wrong-password',
-        }),
-      ).rejects.toBeInstanceOf(IncorrectCurrentPasswordError)
+    it('is an idempotent no-op when the email already equals the target (replay)', async () => {
+      await usersService.applyConfirmedEmailChange('user-1', 'new@example.com')
+      const replay = await usersService.applyConfirmedEmailChange('user-1', 'new@example.com')
+
+      expect(replay.email).toBe('new@example.com')
+      expect(await usersService.getPreviousEmails('user-1')).toEqual(['old@example.com'])
     })
 
-    it('rejects an email already registered to another account with Conflict', async () => {
+    it('rejects an email already registered to another account', async () => {
       await expect(
-        usersService.updateEmail('user-1', {
-          email: 'taken@example.com',
-          currentPassword: 'correct-password',
-        }),
+        usersService.applyConfirmedEmailChange('user-1', 'taken@example.com'),
       ).rejects.toBeInstanceOf(EmailAlreadyRegisteredError)
     })
 
-    it('is a no-op that returns the user when the email is unchanged', async () => {
-      const result = await usersService.updateEmail('user-1', {
-        email: 'old@example.com',
-        currentPassword: 'correct-password',
-      })
+    it('keeps a raw FIFO window of at most 10 previous emails including duplicates', async () => {
+      for (let index = 1; index <= 12; index++) {
+        await usersService.applyConfirmedEmailChange('user-1', `email-${index.toString()}@example.com`)
+      }
+      await usersService.applyConfirmedEmailChange('user-1', 'old@example.com')
 
-      expect(result.email).toBe('old@example.com')
+      const previousEmails = await usersService.getPreviousEmails('user-1')
+      expect(previousEmails).toHaveLength(MAX_PREVIOUS_EMAILS)
+      expect(previousEmails.at(-1)).toBe('email-12@example.com')
+      expect(previousEmails).not.toContain('old@example.com')
+    })
+
+    it('maps an email-taken repository outcome without inspecting Mongo errors', async () => {
+      const racyRepository = {
+        ...buildRepository(),
+        findByEmail: () => Promise.resolve(null),
+        applyConfirmedEmailChange: () => Promise.resolve({ outcome: 'email-taken' as const }),
+      } as unknown as UserRepository
+      const service = new UsersService(racyRepository, passwordHasher)
+
+      await expect(
+        service.applyConfirmedEmailChange('user-1', 'free@example.com'),
+      ).rejects.toBeInstanceOf(EmailAlreadyRegisteredError)
+    })
+
+    it('throws NotFound for an unknown user', async () => {
+      await expect(
+        usersService.applyConfirmedEmailChange('ghost', 'x@example.com'),
+      ).rejects.toBeInstanceOf(UserNotFoundError)
+    })
+
+    it('throws NotFound before checking ownership when an unknown user targets a taken email', async () => {
+      await expect(
+        usersService.applyConfirmedEmailChange('ghost', 'taken@example.com'),
+      ).rejects.toBeInstanceOf(UserNotFoundError)
+    })
+  })
+
+  describe('getPreviousEmails', () => {
+    it('throws NotFound for an unknown user', async () => {
+      await expect(usersService.getPreviousEmails('ghost')).rejects.toBeInstanceOf(
+        UserNotFoundError,
+      )
+    })
+  })
+
+  describe('resolveExistingUsersByEmails', () => {
+    it('matches a normalized request to a mixed-case stored email', async () => {
+      const repository = {
+        ...buildRepository(),
+        findByEmails: () =>
+          Promise.resolve([{ ...EXISTING_USER, email: 'Alice@Example.com' }]),
+      } as UserRepository
+      const service = new UsersService(repository, passwordHasher)
+
+      const users = await service.resolveExistingUsersByEmails(['alice@example.com'])
+
+      expect(users).toMatchObject([{ id: EXISTING_USER.id, email: 'Alice@Example.com' }])
     })
   })
 })

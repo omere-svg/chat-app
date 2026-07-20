@@ -3,8 +3,11 @@ import { InjectModel } from '@nestjs/mongoose'
 import type { Model } from 'mongoose'
 import { UserDocument } from './user.schema.js'
 import { toUserRecord } from './user.mapper.js'
+import { MAX_PREVIOUS_EMAILS, USER_EMAIL_COLLATION } from './constants.js'
+import { isDuplicateKeyError } from '../../shared/database/mongo-errors.js'
 import type { UserRepository } from './user.repository.js'
-import type { UserRecord, UserUpdate } from './types/user.entity.js'
+import type { ConfirmedEmailChange, UserRecord, UserUpdate } from './types/user.entity.js'
+import type { ConfirmedEmailChangeResult } from './types/confirmed-email-change-result.js'
 
 @Injectable()
 export class MongoUserRepository implements UserRepository {
@@ -22,13 +25,17 @@ export class MongoUserRepository implements UserRepository {
   }
 
   async findByEmail(normalizedEmail: string): Promise<UserRecord | null> {
-    const document = await this.userModel.findOne({ email: normalizedEmail }).lean<UserDocument | null>()
+    const document = await this.userModel
+      .findOne({ email: normalizedEmail })
+      .collation(USER_EMAIL_COLLATION)
+      .lean<UserDocument | null>()
     return document === null ? null : toUserRecord(document)
   }
 
   async findByEmails(normalizedEmails: readonly string[]): Promise<UserRecord[]> {
     const documents = await this.userModel
       .find({ email: { $in: [...normalizedEmails] } })
+      .collation(USER_EMAIL_COLLATION)
       .lean<UserDocument[]>()
     return documents.map(toUserRecord)
   }
@@ -48,6 +55,7 @@ export class MongoUserRepository implements UserRepository {
       firstName: userRecord.firstName,
       lastName: userRecord.lastName,
       avatar: userRecord.avatar,
+      previousEmails: userRecord.previousEmails,
       createdAt: new Date(),
     })
     return toUserRecord(created.toObject())
@@ -58,5 +66,52 @@ export class MongoUserRepository implements UserRepository {
       .findByIdAndUpdate(userId, { $set: patch }, { returnDocument: 'after' })
       .lean<UserDocument | null>()
     return document === null ? null : toUserRecord(document)
+  }
+
+  async applyConfirmedEmailChange({
+    userId,
+    newEmail,
+  }: ConfirmedEmailChange): Promise<ConfirmedEmailChangeResult> {
+    try {
+      const document = await this.userModel
+        .findOneAndUpdate(
+          { _id: userId },
+          [
+            {
+              $set: {
+                previousEmails: {
+                  $cond: [
+                    { $eq: ['$email', newEmail] },
+                    { $ifNull: ['$previousEmails', []] },
+                    {
+                      $slice: [
+                        {
+                          $concatArrays: [{ $ifNull: ['$previousEmails', []] }, ['$email']],
+                        },
+                        -MAX_PREVIOUS_EMAILS,
+                      ],
+                    },
+                  ],
+                },
+                email: newEmail,
+              },
+            },
+          ],
+          {
+            returnDocument: 'after',
+            updatePipeline: true,
+            collation: USER_EMAIL_COLLATION,
+          },
+        )
+        .lean<UserDocument | null>()
+      return document === null
+        ? { outcome: 'not-found' }
+        : { outcome: 'user', user: toUserRecord(document) }
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        return { outcome: 'email-taken' }
+      }
+      throw error
+    }
   }
 }
