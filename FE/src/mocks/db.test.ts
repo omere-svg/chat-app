@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   getUserConversations,
+  requestEmailChange,
   resetDb,
   updateUserName,
 } from './db.ts'
@@ -24,5 +25,21 @@ describe('mock db direct-conversation titles', () => {
     const aliceBob = conversations.find((c) => c.id === 'conv-alice-bob')
 
     expect(aliceBob?.title).toBe('Alicia Andrews & Bob Brown')
+  })
+})
+
+describe('mock db email change requests', () => {
+  it('rejects a malformed email', () => {
+    expect(requestEmailChange('user-alice', 'not-an-email')).toEqual({
+      error: 'VALIDATION_ERROR',
+    })
+  })
+
+  it('rejects an email over 254 characters', () => {
+    const overlongEmail = `${'a'.repeat(243)}@example.com`
+
+    expect(requestEmailChange('user-alice', overlongEmail)).toEqual({
+      error: 'VALIDATION_ERROR',
+    })
   })
 })

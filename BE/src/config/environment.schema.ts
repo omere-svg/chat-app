@@ -2,6 +2,10 @@ import { Type, plainToInstance } from 'class-transformer'
 import { IsIn, IsInt, IsOptional, IsString, IsUrl, Matches, Max, Min, MinLength, validateSync } from 'class-validator'
 import type { ValidationError } from 'class-validator'
 import { DEFAULT_ATLAS_VECTOR_INDEX } from '../modules/knowledge-rag/atlas/vector-index.config.js'
+import {
+  DEFAULT_EMAIL_CHANGE_JWT_EXPIRES_IN,
+  REQUIRED_EMAIL_INTEGRATION_KEYS,
+} from './environment.constants.js'
 import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
 
 const MIN_JWT_SECRET_LENGTH = 32
@@ -43,6 +47,17 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @Min(MIN_JWT_EXPIRY_SECONDS)
   @Max(MAX_JWT_EXPIRY_SECONDS)
   JWT_EXPIRES_IN!: number
+
+  @IsString()
+  @MinLength(MIN_JWT_SECRET_LENGTH)
+  EMAIL_CHANGE_JWT_SECRET!: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(MIN_JWT_EXPIRY_SECONDS)
+  @Max(MAX_JWT_EXPIRY_SECONDS)
+  EMAIL_CHANGE_JWT_EXPIRES_IN!: number
 
   @IsString()
   @Matches(/^mongodb(\+srv)?:\/\//, {
@@ -96,6 +111,14 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @IsOptional()
   @IsUrl({ require_tld: false })
   AVATAR_CDN_BASE_URL!: string
+
+  @IsOptional()
+  @IsString()
+  SES_REGION!: string
+
+  @IsOptional()
+  @IsString()
+  SES_SOURCE_EMAIL!: string
 }
 
 const REQUIRED_STORAGE_KEYS: readonly (keyof AppEnvironment)[] = [
@@ -111,6 +134,17 @@ function assertStorageConfiguredInProduction(environment: AppEnvironment): void 
   }
 
   const missingKeys = REQUIRED_STORAGE_KEYS.filter((key) => environment[key] === '')
+  if (missingKeys.length > 0) {
+    throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
+  }
+}
+
+function assertEmailIntegrationConfiguredInProduction(environment: AppEnvironment): void {
+  if (environment.NODE_ENV !== 'production') {
+    return
+  }
+
+  const missingKeys = REQUIRED_EMAIL_INTEGRATION_KEYS.filter((key) => environment[key] === '')
   if (missingKeys.length > 0) {
     throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
   }
@@ -148,6 +182,9 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     FRONTEND_ORIGIN: candidateEnvironment.FRONTEND_ORIGIN,
     JWT_SECRET: candidateEnvironment.JWT_SECRET,
     JWT_EXPIRES_IN: candidateEnvironment.JWT_EXPIRES_IN,
+    EMAIL_CHANGE_JWT_SECRET: candidateEnvironment.EMAIL_CHANGE_JWT_SECRET,
+    EMAIL_CHANGE_JWT_EXPIRES_IN:
+      candidateEnvironment.EMAIL_CHANGE_JWT_EXPIRES_IN ?? DEFAULT_EMAIL_CHANGE_JWT_EXPIRES_IN,
     MONGO_URI: candidateEnvironment.MONGO_URI,
     OPENAI_API_KEY: candidateEnvironment.OPENAI_API_KEY,
     ASSISTANT_MODEL: candidateEnvironment.ASSISTANT_MODEL ?? DEFAULT_ASSISTANT_MODEL,
@@ -159,9 +196,12 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     AWS_ACCESS_KEY_ID: candidateEnvironment.AWS_ACCESS_KEY_ID ?? '',
     AWS_SECRET_ACCESS_KEY: candidateEnvironment.AWS_SECRET_ACCESS_KEY ?? '',
     AVATAR_CDN_BASE_URL: candidateEnvironment.AVATAR_CDN_BASE_URL ?? '',
+    SES_REGION: candidateEnvironment.SES_REGION ?? '',
+    SES_SOURCE_EMAIL: candidateEnvironment.SES_SOURCE_EMAIL ?? '',
   }
 
   assertStorageConfiguredInProduction(resolvedEnvironment)
+  assertEmailIntegrationConfiguredInProduction(resolvedEnvironment)
 
   return resolvedEnvironment
 }

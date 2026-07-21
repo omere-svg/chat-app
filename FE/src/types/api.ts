@@ -1,4 +1,5 @@
 import type { ConversationPreview, Message, User } from './domain.ts'
+import type { EMAIL_CHANGE_REQUEST_STATUS } from '../api/constants.ts'
 
 export type KnowledgeDocument = {
   id: string
@@ -34,9 +35,24 @@ export type UpdateProfileRequest = {
   lastName: string
 }
 
-export type UpdateEmailRequest = {
+export type RequestEmailChangeRequest = {
+  newEmail: string
+}
+
+export type RequestEmailChangeResult = {
+  status: typeof EMAIL_CHANGE_REQUEST_STATUS
+}
+
+export type ConfirmEmailChangeRequest = {
+  token: string
+}
+
+export type ConfirmEmailChangeResponse = User & {
   email: string
-  currentPassword: string
+}
+
+export type PreviousEmailsResponse = {
+  previousEmails: string[]
 }
 
 export type RequestAvatarUploadRequest = {

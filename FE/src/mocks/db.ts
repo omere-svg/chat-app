@@ -1,4 +1,9 @@
 import type { ApiErrorPayload } from "../types/api.ts";
+import {
+  MOCK_EMAIL_CHANGE_HISTORY_LIMIT,
+  MOCK_EMAIL_CHANGE_TOKEN_PREFIX,
+} from "./constants.ts";
+import { isValidEmail } from "../shared/validation/isValidEmail.ts";
 import { fullName } from "../types/domain.ts";
 import type {
   ConversationParticipant,
@@ -6,6 +11,11 @@ import type {
   Message,
   User,
 } from "../types/domain.ts";
+import type {
+  EmailChangeTokenPayload,
+  MockConfirmEmailChangeOutcome,
+  MockRequestEmailChangeOutcome,
+} from "./types/emailChange.ts";
 
 type StoredUser = {
   id: string;
@@ -14,6 +24,7 @@ type StoredUser = {
   firstName: string;
   lastName: string;
   avatarKey: string | null;
+  previousEmails: string[];
 };
 
 const SHARED_DEMO_PASSWORD = "password123";
@@ -28,6 +39,7 @@ function buildSeedUsers(): StoredUser[] {
       firstName: "Alice",
       lastName: "Anderson",
       avatarKey: null,
+      previousEmails: [],
     },
     {
       id: "user-bob",
@@ -36,6 +48,7 @@ function buildSeedUsers(): StoredUser[] {
       firstName: "Bob",
       lastName: "Brown",
       avatarKey: null,
+      previousEmails: [],
     },
     {
       id: "user-carol",
@@ -44,6 +57,7 @@ function buildSeedUsers(): StoredUser[] {
       firstName: "Carol",
       lastName: "Clark",
       avatarKey: null,
+      previousEmails: [],
     },
   ];
 }
@@ -237,6 +251,7 @@ export function createUser(input: {
     firstName: input.firstName.trim(),
     lastName: input.lastName.trim(),
     avatarKey: null,
+    previousEmails: [],
   };
   db.users.push(user);
   return { user };
@@ -254,31 +269,79 @@ export function updateUserName(
   return user;
 }
 
-export type UpdateEmailResult =
-  | { user: StoredUser }
-  | { error: "INVALID_CREDENTIALS" | "EMAIL_ALREADY_REGISTERED" };
+function encodeEmailChangeToken(payload: EmailChangeTokenPayload): string {
+  return `${MOCK_EMAIL_CHANGE_TOKEN_PREFIX}${btoa(JSON.stringify(payload))}`;
+}
 
-export function updateUserEmail(
+function decodeEmailChangeToken(token: string): EmailChangeTokenPayload | null {
+  if (!token.startsWith(MOCK_EMAIL_CHANGE_TOKEN_PREFIX)) return null;
+  try {
+    const parsed = JSON.parse(
+      atob(token.slice(MOCK_EMAIL_CHANGE_TOKEN_PREFIX.length)),
+    ) as unknown;
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      typeof (parsed as EmailChangeTokenPayload).userId === "string" &&
+      typeof (parsed as EmailChangeTokenPayload).newEmail === "string"
+    ) {
+      return parsed as EmailChangeTokenPayload;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function isEmailTakenByAnother(email: string, userId: string): boolean {
+  return db.users.some(
+    (candidate) => candidate.email === email && candidate.id !== userId,
+  );
+}
+
+export function requestEmailChange(
   userId: string,
-  email: string,
-  currentPassword: string,
-): UpdateEmailResult {
+  newEmail: string,
+): MockRequestEmailChangeOutcome {
   const user = findUserById(userId);
-  if (!user) return { error: "INVALID_CREDENTIALS" };
-  if (user.password !== currentPassword) {
-    return { error: "INVALID_CREDENTIALS" };
-  }
+  if (!user) return { error: "VALIDATION_ERROR" };
 
-  const normalizedEmail = email.trim().toLowerCase();
-  if (normalizedEmail === user.email) {
-    return { user };
+  const normalizedEmail = newEmail.trim().toLowerCase();
+  if (!isValidEmail(normalizedEmail) || normalizedEmail === user.email) {
+    return { error: "VALIDATION_ERROR" };
   }
-  if (db.users.some((candidate) => candidate.email === normalizedEmail)) {
+  if (isEmailTakenByAnother(normalizedEmail, userId)) {
     return { error: "EMAIL_ALREADY_REGISTERED" };
   }
 
-  user.email = normalizedEmail;
+  return { token: encodeEmailChangeToken({ userId, newEmail: normalizedEmail }) };
+}
+
+export function confirmEmailChange(
+  token: string,
+): MockConfirmEmailChangeOutcome<StoredUser> {
+  const payload = decodeEmailChangeToken(token);
+  if (!payload) return { error: "EMAIL_CHANGE_TOKEN_INVALID" };
+
+  const user = findUserById(payload.userId);
+  if (!user) return { error: "EMAIL_CHANGE_TOKEN_INVALID" };
+  if (payload.newEmail === user.email) {
+    return { user };
+  }
+  if (isEmailTakenByAnother(payload.newEmail, user.id)) {
+    return { error: "EMAIL_ALREADY_REGISTERED" };
+  }
+
+  user.previousEmails = [...user.previousEmails, user.email].slice(
+    -MOCK_EMAIL_CHANGE_HISTORY_LIMIT,
+  );
+  user.email = payload.newEmail;
   return { user };
+}
+
+export function getPreviousEmails(userId: string): string[] | null {
+  const user = findUserById(userId);
+  return user ? user.previousEmails : null;
 }
 
 function deriveDirectTitle(conversation: ConversationPreview): string {

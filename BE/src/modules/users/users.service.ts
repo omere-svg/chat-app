@@ -5,22 +5,17 @@ import { USER_REPOSITORY } from './user.repository.js'
 import { toUser } from './user.mapper.js'
 import { EmailAlreadyRegisteredError } from './errors/email-already-registered.error.js'
 import { UserNotFoundError } from './errors/user-not-found.error.js'
-import { IncorrectCurrentPasswordError } from './errors/incorrect-current-password.error.js'
 import { UnknownParticipantEmailsError } from './errors/unknown-participant-emails.error.js'
+import { normalizeEmail } from '../../shared/validation/normalize-email.js'
 import type { UserRepository } from './user.repository.js'
 import type { User } from './types/user.js'
 import type { StoredAvatar } from './types/stored-avatar.js'
 import type { UserRecord } from './types/user.entity.js'
 import type {
   CreateUserInput,
-  UpdateEmailInput,
   UpdateNameInput,
   VerifyCredentialsInput,
 } from './types/user-service.types.js'
-
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase()
-}
 
 @Injectable()
 export class UsersService {
@@ -49,6 +44,7 @@ export class UsersService {
       firstName: createUserInput.firstName,
       lastName: createUserInput.lastName,
       avatar: null,
+      previousEmails: [],
     }
 
     return this.userRepository.insert(userRecord)
@@ -89,35 +85,35 @@ export class UsersService {
     return this.toUser(updatedUser)
   }
 
-  async updateEmail(userId: string, { email, currentPassword }: UpdateEmailInput): Promise<User> {
-    const existingUser = await this.userRepository.findById(userId)
-    if (existingUser === null) {
-      throw new UserNotFoundError()
-    }
+  async getPreviousEmails(userId: string): Promise<string[]> {
+    const existingUser = await this.getUserRecord(userId)
+    return existingUser.previousEmails
+  }
 
-    const passwordMatches = await this.passwordHasher.verify(
-      currentPassword,
-      existingUser.passwordHash,
-    )
-    if (!passwordMatches) {
-      throw new IncorrectCurrentPasswordError()
-    }
-
-    const normalizedEmail = normalizeEmail(email)
-    if (normalizedEmail === existingUser.email) {
-      return this.toUser(existingUser)
-    }
-
-    const emailOwner = await this.userRepository.findByEmail(normalizedEmail)
-    if (emailOwner !== null) {
+  async assertEmailAvailable(email: string, forUserId: string): Promise<void> {
+    const emailOwner = await this.userRepository.findByEmail(normalizeEmail(email))
+    if (emailOwner !== null && emailOwner.id !== forUserId) {
       throw new EmailAlreadyRegisteredError()
     }
+  }
 
-    const updatedUser = await this.userRepository.update(userId, { email: normalizedEmail })
-    if (updatedUser === null) {
+  async applyConfirmedEmailChange(userId: string, newEmail: string): Promise<User> {
+    await this.getUserRecord(userId)
+
+    const normalizedEmail = normalizeEmail(newEmail)
+    await this.assertEmailAvailable(normalizedEmail, userId)
+
+    const result = await this.userRepository.applyConfirmedEmailChange({
+      userId,
+      newEmail: normalizedEmail,
+    })
+    if (result.outcome === 'not-found') {
       throw new UserNotFoundError()
     }
-    return this.toUser(updatedUser)
+    if (result.outcome === 'email-taken') {
+      throw new EmailAlreadyRegisteredError()
+    }
+    return this.toUser(result.user)
   }
 
   async verifyCredentials({ email, password }: VerifyCredentialsInput): Promise<UserRecord | null> {
@@ -149,7 +145,7 @@ export class UsersService {
     const foundUsers = await this.userRepository.findByEmails(
       normalizedByOriginal.map((entry) => entry.normalized),
     )
-    const foundEmails = new Set(foundUsers.map((user) => user.email))
+    const foundEmails = new Set(foundUsers.map((user) => normalizeEmail(user.email)))
 
     const unknownEmails = normalizedByOriginal
       .filter((entry) => !foundEmails.has(entry.normalized))

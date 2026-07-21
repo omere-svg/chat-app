@@ -14,8 +14,12 @@ import { DeleteDocumentModule } from '../delete-document/delete-document.module.
 import { RequestAvatarUploadModule } from '../request-avatar-upload/request-avatar-upload.module.js'
 import { SetAvatarModule } from '../set-avatar/set-avatar.module.js'
 import { RemoveAvatarModule } from '../remove-avatar/remove-avatar.module.js'
+import { ListPreviousEmailsModule } from '../list-previous-emails/list-previous-emails.module.js'
+import { RequestEmailChangeModule } from '../request-email-change/request-email-change.module.js'
+import { ConfirmEmailChangeModule } from '../confirm-email-change/confirm-email-change.module.js'
 import { AuthController } from './auth.controller.js'
 import { CurrentUserController } from './current-user.controller.js'
+import { EmailChangeController } from './email-change.controller.js'
 import { AvatarController } from './avatar.controller.js'
 import { ConversationsController } from './conversations.controller.js'
 import { MessagesController } from './messages.controller.js'
@@ -39,10 +43,14 @@ import { ConversationParticipantGuard } from './guard/conversation-participant.g
     RequestAvatarUploadModule,
     SetAvatarModule,
     RemoveAvatarModule,
+    ListPreviousEmailsModule,
+    RequestEmailChangeModule,
+    ConfirmEmailChangeModule,
   ],
   controllers: [
     AuthController,
     CurrentUserController,
+    EmailChangeController,
     AvatarController,
     ConversationsController,
     MessagesController,

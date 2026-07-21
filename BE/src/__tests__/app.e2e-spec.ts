@@ -4,11 +4,30 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { ASSISTANT_REPLY_STRATEGY } from '../modules/agent/agent.tokens.js'
 import { FakeAssistantStrategy } from '../modules/agent/fake-assistant.strategy.js'
+import { EMAIL_SENDER } from '../modules/email-sender/email-sender.tokens.js'
+import type { EmailMessage } from '../modules/email-sender/types/email-message.js'
 import type { INestApplication } from '@nestjs/common'
 import type { Server } from 'node:http'
 import { applyGlobalApiContract } from '../app-http-contract.js'
 
 const SEEDED_FOREIGN_CONVERSATION_ID = 'conv-alice-bob'
+
+const sentEmails: EmailMessage[] = []
+const fakeEmailSender = {
+  send: (message: EmailMessage): Promise<void> => {
+    sentEmails.push(message)
+    return Promise.resolve()
+  },
+}
+
+function extractConfirmationToken(recipient: string): string {
+  const message = [...sentEmails].reverse().find((email) => email.to === recipient)
+  const token = message?.textBody.match(/token=([^\s]+)/)?.[1]
+  if (token === undefined) {
+    throw new Error(`No confirmation token was sent to ${recipient}`)
+  }
+  return token
+}
 
 interface SseEvent {
   event: string
@@ -42,6 +61,8 @@ describe('Chat API (e2e)', () => {
     })
       .overrideProvider(ASSISTANT_REPLY_STRATEGY)
       .useClass(FakeAssistantStrategy)
+      .overrideProvider(EMAIL_SENDER)
+      .useValue(fakeEmailSender)
       .compile()
 
     application = moduleRef.createNestApplication()
@@ -75,6 +96,7 @@ describe('Chat API (e2e)', () => {
       })
       expect(response.body.user).not.toHaveProperty('passwordHash')
       expect(response.body.user).not.toHaveProperty('password')
+      expect(response.body.user).not.toHaveProperty('previousEmails')
     })
 
     it('rejects a duplicate email with 409', async () => {
@@ -97,6 +119,8 @@ describe('Chat API (e2e)', () => {
         .set('Authorization', `Bearer ${response.body.token}`)
       expect(meResponse.status).toBe(200)
       expect(meResponse.body.email).toBe(credentials.email)
+      expect(meResponse.body).not.toHaveProperty('previousEmails')
+      expect(response.body.user).not.toHaveProperty('previousEmails')
     })
 
     it('rejects invalid credentials with 401', async () => {
@@ -131,42 +155,6 @@ describe('Chat API (e2e)', () => {
       expect(response.body).toMatchObject({ firstName: 'Nora', lastName: 'Newman' })
     })
 
-    it('changes the email when the current password is correct', async () => {
-      const token = await signUpAndGetToken(httpServer, 'oscar@example.com', 'Oscar')
-
-      const response = await request(httpServer)
-        .patch('/api/me/email')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'oscar.new@example.com', currentPassword: 'password123' })
-
-      expect(response.status).toBe(200)
-      expect(response.body.email).toBe('oscar.new@example.com')
-    })
-
-    it('rejects an email change with a wrong password (401)', async () => {
-      const token = await signUpAndGetToken(httpServer, 'pat@example.com', 'Pat')
-
-      const response = await request(httpServer)
-        .patch('/api/me/email')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'pat.new@example.com', currentPassword: 'not-the-password' })
-
-      expect(response.status).toBe(401)
-      expect(response.body.error.code).toBe('INVALID_CREDENTIALS')
-    })
-
-    it('rejects changing to an already-registered email (409)', async () => {
-      const token = await signUpAndGetToken(httpServer, 'quincy@example.com', 'Quincy')
-
-      const response = await request(httpServer)
-        .patch('/api/me/email')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'bob@example.com', currentPassword: 'password123' })
-
-      expect(response.status).toBe(409)
-      expect(response.body.error.code).toBe('EMAIL_ALREADY_REGISTERED')
-    })
-
     it('requires authentication (401)', async () => {
       const response = await request(httpServer)
         .patch('/api/me/profile')
@@ -199,6 +187,145 @@ describe('Chat API (e2e)', () => {
       )
       expect(conversation.title).toContain('Maximus')
       expect(conversation.title).not.toContain('Rex')
+    })
+  })
+
+  describe('email change (confirmation flow)', () => {
+    it('requests, confirms, swaps the email and records the previous one', async () => {
+      const token = await signUpAndGetToken(httpServer, 'oscar@example.com', 'Oscar')
+
+      const requestResponse = await request(httpServer)
+        .post('/api/me/email-change/request')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newEmail: 'oscar.new@example.com' })
+      expect(requestResponse.status).toBe(202)
+      expect(requestResponse.body.status).toBe('confirmation_sent')
+
+      const confirmationToken = extractConfirmationToken('oscar.new@example.com')
+      const confirmResponse = await request(httpServer)
+        .post('/api/email-change/confirm')
+        .send({ token: confirmationToken })
+      expect(confirmResponse.status).toBe(200)
+      expect(confirmResponse.body.email).toBe('oscar.new@example.com')
+
+      const meResponse = await request(httpServer)
+        .get('/api/me')
+        .set('Authorization', `Bearer ${token}`)
+      expect(meResponse.body.email).toBe('oscar.new@example.com')
+
+      const previousResponse = await request(httpServer)
+        .get('/api/me/previous-emails')
+        .set('Authorization', `Bearer ${token}`)
+      expect(previousResponse.status).toBe(200)
+      expect(previousResponse.body.previousEmails).toEqual(['oscar@example.com'])
+    })
+
+    it('is an idempotent no-op when the same token is confirmed twice', async () => {
+      const token = await signUpAndGetToken(httpServer, 'replay@example.com', 'Replay')
+
+      await request(httpServer)
+        .post('/api/me/email-change/request')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newEmail: 'replay.new@example.com' })
+      const confirmationToken = extractConfirmationToken('replay.new@example.com')
+
+      const first = await request(httpServer)
+        .post('/api/email-change/confirm')
+        .send({ token: confirmationToken })
+      const second = await request(httpServer)
+        .post('/api/email-change/confirm')
+        .send({ token: confirmationToken })
+
+      expect(first.status).toBe(200)
+      expect(second.status).toBe(200)
+      expect(second.body.email).toBe('replay.new@example.com')
+
+      const previousResponse = await request(httpServer)
+        .get('/api/me/previous-emails')
+        .set('Authorization', `Bearer ${token}`)
+      expect(previousResponse.body.previousEmails).toEqual(['replay@example.com'])
+    })
+
+    it('returns the changed email to both concurrent confirmations and records history once', async () => {
+      const token = await signUpAndGetToken(httpServer, 'concurrent@example.com', 'Concurrent')
+
+      await request(httpServer)
+        .post('/api/me/email-change/request')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newEmail: 'concurrent.new@example.com' })
+      const confirmationToken = extractConfirmationToken('concurrent.new@example.com')
+
+      const [first, second] = await Promise.all([
+        request(httpServer).post('/api/email-change/confirm').send({ token: confirmationToken }),
+        request(httpServer).post('/api/email-change/confirm').send({ token: confirmationToken }),
+      ])
+
+      expect(first.status).toBe(200)
+      expect(first.body.email).toBe('concurrent.new@example.com')
+      expect(second.status).toBe(200)
+      expect(second.body.email).toBe('concurrent.new@example.com')
+
+      const previousResponse = await request(httpServer)
+        .get('/api/me/previous-emails')
+        .set('Authorization', `Bearer ${token}`)
+      expect(previousResponse.body.previousEmails).toEqual(['concurrent@example.com'])
+    })
+
+    it('rejects requesting the current email (400)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'pat@example.com', 'Pat')
+
+      const response = await request(httpServer)
+        .post('/api/me/email-change/request')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newEmail: 'pat@example.com' })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('VALIDATION_ERROR')
+    })
+
+    it('rejects requesting an already-registered email (409)', async () => {
+      const token = await signUpAndGetToken(httpServer, 'quincy@example.com', 'Quincy')
+
+      const response = await request(httpServer)
+        .post('/api/me/email-change/request')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newEmail: 'bob@example.com' })
+
+      expect(response.status).toBe(409)
+      expect(response.body.error.code).toBe('EMAIL_ALREADY_REGISTERED')
+    })
+
+    it('requires authentication to request a change (401)', async () => {
+      const response = await request(httpServer)
+        .post('/api/me/email-change/request')
+        .send({ newEmail: 'someone@example.com' })
+
+      expect(response.status).toBe(401)
+    })
+
+    it('rejects confirming an invalid token (400)', async () => {
+      const response = await request(httpServer)
+        .post('/api/email-change/confirm')
+        .send({ token: 'not-a-real-token' })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('EMAIL_CHANGE_TOKEN_INVALID')
+    })
+
+    it.each([{}, { token: '' }, { token: 123 }])(
+      'maps malformed confirmation token bodies to the token domain error',
+      async (body) => {
+        const response = await request(httpServer).post('/api/email-change/confirm').send(body)
+
+        expect(response.status).toBe(400)
+        expect(response.body.error.code).toBe('EMAIL_CHANGE_TOKEN_INVALID')
+      },
+    )
+
+    it('requires authentication to read previous emails (401)', async () => {
+      const response = await request(httpServer).get('/api/me/previous-emails')
+
+      expect(response.status).toBe(401)
     })
   })
 

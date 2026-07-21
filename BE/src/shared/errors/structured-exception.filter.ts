@@ -56,9 +56,9 @@ export class StructuredExceptionFilter implements ExceptionFilter {
     body: StructuredErrorResponse
   } {
     if (exception instanceof AppException) {
-      const { code, message, details } = exception
+      const { status, code, message, details } = exception
       return {
-        status: exception.getStatus(),
+        status,
         body: {
           error: details === undefined ? { code, message } : { code, message, details },
         },

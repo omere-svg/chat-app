@@ -1,6 +1,7 @@
 import { AvatarCardContainer } from './components/AvatarCard/AvatarCardContainer.tsx'
-import { EmailCardContainer } from './components/EmailCard/EmailCardContainer.tsx'
+import { EmailChangeRequestCardContainer } from './components/EmailChangeRequestCard/EmailChangeRequestCardContainer.tsx'
 import { NameCardContainer } from './components/NameCard/NameCardContainer.tsx'
+import { PreviousEmailsCardContainer } from './components/PreviousEmailsCard/PreviousEmailsCardContainer.tsx'
 import { ProfilePage } from './ProfilePage.tsx'
 
 export function ProfilePageContainer(): React.ReactElement {
@@ -8,7 +9,8 @@ export function ProfilePageContainer(): React.ReactElement {
     <ProfilePage
       avatarCard={<AvatarCardContainer />}
       nameCard={<NameCardContainer />}
-      emailCard={<EmailCardContainer />}
+      emailChangeCard={<EmailChangeRequestCardContainer />}
+      previousEmailsCard={<PreviousEmailsCardContainer />}
     />
   )
 }

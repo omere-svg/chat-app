@@ -3,7 +3,9 @@ import { AuthScreenContainer } from '../features/auth/components/AuthScreen/Auth
 import { SessionRestoring } from '../features/auth/components/SessionRestoring/SessionRestoring.tsx'
 import { useAuth } from '../features/auth/hooks/useAuth.ts'
 import { ProfilePageContainer } from '../features/profile/components/ProfilePage/ProfilePageContainer.tsx'
+import { EmailChangeConfirmScreenContainer } from '../features/email-change/components/EmailChangeConfirmScreen/EmailChangeConfirmScreenContainer.tsx'
 import { ChatLayoutContainer } from './components/ChatLayout/ChatLayoutContainer.tsx'
+import { CHAT_ROUTE, CONFIRM_EMAIL_ROUTE, LOGIN_ROUTE, PROFILE_ROUTE } from './constants/routes.ts'
 
 function App(): React.ReactElement {
   const { isAuthenticated, isRestoringSession } = useAuth()
@@ -15,30 +17,31 @@ function App(): React.ReactElement {
   return (
     <Routes>
       <Route
-        path="/login"
+        path={LOGIN_ROUTE}
         element={
-          isAuthenticated ? <Navigate to="/chat" replace /> : <AuthScreenContainer />
+          isAuthenticated ? <Navigate to={CHAT_ROUTE} replace /> : <AuthScreenContainer />
         }
       />
       <Route
-        path="/chat"
+        path={CHAT_ROUTE}
         element={
-          isAuthenticated ? <ChatLayoutContainer /> : <Navigate to="/login" replace />
+          isAuthenticated ? <ChatLayoutContainer /> : <Navigate to={LOGIN_ROUTE} replace />
         }
       />
       <Route
-        path="/profile"
+        path={PROFILE_ROUTE}
         element={
           isAuthenticated ? (
             <ProfilePageContainer />
           ) : (
-            <Navigate to="/login" replace />
+            <Navigate to={LOGIN_ROUTE} replace />
           )
         }
       />
+      <Route path={CONFIRM_EMAIL_ROUTE} element={<EmailChangeConfirmScreenContainer />} />
       <Route
         path="*"
-        element={<Navigate to={isAuthenticated ? '/chat' : '/login'} replace />}
+        element={<Navigate to={isAuthenticated ? CHAT_ROUTE : LOGIN_ROUTE} replace />}
       />
     </Routes>
   )

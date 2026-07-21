@@ -10,6 +10,7 @@ export function toUserRecord(document: UserDocument): UserRecord {
     firstName: document.firstName,
     lastName: document.lastName,
     avatar: document.avatar ?? null,
+    previousEmails: document.previousEmails ?? [],
   }
 }
 

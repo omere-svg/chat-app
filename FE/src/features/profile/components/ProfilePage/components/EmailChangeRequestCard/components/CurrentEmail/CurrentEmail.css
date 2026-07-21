@@ -1,0 +1,10 @@
+.email-change-request-card__current-email {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.email-change-request-card__current-email-label {
+  font-weight: 600;
+  color: var(--text-h);
+}
