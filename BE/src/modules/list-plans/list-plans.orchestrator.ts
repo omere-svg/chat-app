@@ -1,17 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PlanService } from '../plans/plan.service.js'
-import type { Plan } from '../plans/types/plan.js'
-import type { PlansView, PlanView } from './types/plans.view.js'
-
-function toPlanView(plan: Plan): PlanView {
-  return {
-    code: plan.code,
-    name: plan.name,
-    amount: plan.amount,
-    currency: plan.currency,
-    interval: plan.interval,
-  }
-}
+import { toPlanView } from './plan-view.mapper.js'
+import type { PlansView } from './types/plans.view.js'
 
 @Injectable()
 export class ListPlansOrchestrator {

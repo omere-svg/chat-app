@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
-import App from './App.tsx'
+import { AppContainer } from './AppContainer.tsx'
 import { apiClient } from '@/api/apiClient.ts'
 import type { ConfirmEmailChangeResponse } from '@/types/api.ts'
 
@@ -42,7 +42,7 @@ describe('App email confirmation route', () => {
 
     render(
       <MemoryRouter initialEntries={['/confirm-email?token=public-token']}>
-        <App />
+        <AppContainer />
         <CurrentPath />
       </MemoryRouter>,
     )

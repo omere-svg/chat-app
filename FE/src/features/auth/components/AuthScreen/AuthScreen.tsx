@@ -1,10 +1,11 @@
-import { AUTH_SCREEN_CLASS, AUTH_SCREEN_TEXT } from './AuthScreen.constants.ts'
+import { AUTH_SCREEN_CLASS } from './AuthScreen.constants.ts'
 import { useAuthScreenContext } from './context/useAuthScreenContext.tsx'
+import { AuthTitle } from './components/AuthTitle/AuthTitle.tsx'
 import { AuthEmailField } from './components/AuthEmailField/AuthEmailField.tsx'
-import { AuthErrorMessage } from './components/AuthErrorMessage/AuthErrorMessage.tsx'
-import { AuthForgotPasswordLink } from './components/AuthForgotPasswordLink/AuthForgotPasswordLink.tsx'
+import { AuthErrorMessageContainer } from './components/AuthErrorMessage/AuthErrorMessageContainer.tsx'
+import { AuthForgotPasswordLinkContainer } from './components/AuthForgotPasswordLink/AuthForgotPasswordLinkContainer.tsx'
 import { AuthModeSwitch } from './components/AuthModeSwitch/AuthModeSwitch.tsx'
-import { AuthNameFields } from './components/AuthNameFields/AuthNameFields.tsx'
+import { AuthNameFieldsContainer } from './components/AuthNameFields/AuthNameFieldsContainer.tsx'
 import { AuthPasswordField } from './components/AuthPasswordField/AuthPasswordField.tsx'
 import { AuthSubmit } from './components/AuthSubmit/AuthSubmit.tsx'
 import { AuthSubtitle } from './components/AuthSubtitle/AuthSubtitle.tsx'
@@ -15,13 +16,13 @@ export function AuthScreen(): React.ReactElement {
 
   return (
     <form className={AUTH_SCREEN_CLASS.form} noValidate onSubmit={handleSubmit}>
-      <h1>{AUTH_SCREEN_TEXT.appTitle}</h1>
+      <AuthTitle />
       <AuthSubtitle />
-      <AuthNameFields />
+      <AuthNameFieldsContainer />
       <AuthEmailField />
       <AuthPasswordField />
-      <AuthForgotPasswordLink />
-      <AuthErrorMessage />
+      <AuthForgotPasswordLinkContainer />
+      <AuthErrorMessageContainer />
       <AuthSubmit />
       <AuthModeSwitch />
     </form>

@@ -2,13 +2,9 @@ import { FormField } from '@/shared/components/FormField/FormField.tsx'
 import { AUTH_FIELD } from '@/features/auth/components/AuthScreen/AuthScreen.constants.ts'
 import { useAuthScreenContext } from '@/features/auth/components/AuthScreen/context/useAuthScreenContext.tsx'
 
-export function AuthNameFields(): React.ReactElement | null {
-  const { isSignup, firstName, lastName, isSubmitting, setFirstName, setLastName } =
+export function AuthNameFields(): React.ReactElement {
+  const { firstName, lastName, isSubmitting, setFirstName, setLastName } =
     useAuthScreenContext()
-
-  if (!isSignup) {
-    return null
-  }
 
   return (
     <>
