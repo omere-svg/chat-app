@@ -1,0 +1,1 @@
+export const PAYMENT_EVENT_QUEUE = Symbol('PAYMENT_EVENT_QUEUE')

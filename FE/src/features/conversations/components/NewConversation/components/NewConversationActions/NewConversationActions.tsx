@@ -1,28 +1,25 @@
 import { NEW_CONVERSATION_CLASS } from '@/features/conversations/components/NewConversation/NewConversation.constants.ts'
-import type { NewConversationActionsProps } from '@/features/conversations/components/NewConversation/NewConversation.types.ts'
+import { useNewConversationContext } from '@/features/conversations/components/NewConversation/context/useNewConversationContext.tsx'
 
-export function NewConversationActions({
-  disabled,
-  assistantLabel,
-  tutorLabel,
-  onCreateAssistant,
-  onCreateTutor,
-}: NewConversationActionsProps): React.ReactElement {
+export function NewConversationActions(): React.ReactElement {
+  const { isSubmitting, assistantLabel, tutorLabel, createAssistant, createTutor } =
+    useNewConversationContext()
+
   return (
     <>
       <button
         type="button"
         className={NEW_CONVERSATION_CLASS.assistant}
-        disabled={disabled}
-        onClick={onCreateAssistant}
+        disabled={isSubmitting}
+        onClick={() => void createAssistant()}
       >
         {assistantLabel}
       </button>
       <button
         type="button"
         className={NEW_CONVERSATION_CLASS.tutor}
-        disabled={disabled}
-        onClick={onCreateTutor}
+        disabled={isSubmitting}
+        onClick={() => void createTutor()}
       >
         {tutorLabel}
       </button>

@@ -30,18 +30,6 @@ export type UseAuthScreenValue = {
   toggleMode: () => void
 }
 
-export type AuthScreenProps = {
-  subtitle: string
-  nameFields: ReactNode
-  email: string
-  password: string
-  passwordAutoComplete: string
-  areInputsDisabled: boolean
-  onEmailChange: (value: string) => void
-  onPasswordChange: (value: string) => void
-  errorMessage: ReactNode
-  submitLabel: string
-  isSubmitDisabled: boolean
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
-  modeSwitch: ReactNode
+export type AuthScreenProviderProps = {
+  children: ReactNode
 }

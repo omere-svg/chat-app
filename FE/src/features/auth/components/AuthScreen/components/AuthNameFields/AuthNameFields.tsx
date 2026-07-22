@@ -1,14 +1,15 @@
 import { FormField } from '@/shared/components/FormField/FormField.tsx'
 import { AUTH_FIELD } from '@/features/auth/components/AuthScreen/AuthScreen.constants.ts'
-import type { AuthNameFieldsProps } from './AuthNameFields.types.ts'
+import { useAuthScreenContext } from '@/features/auth/components/AuthScreen/context/useAuthScreenContext.tsx'
 
-export function AuthNameFields({
-  firstName,
-  lastName,
-  onFirstNameChange,
-  onLastNameChange,
-  disabled,
-}: AuthNameFieldsProps): React.ReactElement {
+export function AuthNameFields(): React.ReactElement | null {
+  const { isSignup, firstName, lastName, isSubmitting, setFirstName, setLastName } =
+    useAuthScreenContext()
+
+  if (!isSignup) {
+    return null
+  }
+
   return (
     <>
       <FormField
@@ -17,8 +18,8 @@ export function AuthNameFields({
         type={AUTH_FIELD.firstName.type}
         autoComplete={AUTH_FIELD.firstName.autoComplete}
         value={firstName}
-        disabled={disabled}
-        onValueChange={onFirstNameChange}
+        disabled={isSubmitting}
+        onValueChange={setFirstName}
       />
       <FormField
         label={AUTH_FIELD.lastName.label}
@@ -26,8 +27,8 @@ export function AuthNameFields({
         type={AUTH_FIELD.lastName.type}
         autoComplete={AUTH_FIELD.lastName.autoComplete}
         value={lastName}
-        disabled={disabled}
-        onValueChange={onLastNameChange}
+        disabled={isSubmitting}
+        onValueChange={setLastName}
       />
     </>
   )

@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { PasswordHasher } from './password-hasher.js'
 import { USER_REPOSITORY } from './user.repository.js'
 import { toUser } from './user.mapper.js'
+import { isSessionSuperseded } from './session-freshness.js'
 import { EmailAlreadyRegisteredError } from './errors/email-already-registered.error.js'
 import { UserNotFoundError } from './errors/user-not-found.error.js'
 import { UnknownParticipantEmailsError } from './errors/unknown-participant-emails.error.js'
@@ -11,6 +12,7 @@ import type { UserRepository } from './user.repository.js'
 import type { User } from './types/user.js'
 import type { StoredAvatar } from './types/stored-avatar.js'
 import type { UserRecord } from './types/user.entity.js'
+import type { AuthenticatedUserResolution } from './types/authenticated-user-resolution.js'
 import type {
   CreateUserInput,
   UpdateNameInput,
@@ -45,6 +47,7 @@ export class UsersService {
       lastName: createUserInput.lastName,
       avatar: null,
       previousEmails: [],
+      sessionsInvalidatedAt: null,
     }
 
     return this.userRepository.insert(userRecord)
@@ -129,6 +132,36 @@ export class UsersService {
   async findUserById(userId: string): Promise<User | null> {
     const userRecord = await this.userRepository.findById(userId)
     return userRecord === null ? null : this.toUser(userRecord)
+  }
+
+  async findRecordByEmail(email: string): Promise<UserRecord | null> {
+    return this.userRepository.findByEmail(normalizeEmail(email))
+  }
+
+  async resetPassword(userId: string, newPassword: string): Promise<void> {
+    const passwordHash = await this.passwordHasher.hash(newPassword)
+    const applied = await this.userRepository.applyPasswordReset({
+      userId,
+      passwordHash,
+      sessionsInvalidatedAt: new Date(),
+    })
+    if (!applied) {
+      throw new UserNotFoundError()
+    }
+  }
+
+  async resolveAuthenticatedUser(
+    userId: string,
+    tokenIssuedAtSeconds: number | undefined,
+  ): Promise<AuthenticatedUserResolution> {
+    const userRecord = await this.userRepository.findById(userId)
+    if (userRecord === null) {
+      return { outcome: 'not-found' }
+    }
+    if (isSessionSuperseded(userRecord.sessionsInvalidatedAt, tokenIssuedAtSeconds)) {
+      return { outcome: 'session-revoked' }
+    }
+    return { outcome: 'authenticated', user: this.toUser(userRecord) }
   }
 
   async findUsersByIds(userIds: readonly string[]): Promise<User[]> {

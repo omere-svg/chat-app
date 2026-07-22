@@ -1,12 +1,16 @@
 import { NEW_CONVERSATION_CLASS } from '@/features/conversations/components/NewConversation/NewConversation.constants.ts'
-import type { NewConversationErrorProps } from '@/features/conversations/components/NewConversation/NewConversation.types.ts'
+import { useNewConversationContext } from '@/features/conversations/components/NewConversation/context/useNewConversationContext.tsx'
 
-export function NewConversationError({
-  message,
-}: NewConversationErrorProps): React.ReactElement {
+export function NewConversationError(): React.ReactElement | null {
+  const { errorMessage } = useNewConversationContext()
+
+  if (errorMessage === null) {
+    return null
+  }
+
   return (
     <p className={NEW_CONVERSATION_CLASS.error} role="alert">
-      {message}
+      {errorMessage}
     </p>
   )
 }

@@ -323,6 +323,65 @@ are no-ops that return the already-updated user.
 
 ---
 
+## Password reset (unauthenticated OTP flow)
+
+Reset without being logged in by proving inbox control with an emailed one-time code.
+The request endpoint, when the account exists, generates a short-lived numeric OTP
+(6 digits, ~10 min TTL, single-use, one active per user), stores only its hash, and emails
+the code via AWS SES. Responses never reveal whether an account exists (no enumeration).
+The confirm endpoint verifies the code, sets the new password, consumes the code, and
+invalidates all existing sessions (JWTs issued before the reset are rejected).
+
+### `POST /api/auth/password-reset/request`
+
+Public. Always returns the same response whether or not the email matches an account.
+
+**Request**
+
+```ts
+{ email: string }
+```
+
+**Response `202`**
+
+```ts
+{ status: 'reset_code_sent' }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid email format (`VALIDATION_ERROR`) |
+
+### `POST /api/auth/password-reset/confirm`
+
+Public. Verifies the code and sets the new password. Unknown email and wrong/expired/used
+code return the same generic error (no enumeration).
+
+**Request**
+
+```ts
+{ email: string; code: string; newPassword: string } // code is 6 numeric digits
+```
+
+**Response `200`**
+
+```ts
+{ status: 'password_reset' }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid body (`VALIDATION_ERROR`), or invalid/expired/used code or unknown account (`PASSWORD_RESET_CODE_INVALID`) |
+
+After a successful reset, previously issued access tokens are rejected with `401`
+(`UNAUTHORIZED`); the user must log in again.
+
+---
+
 ## Assistant conversations (Week 6)
 
 ### `POST /api/conversations` (assistant variant)
@@ -431,6 +490,121 @@ Remove a document and all of its chunks. Scoped to the owner.
 
 ---
 
+## PRO subscription (Week 8.2)
+
+A tiered subscription model. Plan details (price, currency, interval) live in MongoDB — the
+same catalogue for every user, editable directly in the database with nothing hardcoded in
+the app. Upgrading redirects the user to a payment provider's **hosted checkout** (Rapyd),
+then the provider notifies us asynchronously via a signed **webhook**. The webhook does not
+do the work itself: it verifies the signature and enqueues the event to a queue (AWS SQS);
+a background consumer processes each event idempotently, activating the subscription on
+success. Failed events are retried by SQS (visibility-timeout backoff) and, after
+`maxReceiveCount`, moved to a dead-letter queue.
+
+### `GET /api/users/plans`
+
+Authenticated. Returns the active plan catalogue so the client never hardcodes prices.
+
+**Response `200`**
+
+```ts
+{
+  plans: {
+    code: string // e.g. "pro"
+    name: string
+    amount: number // major currency units, e.g. 9.99
+    currency: string // ISO 4217, e.g. "USD"
+    interval: string // e.g. "month"
+  }[]
+}
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 401 | Unauthorized |
+
+### `GET /api/users/subscription`
+
+Authenticated. Returns the current user's subscription status (used by the profile card and
+the callback screen's activation polling).
+
+**Response `200`**
+
+```ts
+{
+  status: 'active' | 'none'
+  planCode: string | null
+  activatedAt: string | null // ISO 8601
+}
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 401 | Unauthorized |
+
+### `POST /api/users/plans/payment-session`
+
+Authenticated. Creates a hosted checkout session for the requested plan and returns the URL
+to redirect the browser to. Persists a `pending` payment session server-side, which is the
+idempotency anchor for webhook processing.
+
+**Request**
+
+```ts
+{ planCode: string } // e.g. "pro"
+```
+
+**Response `201`**
+
+```ts
+{ checkoutUrl: string }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid body (`VALIDATION_ERROR`) |
+| 401 | Unauthorized |
+| 404 | Unknown or inactive plan (`PLAN_NOT_FOUND`) |
+| 409 | Account already has an active subscription (`SUBSCRIPTION_ALREADY_ACTIVE`) |
+| 502 | Payment provider failed to create the session (`PAYMENT_PROVIDER_ERROR`) |
+
+### `POST /api/users/plans/webhook`
+
+**Public**, called by the payment provider. The raw request body and provider headers are
+verified against the webhook secret (the request is authenticated by its signature, not a
+bearer token). On success the event is enqueued and a fast `200` is returned; the actual
+subscription activation happens asynchronously in the consumer.
+
+**Request**: the provider's raw JSON payload (signature-verified; not parsed as a DTO).
+
+**Response `200`**
+
+```ts
+{ status: 'accepted' | 'ignored' } // 'ignored' = well-formed but not a payment event we act on
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Signature could not be verified (`WEBHOOK_SIGNATURE_INVALID`) |
+| 5xx | Enqueue failed — provider retries with its own backoff |
+
+**Async processing guarantees**
+
+- **Idempotent**: a payment session transitions `pending → completed/failed` exactly once;
+  duplicate webhook deliveries (same or repeated event) do not re-activate or double-charge.
+- **Retries + DLQ**: transient processing failures leave the message on the queue; SQS
+  redelivers (visibility-timeout backoff) and routes it to the DLQ after `maxReceiveCount`.
+
+---
+
 ## Changelog
 
 | Date | Change |
@@ -442,3 +616,5 @@ Remove a document and all of its chunks. Scoped to the owner.
 | 2026-06-29 | Week 7: tutor (RAG) conversations; `/knowledge/documents` upload/list/delete; `Citation` + `Message.metadata.citations`; `citations` SSE event |
 | 2026-07-16 | Profile: `User` now uses `firstName`/`lastName` (replaces `displayName`); added `PATCH /me/profile` and `PATCH /me/email` (password-confirmed); signup takes first/last name |
 | 2026-07-20 | Week 8: replaced password-confirmed `PATCH /me/email` with the confirmation flow (`POST /me/email-change/request` + public `POST /email-change/confirm`); added `GET /me/previous-emails`; `User` shape unchanged |
+| 2026-07-21 | Week 8.1: unauthenticated password reset via emailed OTP (`POST /auth/password-reset/request` + `POST /auth/password-reset/confirm`); a successful reset invalidates all existing sessions; `User` shape unchanged |
+| 2026-07-22 | Week 8.2: PRO subscription model — DB-driven plan catalogue (`GET /users/plans`), subscription status (`GET /users/subscription`), Rapyd hosted-checkout session (`POST /users/plans/payment-session`), and a public signature-verified `POST /users/plans/webhook` that enqueues to SQS for idempotent async activation with DLQ; `User` shape unchanged |

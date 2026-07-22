@@ -5,4 +5,5 @@ export type ProfilePageProps = {
   nameCard: ReactNode
   emailChangeCard: ReactNode
   previousEmailsCard: ReactNode
+  subscriptionCard: ReactNode
 }

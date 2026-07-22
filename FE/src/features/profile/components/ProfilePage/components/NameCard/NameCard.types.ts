@@ -13,14 +13,6 @@ export type UseProfileNameValue = {
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void
 }
 
-export type NameCardProps = {
-  firstName: string
-  lastName: string
-  onFirstNameChange: (value: string) => void
-  onLastNameChange: (value: string) => void
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
-  areInputsDisabled: boolean
-  isSubmitDisabled: boolean
-  submitLabel: string
-  statusMessage: ReactNode
+export type ProfileNameProviderProps = {
+  children: ReactNode
 }

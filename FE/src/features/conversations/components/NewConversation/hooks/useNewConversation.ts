@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { CONVERSATIONS_ERROR } from '@/features/conversations/constants/conversations.ts'
+import { NEW_CONVERSATION_TEXT } from '../NewConversation.constants.ts'
 import type { UseNewConversationValue } from '../NewConversation.types.ts'
 
 export function useNewConversation(
@@ -74,6 +75,9 @@ export function useNewConversation(
     void createDirect()
   }
 
+  const canSubmit = participantEmail.trim().length > 0
+  const busyLabel = isSubmitting ? NEW_CONVERSATION_TEXT.starting : null
+
   return {
     participantEmail,
     setParticipantEmail,
@@ -82,5 +86,9 @@ export function useNewConversation(
     handleSubmit,
     createAssistant,
     createTutor,
+    isSubmitDisabled: !canSubmit || isSubmitting,
+    submitLabel: busyLabel ?? NEW_CONVERSATION_TEXT.submit,
+    assistantLabel: busyLabel ?? NEW_CONVERSATION_TEXT.assistant,
+    tutorLabel: busyLabel ?? NEW_CONVERSATION_TEXT.tutor,
   }
 }

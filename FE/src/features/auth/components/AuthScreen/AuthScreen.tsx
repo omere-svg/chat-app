@@ -1,59 +1,29 @@
-import { Button } from '@/shared/components/Button/Button.tsx'
-import { FormField } from '@/shared/components/FormField/FormField.tsx'
-import { AUTH_FIELD, AUTH_SCREEN_CLASS, AUTH_SCREEN_TEXT } from './AuthScreen.constants.ts'
-import type { AuthScreenProps } from './AuthScreen.types.ts'
+import { AUTH_SCREEN_CLASS, AUTH_SCREEN_TEXT } from './AuthScreen.constants.ts'
+import { useAuthScreenContext } from './context/useAuthScreenContext.tsx'
+import { AuthEmailField } from './components/AuthEmailField/AuthEmailField.tsx'
+import { AuthErrorMessage } from './components/AuthErrorMessage/AuthErrorMessage.tsx'
+import { AuthForgotPasswordLink } from './components/AuthForgotPasswordLink/AuthForgotPasswordLink.tsx'
+import { AuthModeSwitch } from './components/AuthModeSwitch/AuthModeSwitch.tsx'
+import { AuthNameFields } from './components/AuthNameFields/AuthNameFields.tsx'
+import { AuthPasswordField } from './components/AuthPasswordField/AuthPasswordField.tsx'
+import { AuthSubmit } from './components/AuthSubmit/AuthSubmit.tsx'
+import { AuthSubtitle } from './components/AuthSubtitle/AuthSubtitle.tsx'
 import './AuthScreen.css'
 
-export function AuthScreen({
-  subtitle,
-  nameFields,
-  email,
-  password,
-  passwordAutoComplete,
-  areInputsDisabled,
-  onEmailChange,
-  onPasswordChange,
-  errorMessage,
-  submitLabel,
-  isSubmitDisabled,
-  onSubmit,
-  modeSwitch,
-}: AuthScreenProps): React.ReactElement {
+export function AuthScreen(): React.ReactElement {
+  const { handleSubmit } = useAuthScreenContext()
+
   return (
-    <form className={AUTH_SCREEN_CLASS.form} noValidate onSubmit={onSubmit}>
+    <form className={AUTH_SCREEN_CLASS.form} noValidate onSubmit={handleSubmit}>
       <h1>{AUTH_SCREEN_TEXT.appTitle}</h1>
-      <p className={AUTH_SCREEN_CLASS.subtitle}>{subtitle}</p>
-
-      {nameFields}
-
-      <FormField
-        label={AUTH_FIELD.email.label}
-        name={AUTH_FIELD.email.name}
-        type={AUTH_FIELD.email.type}
-        autoComplete={AUTH_FIELD.email.autoComplete}
-        value={email}
-        disabled={areInputsDisabled}
-        autoFocus
-        onValueChange={onEmailChange}
-      />
-
-      <FormField
-        label={AUTH_FIELD.password.label}
-        name={AUTH_FIELD.password.name}
-        type={AUTH_FIELD.password.type}
-        autoComplete={passwordAutoComplete}
-        value={password}
-        disabled={areInputsDisabled}
-        onValueChange={onPasswordChange}
-      />
-
-      {errorMessage}
-
-      <Button type="submit" variant="primary" disabled={isSubmitDisabled}>
-        {submitLabel}
-      </Button>
-
-      {modeSwitch}
+      <AuthSubtitle />
+      <AuthNameFields />
+      <AuthEmailField />
+      <AuthPasswordField />
+      <AuthForgotPasswordLink />
+      <AuthErrorMessage />
+      <AuthSubmit />
+      <AuthModeSwitch />
     </form>
   )
 }

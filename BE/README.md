@@ -36,9 +36,29 @@ Configuration is read from environment variables (see [`.env.example`](./.env.ex
 | `ASSISTANT_MODEL` | `gpt-4o-mini` | Chat model for assistant + tutor replies |
 | `EMBEDDINGS_MODEL` | `text-embedding-3-small` | Embedding model (1536 dims) for the knowledge base |
 | `ATLAS_VECTOR_INDEX` | `knowledge_chunks_vector_index` | Name of the Atlas Vector Search index |
+| `PAYMENT_PROVIDER_KIND` | `fake` | PRO checkout provider: `rapyd` (hosted checkout) or `fake` (offline) |
+| `RAPYD_ACCESS_KEY` / `RAPYD_SECRET_KEY` | — | Rapyd API credentials (required in prod when `rapyd`) |
+| `RAPYD_BASE_URL` | `https://sandboxapi.rapyd.net` | Rapyd API base URL |
+| `RAPYD_WEBHOOK_SECRET` | — | Secret used to verify inbound Rapyd webhook signatures |
+| `PAYMENT_QUEUE_KIND` | `fake` | Payment-event queue: `sqs` (AWS SQS + DLQ) or `fake` (in-memory) |
+| `SQS_PAYMENT_QUEUE_URL` | — | SQS queue URL for payment events (required in prod when `sqs`) |
 
 The environment is validated on boot (`config/environment.schema.ts`); the server
 fails fast with a clear message if anything is missing or malformed.
+
+### PRO subscription (payments) — Week 8.2
+
+Users can upgrade to a PRO plan. Plan pricing is stored in MongoDB (seeded on boot, then
+editable directly in the DB — nothing hardcoded), exposed via `GET /users/plans`.
+`POST /users/plans/payment-session` opens a Rapyd hosted-checkout session and records a
+`pending` payment session; the browser is redirected to the provider. Rapyd then calls the
+**public, signature-verified** `POST /users/plans/webhook`, which enqueues the event to SQS
+and returns fast. A background consumer (`payment-event-consumer`) long-polls SQS and
+processes each event **idempotently** (a payment session moves `pending → completed/failed`
+once), activating the subscription on success. Transient failures are retried by SQS and
+land in a **DLQ** after `maxReceiveCount`. Both the provider and the queue sit behind Symbol
+ports, so `PAYMENT_PROVIDER_KIND=fake` / `PAYMENT_QUEUE_KIND=fake` run the whole flow
+offline for local dev and tests.
 
 ### Knowledge base / tutor (RAG) — requires Atlas
 

@@ -12,6 +12,4 @@ export type ConversationListItemProps = {
 
 export type ConversationListItemContainerProps = {
   conversation: ConversationPreview
-  isSelected: boolean
-  onSelectConversation: (conversationId: string) => void
 }

@@ -11,6 +11,7 @@ export function toUserRecord(document: UserDocument): UserRecord {
     lastName: document.lastName,
     avatar: document.avatar ?? null,
     previousEmails: document.previousEmails ?? [],
+    sessionsInvalidatedAt: document.sessionsInvalidatedAt ?? null,
   }
 }
 

@@ -8,6 +8,7 @@ export function ProfilePage({
   nameCard,
   emailChangeCard,
   previousEmailsCard,
+  subscriptionCard,
 }: ProfilePageProps): React.ReactElement {
   return (
     <div className={PROFILE_PAGE_CLASS.page}>
@@ -16,6 +17,7 @@ export function ProfilePage({
       {nameCard}
       {emailChangeCard}
       {previousEmailsCard}
+      {subscriptionCard}
     </div>
   )
 }

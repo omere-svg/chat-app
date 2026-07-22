@@ -1,22 +1,24 @@
 import { Button } from '@/shared/components/Button/Button.tsx'
+import { NewConversationError } from './components/NewConversationError/NewConversationError.tsx'
+import { useNewConversationContext } from './context/useNewConversationContext.tsx'
 import {
   NEW_CONVERSATION_CLASS,
   NEW_CONVERSATION_TEXT,
 } from './NewConversation.constants.ts'
-import type { NewConversationFormProps } from './NewConversation.types.ts'
 import './NewConversation.css'
 
-export function NewConversationForm({
-  participantEmail,
-  isSubmitting,
-  isSubmitDisabled,
-  submitLabel,
-  errorMessage,
-  onParticipantEmailChange,
-  onSubmit,
-}: NewConversationFormProps): React.ReactElement {
+export function NewConversationForm(): React.ReactElement {
+  const {
+    participantEmail,
+    isSubmitting,
+    isSubmitDisabled,
+    submitLabel,
+    setParticipantEmail,
+    handleSubmit,
+  } = useNewConversationContext()
+
   return (
-    <form className={NEW_CONVERSATION_CLASS.form} noValidate onSubmit={onSubmit}>
+    <form className={NEW_CONVERSATION_CLASS.form} noValidate onSubmit={handleSubmit}>
       <div className={NEW_CONVERSATION_CLASS.row}>
         <input
           className={NEW_CONVERSATION_CLASS.input}
@@ -26,14 +28,14 @@ export function NewConversationForm({
           aria-label={NEW_CONVERSATION_TEXT.inputAriaLabel}
           value={participantEmail}
           disabled={isSubmitting}
-          onChange={(event) => onParticipantEmailChange(event.target.value)}
+          onChange={(event) => setParticipantEmail(event.target.value)}
         />
         <Button type="submit" variant="primary" disabled={isSubmitDisabled}>
           {submitLabel}
         </Button>
       </div>
 
-      {errorMessage}
+      <NewConversationError />
     </form>
   )
 }

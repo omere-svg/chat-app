@@ -4,8 +4,19 @@ import { SessionRestoring } from '../features/auth/components/SessionRestoring/S
 import { useAuth } from '../features/auth/hooks/useAuth.ts'
 import { ProfilePageContainer } from '../features/profile/components/ProfilePage/ProfilePageContainer.tsx'
 import { EmailChangeConfirmScreenContainer } from '../features/email-change/components/EmailChangeConfirmScreen/EmailChangeConfirmScreenContainer.tsx'
+import { ForgotPasswordScreenContainer } from '../features/password-reset/components/ForgotPasswordScreen/ForgotPasswordScreenContainer.tsx'
+import { ResetPasswordScreenContainer } from '../features/password-reset/components/ResetPasswordScreen/ResetPasswordScreenContainer.tsx'
+import { SubscriptionCallbackScreenContainer } from '../features/subscription/components/SubscriptionCallbackScreen/SubscriptionCallbackScreenContainer.tsx'
 import { ChatLayoutContainer } from './components/ChatLayout/ChatLayoutContainer.tsx'
-import { CHAT_ROUTE, CONFIRM_EMAIL_ROUTE, LOGIN_ROUTE, PROFILE_ROUTE } from './constants/routes.ts'
+import {
+  CHAT_ROUTE,
+  CONFIRM_EMAIL_ROUTE,
+  FORGOT_PASSWORD_ROUTE,
+  LOGIN_ROUTE,
+  PROFILE_ROUTE,
+  RESET_PASSWORD_ROUTE,
+  SUBSCRIPTION_CALLBACK_ROUTE,
+} from './constants/routes.ts'
 
 function App(): React.ReactElement {
   const { isAuthenticated, isRestoringSession } = useAuth()
@@ -39,6 +50,28 @@ function App(): React.ReactElement {
         }
       />
       <Route path={CONFIRM_EMAIL_ROUTE} element={<EmailChangeConfirmScreenContainer />} />
+      <Route
+        path={FORGOT_PASSWORD_ROUTE}
+        element={
+          isAuthenticated ? <Navigate to={CHAT_ROUTE} replace /> : <ForgotPasswordScreenContainer />
+        }
+      />
+      <Route
+        path={RESET_PASSWORD_ROUTE}
+        element={
+          isAuthenticated ? <Navigate to={CHAT_ROUTE} replace /> : <ResetPasswordScreenContainer />
+        }
+      />
+      <Route
+        path={SUBSCRIPTION_CALLBACK_ROUTE}
+        element={
+          isAuthenticated ? (
+            <SubscriptionCallbackScreenContainer />
+          ) : (
+            <Navigate to={LOGIN_ROUTE} replace />
+          )
+        }
+      />
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? CHAT_ROUTE : LOGIN_ROUTE} replace />}

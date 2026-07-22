@@ -17,6 +17,9 @@ truth for every endpoint, request/response shape, and error code.
 - **Password reset** — unauthenticated flow: request an emailed one-time code, then
   set a new password. A successful reset consumes the code and invalidates all
   existing sessions.
+- **PRO subscription** — DB-driven plan pricing, upgrade via a payment provider's
+  hosted checkout (Rapyd), and an async signature-verified webhook that enqueues to
+  SQS for idempotent background activation with retries and a dead-letter queue.
 
 ## Quickstart
 

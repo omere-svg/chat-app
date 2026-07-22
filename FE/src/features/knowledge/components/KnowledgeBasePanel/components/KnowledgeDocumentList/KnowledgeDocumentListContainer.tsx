@@ -1,20 +1,22 @@
+import { useKnowledgeContext } from '../../context/useKnowledgeContext.tsx'
 import { KnowledgeDocumentItem } from './components/KnowledgeDocumentItem/KnowledgeDocumentItem.tsx'
 import { KnowledgeDocumentList } from './KnowledgeDocumentList.tsx'
-import type { KnowledgeDocumentListContainerProps } from './KnowledgeDocumentList.types.ts'
 import { documentMetaLabel } from './KnowledgeDocumentList.utils.ts'
 
-export function KnowledgeDocumentListContainer({
-  documents,
-  deletingDocumentId,
-  onDeleteDocument,
-}: KnowledgeDocumentListContainerProps): React.ReactElement {
+export function KnowledgeDocumentListContainer(): React.ReactElement | null {
+  const { documents, deletingDocumentId, deleteDocument } = useKnowledgeContext()
+
+  if (documents.length === 0) {
+    return null
+  }
+
   const items = documents.map((document) => (
     <KnowledgeDocumentItem
       key={document.id}
       filename={document.filename}
       meta={documentMetaLabel(document)}
       isDeleting={deletingDocumentId === document.id}
-      onDelete={() => onDeleteDocument(document.id)}
+      onDelete={() => deleteDocument(document.id)}
     />
   ))
 
