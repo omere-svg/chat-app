@@ -3,8 +3,7 @@ import {
   MAX_EMAIL_LENGTH,
   MAX_PASSWORD_LENGTH,
 } from '../../../shared/validation/field-constraints.constant.js'
-
-const MIN_PASSWORD_LENGTH = 1
+import { MIN_PASSWORD_LENGTH } from '../constants.js'
 
 export class LoginDto {
   @IsEmail()

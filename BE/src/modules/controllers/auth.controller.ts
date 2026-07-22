@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common'
 import { SignupOrchestrator } from '../signup/signup.orchestrator.js'
 import { LoginOrchestrator } from '../login/login.orchestrator.js'
-import { SignupDto } from '../auth/DTO/signup.dto.js'
-import { LoginDto } from '../auth/DTO/login.dto.js'
+import { SignupDto } from '../signup/DTO/signup.dto.js'
+import { LoginDto } from '../login/DTO/login.dto.js'
 import type { AuthenticationResult } from '../auth/types/authentication-result.js'
 
 @Controller('auth')
