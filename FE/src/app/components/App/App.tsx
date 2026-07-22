@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { AuthScreenContainer } from '@/features/auth/components/AuthScreen/AuthScreenContainer.tsx'
-import { ProfilePageContainer } from '@/features/profile/components/ProfilePage/ProfilePageContainer.tsx'
+import { ProfilePage } from '@/features/profile/components/ProfilePage/ProfilePage.tsx'
 import { EmailChangeConfirmScreenContainer } from '@/features/email-change/components/EmailChangeConfirmScreen/EmailChangeConfirmScreenContainer.tsx'
 import { ForgotPasswordScreenContainer } from '@/features/password-reset/components/ForgotPasswordScreen/ForgotPasswordScreenContainer.tsx'
 import { ResetPasswordScreenContainer } from '@/features/password-reset/components/ResetPasswordScreen/ResetPasswordScreenContainer.tsx'
@@ -43,7 +43,7 @@ export function App(): React.ReactElement {
         path={PROFILE_ROUTE}
         element={
           <RequireAuth>
-            <ProfilePageContainer />
+            <ProfilePage />
           </RequireAuth>
         }
       />

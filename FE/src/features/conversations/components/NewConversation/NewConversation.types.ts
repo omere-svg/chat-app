@@ -6,8 +6,8 @@ export type UseNewConversationValue = {
   isSubmitting: boolean
   errorMessage: string | null
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void
-  onCreateAssistant: () => void
-  onCreateTutor: () => void
+  handleCreateAssistant: () => void
+  handleCreateTutor: () => void
   isSubmitDisabled: boolean
   submitLabel: string
   assistantLabel: string

@@ -9,7 +9,6 @@ export type SubscriptionContextValue = {
   isLoading: boolean
   loadError: string | null
   reload: () => void
-  upgrade: () => void
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void
   isUpgrading: boolean
   upgradeError: string | null

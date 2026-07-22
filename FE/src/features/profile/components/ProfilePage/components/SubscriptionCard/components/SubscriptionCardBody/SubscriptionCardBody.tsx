@@ -1,17 +1,16 @@
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner.tsx'
+import { useSubscriptionContext } from '@/features/subscription/context/useSubscriptionContext.tsx'
 import {
   SUBSCRIPTION_CARD_CLASS,
   SUBSCRIPTION_CARD_TEXT,
 } from '../../SubscriptionCard.constants.ts'
-import type { SubscriptionCardBodyProps } from './SubscriptionCardBody.types.ts'
+import { resolveSubscriptionCardStatus } from './SubscriptionCardBody.utils.ts'
 
-export function SubscriptionCardBody({
-  status,
-  planName,
-  priceLabel,
-  errorMessage,
-  onRetry,
-}: SubscriptionCardBodyProps): React.ReactElement {
+export function SubscriptionCardBody(): React.ReactElement {
+  const context = useSubscriptionContext()
+  const { proPlan, proPriceLabel, loadError, reload } = context
+  const status = resolveSubscriptionCardStatus(context)
+
   if (status === 'loading') {
     return (
       <p className={SUBSCRIPTION_CARD_CLASS.detail} role="status">
@@ -21,7 +20,7 @@ export function SubscriptionCardBody({
   }
 
   if (status === 'error') {
-    return <ErrorBanner message={errorMessage ?? ''} onRetry={onRetry} />
+    return <ErrorBanner message={loadError ?? ''} onRetry={reload} />
   }
 
   if (status === 'active') {
@@ -38,9 +37,9 @@ export function SubscriptionCardBody({
 
   return (
     <>
-      <p className={SUBSCRIPTION_CARD_CLASS.planName}>{planName}</p>
-      {priceLabel === null ? null : (
-        <p className={SUBSCRIPTION_CARD_CLASS.price}>{priceLabel}</p>
+      <p className={SUBSCRIPTION_CARD_CLASS.planName}>{proPlan?.name}</p>
+      {proPriceLabel === null ? null : (
+        <p className={SUBSCRIPTION_CARD_CLASS.price}>{proPriceLabel}</p>
       )}
       <p className={SUBSCRIPTION_CARD_CLASS.detail}>{SUBSCRIPTION_CARD_TEXT.freeTagline}</p>
     </>

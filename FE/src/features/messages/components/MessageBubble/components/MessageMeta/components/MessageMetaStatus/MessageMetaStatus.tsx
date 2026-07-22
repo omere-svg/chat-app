@@ -1,5 +1,5 @@
 import { MESSAGE_META_CLASS } from '../../MessageMeta.constants.ts'
-import type { MessageMetaStatusProps } from '../../MessageMeta.types.ts'
+import type { MessageMetaStatusProps } from './MessageMetaStatus.types.ts'
 
 export function MessageMetaStatus({
   label,

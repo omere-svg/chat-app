@@ -13,7 +13,7 @@ import type {
 } from '../../types/api.ts'
 import type { User } from '../../types/domain.ts'
 
-export function parseUser(value: unknown): User {
+function parseUser(value: unknown): User {
   if (!isRecord(value)) {
     throw new MalformedResponseError('user')
   }

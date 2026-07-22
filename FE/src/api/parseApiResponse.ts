@@ -4,31 +4,29 @@ export {
   parseAuthResponse,
   parseConfirmEmailChangeResponse,
   parsePreviousEmailsResponse,
-  parseUser,
   parseUserResponse,
-} from './parsers/user.parser.ts'
+} from './parsers/userParser.ts'
 export {
   parseCitation,
-  parseMessage,
   parseMessagesResponse,
   parseSendMessageResponse,
-} from './parsers/message.parser.ts'
+} from './parsers/messageParser.ts'
 export {
   parseConversationsResponse,
   parseCreateConversationResponse,
-} from './parsers/conversation.parser.ts'
+} from './parsers/conversationParser.ts'
 export {
   parseCreatePaymentSessionResult,
   parsePlansResult,
   parseSubscriptionResult,
-} from './parsers/subscription.parser.ts'
+} from './parsers/subscriptionParser.ts'
 export {
   parseConfirmPasswordResetResult,
   parseRequestEmailChangeResult,
   parseRequestPasswordResetResult,
-} from './parsers/account.parser.ts'
-export { parseAvatarResult, parseAvatarUploadTicket } from './parsers/avatar.parser.ts'
+} from './parsers/accountParser.ts'
+export { parseAvatarResult, parseAvatarUploadTicket } from './parsers/avatarParser.ts'
 export {
   parseKnowledgeDocumentsResponse,
   parseUploadKnowledgeDocumentResponse,
-} from './parsers/knowledge.parser.ts'
+} from './parsers/knowledgeParser.ts'

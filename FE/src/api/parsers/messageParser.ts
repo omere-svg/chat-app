@@ -50,7 +50,7 @@ function parseMessageMetadata(value: unknown): MessageMetadata | undefined {
   return metadata
 }
 
-export function parseMessage(value: unknown): Message {
+function parseMessage(value: unknown): Message {
   if (!isRecord(value)) {
     throw new MalformedResponseError('message')
   }

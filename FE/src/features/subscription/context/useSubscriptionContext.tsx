@@ -43,7 +43,6 @@ export function SubscriptionProvider({
     reload: () => {
       void reload()
     },
-    upgrade,
     handleSubmit,
     isUpgrading,
     upgradeError,

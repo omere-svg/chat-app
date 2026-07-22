@@ -6,8 +6,12 @@ import { toPreview } from './MessageCitations.utils.ts'
 
 export function MessageCitationsContainer({
   citations,
-}: MessageCitationsContainerProps): React.ReactElement {
+}: MessageCitationsContainerProps): React.ReactElement | null {
   const [openChunkId, setOpenChunkId] = useState<string | null>(null)
+
+  if (citations.length === 0) {
+    return null
+  }
 
   const items = citations.map((citation) => {
     const isOpen = openChunkId === citation.chunkId

@@ -3,7 +3,7 @@ import { useMessageBubble } from '../hooks/useMessageBubble.ts'
 import type { MessageBubbleProviderProps } from '../MessageBubble.types.ts'
 import type { MessageBubbleContextValue } from './useMessageBubbleContext.types.ts'
 
-export const MessageBubbleContext = createContext<MessageBubbleContextValue | null>(null)
+const MessageBubbleContext = createContext<MessageBubbleContextValue | null>(null)
 
 export function MessageBubbleProvider({
   message,

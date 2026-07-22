@@ -6,7 +6,11 @@ import { buildToolViews } from './MessageTools.utils.ts'
 export function MessageToolsContainer({
   tools,
   completedTools,
-}: MessageToolsContainerProps): React.ReactElement {
+}: MessageToolsContainerProps): React.ReactElement | null {
+  if (tools.length === 0) {
+    return null
+  }
+
   const items = buildToolViews(tools, completedTools).map((toolView) => (
     <MessageToolItem
       key={toolView.key}

@@ -1,6 +1,6 @@
 import { useSubscriptionContext } from '@/features/subscription/context/useSubscriptionContext.tsx'
 import { ProfileCard } from '../ProfileCard/ProfileCard.tsx'
-import { SubscriptionCardBodyContainer } from './components/SubscriptionCardBody/SubscriptionCardBodyContainer.tsx'
+import { SubscriptionCardBody } from './components/SubscriptionCardBody/SubscriptionCardBody.tsx'
 import { SubscriptionUpgradeButton } from './components/SubscriptionUpgradeButton/SubscriptionUpgradeButton.tsx'
 import { SubscriptionUpgradeError } from './components/SubscriptionUpgradeError/SubscriptionUpgradeError.tsx'
 import {
@@ -19,7 +19,7 @@ export function SubscriptionCard(): React.ReactElement {
       onSubmit={handleSubmit}
       actions={<SubscriptionUpgradeButton />}
     >
-      <SubscriptionCardBodyContainer />
+      <SubscriptionCardBody />
       <SubscriptionUpgradeError />
     </ProfileCard>
   )
