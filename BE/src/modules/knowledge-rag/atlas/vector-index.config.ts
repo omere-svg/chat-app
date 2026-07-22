@@ -1,6 +1,6 @@
 import { EMBEDDING_DIMENSIONS } from '../../../modules/knowledge-chunk/constants.js'
 
-export const KNOWLEDGE_CHUNKS_COLLECTION = 'knowledge_chunks'
+export { KNOWLEDGE_CHUNKS_COLLECTION } from '../../../modules/knowledge-chunk/constants.js'
 
 export const DEFAULT_ATLAS_VECTOR_INDEX = 'knowledge_chunks_vector_index'
 

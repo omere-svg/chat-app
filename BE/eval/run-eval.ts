@@ -15,14 +15,14 @@ import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai'
 import { ChatPromptTemplate } from '@langchain/core/prompts'
 import { StringOutputParser } from '@langchain/core/output_parsers'
 import type { PipelineStage } from 'mongoose'
-import { TextChunker } from '../src/knowledge/ingestion/text-chunker.js'
-import { buildUserScopedVectorSearchPipeline } from '../src/knowledge/retrieval/atlas-vector-search.query.js'
+import { TextChunker } from '../src/modules/knowledge-rag/ingestion/text-chunker.js'
+import { buildUserScopedVectorSearchPipeline } from '../src/modules/knowledge-chunk/atlas-vector-search.query.js'
 import {
   DEFAULT_ATLAS_VECTOR_INDEX,
   KNOWLEDGE_CHUNKS_COLLECTION,
-} from '../src/knowledge/atlas/vector-index.config.js'
-import { TUTOR_RETRIEVAL_TOP_K } from '../src/knowledge/tutor/tutor-retrieval.config.js'
-import { TUTOR_SYSTEM_PROMPT, buildTutorContext } from '../src/knowledge/tutor/tutor-prompt.js'
+} from '../src/modules/knowledge-rag/atlas/vector-index.config.js'
+import { TUTOR_RETRIEVAL_TOP_K } from '../src/modules/knowledge-rag/tutor/tutor-retrieval.config.js'
+import { TUTOR_SYSTEM_PROMPT, buildTutorContext } from '../src/modules/knowledge-rag/tutor/tutor-prompt.js'
 
 const EVAL_USER_ID = 'eval-user'
 const INDEX_READY_TIMEOUT_MS = 90_000

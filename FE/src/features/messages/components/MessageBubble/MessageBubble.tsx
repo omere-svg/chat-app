@@ -7,14 +7,13 @@ import { MessageToolsContainer } from './components/MessageTools/MessageToolsCon
 import './MessageBubble.css'
 
 export function MessageBubble(): React.ReactElement {
-  const { rowClassName, bubbleClassName, tools, completedTools, citations } =
-    useMessageBubbleContext()
+  const { rowClassName, bubbleClassName, citations } = useMessageBubbleContext()
 
   return (
     <div className={rowClassName}>
       <MessageBubbleAvatar />
       <div className={bubbleClassName} data-testid="message-bubble">
-        <MessageToolsContainer tools={tools} completedTools={completedTools} />
+        <MessageToolsContainer />
         <MessageBubbleBody />
         <MessageCitationsContainer citations={citations} />
         <MessageMetaContainer />

@@ -1,12 +1,11 @@
+import { useMessageBubbleContext } from '../../context/useMessageBubbleContext.tsx'
 import { MessageToolItem } from './components/MessageToolItem/MessageToolItem.tsx'
 import { MessageTools } from './MessageTools.tsx'
-import type { MessageToolsContainerProps } from './MessageTools.types.ts'
 import { buildToolViews } from './MessageTools.utils.ts'
 
-export function MessageToolsContainer({
-  tools,
-  completedTools,
-}: MessageToolsContainerProps): React.ReactElement | null {
+export function MessageToolsContainer(): React.ReactElement | null {
+  const { tools, completedTools } = useMessageBubbleContext()
+
   if (tools.length === 0) {
     return null
   }
