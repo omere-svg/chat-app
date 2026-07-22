@@ -1,7 +1,7 @@
 import type {
   BuildVectorSearchParams,
   VectorSearchPipeline,
-} from '../types/vector-search-pipeline.js'
+} from './types/vector-search-pipeline.js'
 
 export function buildUserScopedVectorSearchPipeline(
   params: BuildVectorSearchParams,

@@ -29,3 +29,12 @@ export interface ProjectScoreStage {
 }
 
 export type VectorSearchPipeline = readonly [VectorSearchStage, ProjectScoreStage]
+
+export interface VectorSearchHit {
+  _id: string
+  documentId: string
+  documentName: string
+  chunkIndex: number
+  text: string
+  score: number
+}

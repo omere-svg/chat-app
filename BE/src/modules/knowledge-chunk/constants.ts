@@ -1,1 +1,3 @@
 export const EMBEDDING_DIMENSIONS = 1536
+
+export const CANDIDATE_POOL_MULTIPLIER = 10
