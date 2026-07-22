@@ -323,6 +323,65 @@ are no-ops that return the already-updated user.
 
 ---
 
+## Password reset (unauthenticated OTP flow)
+
+Reset without being logged in by proving inbox control with an emailed one-time code.
+The request endpoint, when the account exists, generates a short-lived numeric OTP
+(6 digits, ~10 min TTL, single-use, one active per user), stores only its hash, and emails
+the code via AWS SES. Responses never reveal whether an account exists (no enumeration).
+The confirm endpoint verifies the code, sets the new password, consumes the code, and
+invalidates all existing sessions (JWTs issued before the reset are rejected).
+
+### `POST /api/auth/password-reset/request`
+
+Public. Always returns the same response whether or not the email matches an account.
+
+**Request**
+
+```ts
+{ email: string }
+```
+
+**Response `202`**
+
+```ts
+{ status: 'reset_code_sent' }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid email format (`VALIDATION_ERROR`) |
+
+### `POST /api/auth/password-reset/confirm`
+
+Public. Verifies the code and sets the new password. Unknown email and wrong/expired/used
+code return the same generic error (no enumeration).
+
+**Request**
+
+```ts
+{ email: string; code: string; newPassword: string } // code is 6 numeric digits
+```
+
+**Response `200`**
+
+```ts
+{ status: 'password_reset' }
+```
+
+**Errors**
+
+| Status | When |
+|--------|------|
+| 400 | Invalid body (`VALIDATION_ERROR`), or invalid/expired/used code or unknown account (`PASSWORD_RESET_CODE_INVALID`) |
+
+After a successful reset, previously issued access tokens are rejected with `401`
+(`UNAUTHORIZED`); the user must log in again.
+
+---
+
 ## Assistant conversations (Week 6)
 
 ### `POST /api/conversations` (assistant variant)
@@ -442,3 +501,4 @@ Remove a document and all of its chunks. Scoped to the owner.
 | 2026-06-29 | Week 7: tutor (RAG) conversations; `/knowledge/documents` upload/list/delete; `Citation` + `Message.metadata.citations`; `citations` SSE event |
 | 2026-07-16 | Profile: `User` now uses `firstName`/`lastName` (replaces `displayName`); added `PATCH /me/profile` and `PATCH /me/email` (password-confirmed); signup takes first/last name |
 | 2026-07-20 | Week 8: replaced password-confirmed `PATCH /me/email` with the confirmation flow (`POST /me/email-change/request` + public `POST /email-change/confirm`); added `GET /me/previous-emails`; `User` shape unchanged |
+| 2026-07-21 | Week 8.1: unauthenticated password reset via emailed OTP (`POST /auth/password-reset/request` + `POST /auth/password-reset/confirm`); a successful reset invalidates all existing sessions; `User` shape unchanged |

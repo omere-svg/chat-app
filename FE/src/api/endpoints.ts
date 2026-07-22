@@ -8,6 +8,8 @@ export const endpoints = {
   previousEmails: `${API_BASE}/me/previous-emails`,
   emailChangeRequest: `${API_BASE}/me/email-change/request`,
   emailChangeConfirm: `${API_BASE}/email-change/confirm`,
+  passwordResetRequest: `${API_BASE}/auth/password-reset/request`,
+  passwordResetConfirm: `${API_BASE}/auth/password-reset/confirm`,
   avatarUploadUrl: `${API_BASE}/me/avatar/upload-url`,
   avatar: `${API_BASE}/me/avatar`,
   conversations: `${API_BASE}/conversations`,

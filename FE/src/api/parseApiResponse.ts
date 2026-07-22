@@ -3,6 +3,7 @@ import type {
   AvatarResult,
   AvatarUploadTicket,
   ConfirmEmailChangeResponse,
+  ConfirmPasswordResetResult,
   ConversationsResponse,
   CreateConversationResponse,
   KnowledgeDocument,
@@ -10,10 +11,15 @@ import type {
   MessagesResponse,
   PreviousEmailsResponse,
   RequestEmailChangeResult,
+  RequestPasswordResetResult,
   SendMessageResponse,
   UploadKnowledgeDocumentResponse,
 } from '../types/api.ts'
-import { EMAIL_CHANGE_REQUEST_STATUS } from './constants.ts'
+import {
+  EMAIL_CHANGE_REQUEST_STATUS,
+  PASSWORD_RESET_CONFIRM_STATUS,
+  PASSWORD_RESET_REQUEST_STATUS,
+} from './constants.ts'
 import type {
   Citation,
   ConversationParticipant,
@@ -274,6 +280,20 @@ export function parseRequestEmailChangeResult(value: unknown): RequestEmailChang
     throw new MalformedResponseError('requestEmailChangeResult.status')
   }
   return { status: EMAIL_CHANGE_REQUEST_STATUS }
+}
+
+export function parseRequestPasswordResetResult(value: unknown): RequestPasswordResetResult {
+  if (!isRecord(value) || value.status !== PASSWORD_RESET_REQUEST_STATUS) {
+    throw new MalformedResponseError('requestPasswordResetResult.status')
+  }
+  return { status: PASSWORD_RESET_REQUEST_STATUS }
+}
+
+export function parseConfirmPasswordResetResult(value: unknown): ConfirmPasswordResetResult {
+  if (!isRecord(value) || value.status !== PASSWORD_RESET_CONFIRM_STATUS) {
+    throw new MalformedResponseError('confirmPasswordResetResult.status')
+  }
+  return { status: PASSWORD_RESET_CONFIRM_STATUS }
 }
 
 export function parseConfirmEmailChangeResponse(

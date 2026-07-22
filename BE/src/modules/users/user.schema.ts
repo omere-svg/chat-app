@@ -37,6 +37,9 @@ export class UserDocument {
   @Prop({ type: [String], required: true, default: [] })
   previousEmails!: string[]
 
+  @Prop({ type: Date, required: false, default: null })
+  sessionsInvalidatedAt!: Date | null
+
   @Prop({ type: Date, required: true })
   createdAt!: Date
 }

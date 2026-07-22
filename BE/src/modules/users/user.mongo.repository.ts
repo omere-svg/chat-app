@@ -6,7 +6,12 @@ import { toUserRecord } from './user.mapper.js'
 import { MAX_PREVIOUS_EMAILS, USER_EMAIL_COLLATION } from './constants.js'
 import { isDuplicateKeyError } from '../../shared/database/mongo-errors.js'
 import type { UserRepository } from './user.repository.js'
-import type { ConfirmedEmailChange, UserRecord, UserUpdate } from './types/user.entity.js'
+import type {
+  ConfirmedEmailChange,
+  PasswordReset,
+  UserRecord,
+  UserUpdate,
+} from './types/user.entity.js'
 import type { ConfirmedEmailChangeResult } from './types/confirmed-email-change-result.js'
 
 @Injectable()
@@ -56,6 +61,7 @@ export class MongoUserRepository implements UserRepository {
       lastName: userRecord.lastName,
       avatar: userRecord.avatar,
       previousEmails: userRecord.previousEmails,
+      sessionsInvalidatedAt: userRecord.sessionsInvalidatedAt ?? null,
       createdAt: new Date(),
     })
     return toUserRecord(created.toObject())
@@ -113,5 +119,17 @@ export class MongoUserRepository implements UserRepository {
       }
       throw error
     }
+  }
+
+  async applyPasswordReset({
+    userId,
+    passwordHash,
+    sessionsInvalidatedAt,
+  }: PasswordReset): Promise<boolean> {
+    const result = await this.userModel.updateOne(
+      { _id: userId },
+      { $set: { passwordHash, sessionsInvalidatedAt } },
+    )
+    return result.matchedCount === 1
   }
 }

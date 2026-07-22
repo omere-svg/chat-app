@@ -1,4 +1,5 @@
 import { AuthErrorMessage } from './components/AuthErrorMessage/AuthErrorMessage.tsx'
+import { AuthForgotPasswordLink } from './components/AuthForgotPasswordLink/AuthForgotPasswordLink.tsx'
 import { AuthModeSwitch } from './components/AuthModeSwitch/AuthModeSwitch.tsx'
 import { AuthNameFields } from './components/AuthNameFields/AuthNameFields.tsx'
 import { AuthScreen } from './AuthScreen.tsx'
@@ -40,6 +41,8 @@ export function AuthScreenContainer(): React.ReactElement {
     <AuthErrorMessage message={errorMessage} />
   ) : null
 
+  const forgotPasswordLink = isSignup ? null : <AuthForgotPasswordLink />
+
   const modeSwitch = (
     <AuthModeSwitch
       prompt={copy.switchPrompt}
@@ -59,6 +62,7 @@ export function AuthScreenContainer(): React.ReactElement {
       areInputsDisabled={isSubmitting}
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
+      forgotPasswordLink={forgotPasswordLink}
       errorMessage={errorNode}
       submitLabel={submitLabel}
       isSubmitDisabled={!canSubmit || isSubmitting}

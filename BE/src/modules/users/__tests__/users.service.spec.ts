@@ -76,6 +76,14 @@ function buildRepository(): UserRepository {
       users.set(userId, updated)
       return Promise.resolve({ outcome: 'user', user: updated })
     },
+    applyPasswordReset: ({ userId, passwordHash, sessionsInvalidatedAt }) => {
+      const existing = users.get(userId)
+      if (existing === undefined) {
+        return Promise.resolve(false)
+      }
+      users.set(userId, { ...existing, passwordHash, sessionsInvalidatedAt })
+      return Promise.resolve(true)
+    },
   }
 }
 
@@ -189,6 +197,62 @@ describe('UsersService', () => {
       const users = await service.resolveExistingUsersByEmails(['alice@example.com'])
 
       expect(users).toMatchObject([{ id: EXISTING_USER.id, email: 'Alice@Example.com' }])
+    })
+  })
+
+  describe('findRecordByEmail', () => {
+    it('returns the record for a normalized email without throwing', async () => {
+      const record = await usersService.findRecordByEmail('OLD@example.com')
+
+      expect(record?.id).toBe('user-1')
+    })
+
+    it('returns null for an unknown email', async () => {
+      expect(await usersService.findRecordByEmail('ghost@example.com')).toBeNull()
+    })
+  })
+
+  describe('resetPassword', () => {
+    it('hashes the new password and stamps a session-invalidation time', async () => {
+      await usersService.resetPassword('user-1', 'new-secret')
+
+      const record = await usersService.getUserRecord('user-1')
+      expect(record.passwordHash).toBe('hash:new-secret')
+      expect(record.sessionsInvalidatedAt).toBeInstanceOf(Date)
+    })
+
+    it('throws NotFound for an unknown user', async () => {
+      await expect(usersService.resetPassword('ghost', 'secret')).rejects.toBeInstanceOf(
+        UserNotFoundError,
+      )
+    })
+
+    it('revokes tokens issued before the reset', async () => {
+      const beforeReset = Math.floor(Date.now() / 1000) - 5
+      await usersService.resetPassword('user-1', 'new-secret')
+
+      const resolution = await usersService.resolveAuthenticatedUser('user-1', beforeReset)
+      expect(resolution.outcome).toBe('session-revoked')
+    })
+  })
+
+  describe('resolveAuthenticatedUser', () => {
+    it('authenticates a user whose token predates any invalidation', async () => {
+      const resolution = await usersService.resolveAuthenticatedUser(
+        'user-1',
+        Math.floor(Date.now() / 1000),
+      )
+
+      expect(resolution).toEqual({
+        outcome: 'authenticated',
+        user: expect.objectContaining({ id: 'user-1' }),
+      })
+    })
+
+    it('reports not-found for an unknown user', async () => {
+      const resolution = await usersService.resolveAuthenticatedUser('ghost', 0)
+
+      expect(resolution).toEqual({ outcome: 'not-found' })
     })
   })
 })

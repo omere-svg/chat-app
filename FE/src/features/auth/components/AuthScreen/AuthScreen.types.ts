@@ -39,6 +39,7 @@ export type AuthScreenProps = {
   areInputsDisabled: boolean
   onEmailChange: (value: string) => void
   onPasswordChange: (value: string) => void
+  forgotPasswordLink: ReactNode
   errorMessage: ReactNode
   submitLabel: string
   isSubmitDisabled: boolean

@@ -6,12 +6,14 @@ import {
   parseAvatarResult,
   parseAvatarUploadTicket,
   parseConfirmEmailChangeResponse,
+  parseConfirmPasswordResetResult,
   parseConversationsResponse,
   parseCreateConversationResponse,
   parseKnowledgeDocumentsResponse,
   parseMessagesResponse,
   parsePreviousEmailsResponse,
   parseRequestEmailChangeResult,
+  parseRequestPasswordResetResult,
   parseSendMessageResponse,
   parseUploadKnowledgeDocumentResponse,
   parseUserResponse,
@@ -24,6 +26,8 @@ import type {
   AvatarUploadTicket,
   ConfirmEmailChangeRequest,
   ConfirmEmailChangeResponse,
+  ConfirmPasswordResetRequest,
+  ConfirmPasswordResetResult,
   ConversationsResponse,
   CreateConversationRequest,
   CreateConversationResponse,
@@ -32,6 +36,8 @@ import type {
   MessagesResponse,
   RequestEmailChangeRequest,
   RequestEmailChangeResult,
+  RequestPasswordResetRequest,
+  RequestPasswordResetResult,
   SendMessageRequest,
   SendMessageResponse,
   SignupRequest,
@@ -118,6 +124,24 @@ class ApiClient {
     request: ConfirmEmailChangeRequest,
   ): Promise<ConfirmEmailChangeResponse> {
     return this.request(endpoints.emailChangeConfirm, parseConfirmEmailChangeResponse, {
+      method: 'POST',
+      body: request,
+    })
+  }
+
+  async requestPasswordReset(
+    request: RequestPasswordResetRequest,
+  ): Promise<RequestPasswordResetResult> {
+    return this.request(endpoints.passwordResetRequest, parseRequestPasswordResetResult, {
+      method: 'POST',
+      body: request,
+    })
+  }
+
+  async confirmPasswordReset(
+    request: ConfirmPasswordResetRequest,
+  ): Promise<ConfirmPasswordResetResult> {
+    return this.request(endpoints.passwordResetConfirm, parseConfirmPasswordResetResult, {
       method: 'POST',
       body: request,
     })

@@ -13,6 +13,7 @@ export function AuthScreen({
   areInputsDisabled,
   onEmailChange,
   onPasswordChange,
+  forgotPasswordLink,
   errorMessage,
   submitLabel,
   isSubmitDisabled,
@@ -46,6 +47,8 @@ export function AuthScreen({
         disabled={areInputsDisabled}
         onValueChange={onPasswordChange}
       />
+
+      {forgotPasswordLink}
 
       {errorMessage}
 
