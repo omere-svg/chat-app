@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 export type SidebarUserChipContextValue = {
-  name: string
+  userName: string
   avatarUrl: string | null
 }
 

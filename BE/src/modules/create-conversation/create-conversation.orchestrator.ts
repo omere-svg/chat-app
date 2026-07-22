@@ -13,7 +13,7 @@ import {
 } from '../conversations/constants.js'
 import type { ConversationRecord } from '../conversations/types/conversation.entity.js'
 import type { ConversationPreview } from '../conversations/types/conversation-preview.js'
-import type { CreateConversationDto } from '../conversations/DTO/create-conversation.dto.js'
+import type { CreateConversationDto } from './DTO/create-conversation.dto.js'
 import type { User } from '../users/types/user.js'
 
 @Injectable()

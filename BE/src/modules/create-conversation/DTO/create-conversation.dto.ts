@@ -13,8 +13,11 @@ import {
   MAX_EMAIL_LENGTH,
   NON_WHITESPACE_PATTERN,
 } from '../../../shared/validation/field-constraints.constant.js'
-import { CREATABLE_CONVERSATION_TYPES, MAX_CONVERSATION_TITLE_LENGTH } from '../constants.js'
-import type { CreatableConversationType } from '../types/creatable-conversation-type.js'
+import {
+  CREATABLE_CONVERSATION_TYPES,
+  MAX_CONVERSATION_TITLE_LENGTH,
+} from '../../conversations/constants.js'
+import type { CreatableConversationType } from '../../conversations/types/creatable-conversation-type.js'
 
 export class CreateConversationDto {
   @IsOptional()

@@ -14,7 +14,7 @@ export function SidebarUserChipProvider({
   const { currentUser } = useAuth()
 
   const value: SidebarUserChipContextValue = {
-    name: currentUser ? fullName(currentUser) : '',
+    userName: currentUser ? fullName(currentUser) : '',
     avatarUrl: currentUser?.avatarUrl ?? null,
   }
 

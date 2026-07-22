@@ -1,6 +1,6 @@
 import { IsIn } from 'class-validator'
-import { ALLOWED_AVATAR_CONTENT_TYPES } from '../avatar/constants.js'
-import type { AllowedAvatarContentType } from '../avatar/types/allowed-avatar-content-type.js'
+import { ALLOWED_AVATAR_CONTENT_TYPES } from '../../users/avatar/constants.js'
+import type { AllowedAvatarContentType } from '../../users/avatar/types/allowed-avatar-content-type.js'
 
 const ALLOWED_CONTENT_TYPES = Object.keys(
   ALLOWED_AVATAR_CONTENT_TYPES,

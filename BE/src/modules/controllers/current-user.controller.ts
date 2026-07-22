@@ -3,7 +3,7 @@ import { CurrentUser } from '../auth/current-user.decorator.js'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js'
 import { CurrentUserOrchestrator } from '../current-user/current-user.orchestrator.js'
 import { ListPreviousEmailsOrchestrator } from '../list-previous-emails/list-previous-emails.orchestrator.js'
-import { UpdateProfileDto } from '../users/DTO/update-profile.dto.js'
+import { UpdateProfileDto } from '../current-user/DTO/update-profile.dto.js'
 import type { User } from '../users/types/user.js'
 import type { PreviousEmailsView } from '../list-previous-emails/types/previous-emails.view.js'
 

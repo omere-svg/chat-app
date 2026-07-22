@@ -6,7 +6,7 @@ import type { ConversationListSkeletonProps } from './ConversationListSkeleton.t
 import './ConversationListSkeleton.css'
 
 export function ConversationListSkeleton({
-  rows,
+  children,
 }: ConversationListSkeletonProps): React.ReactElement {
   return (
     <div
@@ -14,7 +14,7 @@ export function ConversationListSkeleton({
       aria-busy="true"
       aria-label={CONVERSATION_LIST_SKELETON_TEXT.ariaLabel}
     >
-      {rows}
+      {children}
     </div>
   )
 }

@@ -8,5 +8,5 @@ export function ConversationListSkeletonContainer(): React.ReactElement {
     (_unused, index) => <SkeletonRow key={index} />,
   )
 
-  return <ConversationListSkeleton rows={rows} />
+  return <ConversationListSkeleton>{rows}</ConversationListSkeleton>
 }

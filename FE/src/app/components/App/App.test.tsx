@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { AppContainer } from './AppContainer.tsx'
+import { CONFIRM_EMAIL_ROUTE } from '@/app/constants/routes.ts'
 import { apiClient } from '@/api/apiClient.ts'
 import type { ConfirmEmailChangeResponse } from '@/types/api.ts'
 
@@ -49,6 +50,6 @@ describe('App email confirmation route', () => {
 
     expect(await screen.findByText('new@example.com')).toBeInTheDocument()
     expect(confirmSpy).toHaveBeenCalledWith({ token: 'public-token' })
-    expect(screen.getByLabelText('Current path')).toHaveTextContent('/confirm-email')
+    expect(screen.getByLabelText('Current path')).toHaveTextContent(CONFIRM_EMAIL_ROUTE)
   })
 })

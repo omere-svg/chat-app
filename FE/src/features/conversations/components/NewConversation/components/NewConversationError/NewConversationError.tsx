@@ -1,5 +1,5 @@
-import { NEW_CONVERSATION_CLASS } from '@/features/conversations/components/NewConversation/NewConversation.constants.ts'
-import { useNewConversationContext } from '@/features/conversations/components/NewConversation/context/useNewConversationContext.tsx'
+import { NEW_CONVERSATION_CLASS } from '../../NewConversation.constants.ts'
+import { useNewConversationContext } from '../../context/useNewConversationContext.tsx'
 
 export function NewConversationError(): React.ReactElement | null {
   const { errorMessage } = useNewConversationContext()

@@ -3,14 +3,14 @@ import { KnowledgeLoadError } from '../KnowledgeLoadError/KnowledgeLoadError.tsx
 import { KnowledgePanelStatus } from './KnowledgePanelStatus.tsx'
 
 export function KnowledgePanelStatusContainer(): React.ReactElement | null {
-  const { isLoading, loadError, documents, retryLoad } = useKnowledgeContext()
+  const { isLoading, loadError, documents } = useKnowledgeContext()
 
   if (isLoading) {
     return <KnowledgePanelStatus variant="loading" />
   }
 
   if (loadError) {
-    return <KnowledgeLoadError message={loadError} onRetry={retryLoad} />
+    return <KnowledgeLoadError />
   }
 
   if (documents.length === 0) {
