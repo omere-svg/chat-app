@@ -23,7 +23,7 @@ export type UseAuthScreenValue = {
   setLastName: Dispatch<SetStateAction<string>>
   isSubmitting: boolean
   errorMessage: string | null
-  canSubmit: boolean
+  isSubmitDisabled: boolean
   submitLabel: string
   passwordAutoComplete: string
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void

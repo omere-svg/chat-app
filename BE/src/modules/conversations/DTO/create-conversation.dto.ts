@@ -13,11 +13,8 @@ import {
   MAX_EMAIL_LENGTH,
   NON_WHITESPACE_PATTERN,
 } from '../../../shared/validation/field-constraints.constant.js'
-
-const MAX_TITLE_LENGTH = 120
-
-const CREATABLE_CONVERSATION_TYPES = ['direct', 'assistant', 'tutor'] as const
-type CreatableConversationType = (typeof CREATABLE_CONVERSATION_TYPES)[number]
+import { CREATABLE_CONVERSATION_TYPES, MAX_CONVERSATION_TITLE_LENGTH } from '../constants.js'
+import type { CreatableConversationType } from '../types/creatable-conversation-type.js'
 
 export class CreateConversationDto {
   @IsOptional()
@@ -33,7 +30,7 @@ export class CreateConversationDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(MAX_TITLE_LENGTH)
+  @MaxLength(MAX_CONVERSATION_TITLE_LENGTH)
   @Matches(NON_WHITESPACE_PATTERN, { message: 'title must not be blank' })
   title?: string
 }
