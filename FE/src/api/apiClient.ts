@@ -1,4 +1,5 @@
 import { endpoints } from './endpoints.ts'
+import { ApiError } from './apiError.ts'
 import { consumeAssistantStream } from './assistantStream.ts'
 import {
   isRecord,
@@ -53,19 +54,7 @@ import type {
 } from '../types/api.ts'
 import type { User } from '../types/domain.ts'
 
-export class ApiError extends Error {
-  readonly status: number
-  readonly code: string
-  readonly details?: unknown
-
-  constructor(status: number, payload: ApiErrorPayload) {
-    super(payload.message)
-    this.name = 'ApiError'
-    this.status = status
-    this.code = payload.code
-    this.details = payload.details
-  }
-}
+export { ApiError } from './apiError.ts'
 
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
