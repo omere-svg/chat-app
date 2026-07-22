@@ -13,7 +13,7 @@ export function NewConversationForm(): React.ReactElement {
     isSubmitting,
     isSubmitDisabled,
     submitLabel,
-    setParticipantEmail,
+    handleParticipantEmailChange,
     handleSubmit,
   } = useNewConversationContext()
 
@@ -28,7 +28,7 @@ export function NewConversationForm(): React.ReactElement {
           aria-label={NEW_CONVERSATION_TEXT.inputAriaLabel}
           value={participantEmail}
           disabled={isSubmitting}
-          onChange={(event) => setParticipantEmail(event.target.value)}
+          onChange={handleParticipantEmailChange}
         />
         <Button type="submit" variant="primary" disabled={isSubmitDisabled}>
           {submitLabel}

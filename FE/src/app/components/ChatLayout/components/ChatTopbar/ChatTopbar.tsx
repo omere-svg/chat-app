@@ -5,14 +5,12 @@ import {
   CHAT_TOPBAR_ROUTE,
   CHAT_TOPBAR_TEXT,
 } from './ChatTopbar.constants.ts'
-import type { ChatTopbarProps } from './ChatTopbar.types.ts'
+import { useChatTopbar } from './context/useChatTopbarContext.tsx'
 import './ChatTopbar.css'
 
-export function ChatTopbar({
-  userName,
-  avatarUrl,
-  onLogout,
-}: ChatTopbarProps): React.ReactElement {
+export function ChatTopbar(): React.ReactElement {
+  const { userName, avatarUrl, logout } = useChatTopbar()
+
   return (
     <header className={CHAT_TOPBAR_CLASS.topbar}>
       <div className={CHAT_TOPBAR_CLASS.identity}>
@@ -28,7 +26,7 @@ export function ChatTopbar({
         <button
           type="button"
           className={CHAT_TOPBAR_CLASS.action}
-          onClick={onLogout}
+          onClick={logout}
         >
           {CHAT_TOPBAR_TEXT.logout}
         </button>

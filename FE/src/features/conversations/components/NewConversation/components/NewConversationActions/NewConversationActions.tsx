@@ -2,7 +2,7 @@ import { NEW_CONVERSATION_CLASS } from '@/features/conversations/components/NewC
 import { useNewConversationContext } from '@/features/conversations/components/NewConversation/context/useNewConversationContext.tsx'
 
 export function NewConversationActions(): React.ReactElement {
-  const { isSubmitting, assistantLabel, tutorLabel, createAssistant, createTutor } =
+  const { isSubmitting, assistantLabel, tutorLabel, onCreateAssistant, onCreateTutor } =
     useNewConversationContext()
 
   return (
@@ -11,7 +11,7 @@ export function NewConversationActions(): React.ReactElement {
         type="button"
         className={NEW_CONVERSATION_CLASS.assistant}
         disabled={isSubmitting}
-        onClick={() => void createAssistant()}
+        onClick={onCreateAssistant}
       >
         {assistantLabel}
       </button>
@@ -19,7 +19,7 @@ export function NewConversationActions(): React.ReactElement {
         type="button"
         className={NEW_CONVERSATION_CLASS.tutor}
         disabled={isSubmitting}
-        onClick={() => void createTutor()}
+        onClick={onCreateTutor}
       >
         {tutorLabel}
       </button>

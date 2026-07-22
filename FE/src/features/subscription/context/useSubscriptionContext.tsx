@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import type { FormEvent } from 'react'
 import { SUBSCRIPTION_ACTIVE_STATUS } from '@/api/constants.ts'
 import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus.ts'
 import { useUpgradeSubscription } from '../hooks/useUpgradeSubscription.ts'
@@ -16,21 +17,34 @@ export function SubscriptionProvider({
   const { subscription, proPlan, isLoading, loadError, reload } = useSubscriptionStatus()
   const { upgrade: upgradeWithPlan, isUpgrading, upgradeError } = useUpgradeSubscription()
 
+  const isActive = subscription?.status === SUBSCRIPTION_ACTIVE_STATUS
+
+  const upgrade = (): void => {
+    if (proPlan !== null) {
+      void upgradeWithPlan(proPlan.code)
+    }
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+    if (isActive || isUpgrading || proPlan === null) {
+      return
+    }
+    upgrade()
+  }
+
   const value: SubscriptionContextValue = {
     subscription,
     proPlan,
     proPriceLabel: proPlan === null ? null : formatPlanPrice(proPlan),
-    isActive: subscription?.status === SUBSCRIPTION_ACTIVE_STATUS,
+    isActive,
     isLoading,
     loadError,
     reload: () => {
       void reload()
     },
-    upgrade: () => {
-      if (proPlan !== null) {
-        void upgradeWithPlan(proPlan.code)
-      }
-    },
+    upgrade,
+    handleSubmit,
     isUpgrading,
     upgradeError,
   }

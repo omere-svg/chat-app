@@ -1,30 +1,23 @@
-import { MESSAGE_BUBBLE_CLASS } from './MessageBubble.constants.ts'
-import type { MessageBubbleProps } from './MessageBubble.types.ts'
+import { MessageCitationsContainer } from '../MessageCitations/MessageCitationsContainer.tsx'
+import { useMessageBubbleContext } from './context/useMessageBubbleContext.tsx'
+import { MessageBubbleAvatar } from './components/MessageBubbleAvatar/MessageBubbleAvatar.tsx'
+import { MessageBubbleBody } from './components/MessageBubbleBody/MessageBubbleBody.tsx'
+import { MessageMetaContainer } from './components/MessageMeta/MessageMetaContainer.tsx'
+import { MessageToolsContainer } from './components/MessageTools/MessageToolsContainer.tsx'
 import './MessageBubble.css'
 
-export function MessageBubble({
-  rowClassName,
-  className,
-  avatar,
-  body,
-  showCursor,
-  tools,
-  citations,
-  meta,
-}: MessageBubbleProps): React.ReactElement {
+export function MessageBubble(): React.ReactElement {
+  const { rowClassName, bubbleClassName, tools, completedTools, citations } =
+    useMessageBubbleContext()
+
   return (
     <div className={rowClassName}>
-      {avatar}
-      <div className={className} data-testid="message-bubble">
-        {tools}
-        <p className={MESSAGE_BUBBLE_CLASS.body}>
-          {body}
-          {showCursor ? (
-            <span className={MESSAGE_BUBBLE_CLASS.cursor} aria-hidden="true" />
-          ) : null}
-        </p>
-        {citations}
-        {meta}
+      <MessageBubbleAvatar />
+      <div className={bubbleClassName} data-testid="message-bubble">
+        <MessageToolsContainer tools={tools} completedTools={completedTools} />
+        <MessageBubbleBody />
+        <MessageCitationsContainer citations={citations} />
+        <MessageMetaContainer />
       </div>
     </div>
   )

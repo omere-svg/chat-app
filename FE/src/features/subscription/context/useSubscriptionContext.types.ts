@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import type { Plan, Subscription } from '@/types/domain.ts'
 
 export type SubscriptionContextValue = {
@@ -10,6 +10,7 @@ export type SubscriptionContextValue = {
   loadError: string | null
   reload: () => void
   upgrade: () => void
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
   isUpgrading: boolean
   upgradeError: string | null
 }

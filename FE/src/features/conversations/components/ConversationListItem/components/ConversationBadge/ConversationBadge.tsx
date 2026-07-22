@@ -1,9 +1,13 @@
+import { useConversationItemContext } from '../../context/useConversationItemContext.tsx'
 import { CONVERSATION_BADGE_CLASS } from './ConversationBadge.constants.ts'
-import type { ConversationBadgeProps } from './ConversationBadge.types.ts'
 import './ConversationBadge.css'
 
-export function ConversationBadge({
-  label,
-}: ConversationBadgeProps): React.ReactElement {
-  return <span className={CONVERSATION_BADGE_CLASS.badge}>{label}</span>
+export function ConversationBadge(): React.ReactElement | null {
+  const { badgeLabel } = useConversationItemContext()
+
+  if (badgeLabel === null) {
+    return null
+  }
+
+  return <span className={CONVERSATION_BADGE_CLASS.badge}>{badgeLabel}</span>
 }

@@ -1,9 +1,11 @@
 import { UserAvatarContainer } from '@/shared/components/UserAvatar/UserAvatarContainer.tsx'
 import { SIDEBAR_USER_CHIP_CLASS } from './SidebarUserChip.constants.ts'
-import type { SidebarUserChipProps } from './SidebarUserChip.types.ts'
+import { useSidebarUserChip } from './context/useSidebarUserChipContext.tsx'
 import './SidebarUserChip.css'
 
-export function SidebarUserChip({ name, avatarUrl }: SidebarUserChipProps): React.ReactElement {
+export function SidebarUserChip(): React.ReactElement {
+  const { name, avatarUrl } = useSidebarUserChip()
+
   return (
     <div className={SIDEBAR_USER_CHIP_CLASS.chip}>
       <UserAvatarContainer name={name} imageUrl={avatarUrl} size="sm" />

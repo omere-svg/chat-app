@@ -1,9 +1,8 @@
-import type { FormEvent } from 'react'
-import { Button } from '@/shared/components/Button/Button.tsx'
-import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner.tsx'
 import { useSubscriptionContext } from '@/features/subscription/context/useSubscriptionContext.tsx'
 import { ProfileCard } from '../ProfileCard/ProfileCard.tsx'
-import { SubscriptionCardBody } from './components/SubscriptionCardBody/SubscriptionCardBody.tsx'
+import { SubscriptionCardBodyContainer } from './components/SubscriptionCardBody/SubscriptionCardBodyContainer.tsx'
+import { SubscriptionUpgradeButton } from './components/SubscriptionUpgradeButton/SubscriptionUpgradeButton.tsx'
+import { SubscriptionUpgradeError } from './components/SubscriptionUpgradeError/SubscriptionUpgradeError.tsx'
 import {
   SUBSCRIPTION_CARD_HEADING_ID,
   SUBSCRIPTION_CARD_TEXT,
@@ -11,38 +10,17 @@ import {
 import './SubscriptionCard.css'
 
 export function SubscriptionCard(): React.ReactElement {
-  const { proPlan, isActive, isLoading, upgrade, isUpgrading, upgradeError } =
-    useSubscriptionContext()
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault()
-    if (isActive || isUpgrading || proPlan === null) {
-      return
-    }
-    upgrade()
-  }
-
-  const actionLabel = isActive
-    ? SUBSCRIPTION_CARD_TEXT.activeAction
-    : isUpgrading
-      ? SUBSCRIPTION_CARD_TEXT.upgradingAction
-      : SUBSCRIPTION_CARD_TEXT.upgradeAction
-
-  const isActionDisabled = isActive || isLoading || isUpgrading || proPlan === null
+  const { handleSubmit } = useSubscriptionContext()
 
   return (
     <ProfileCard
       title={SUBSCRIPTION_CARD_TEXT.title}
       headingId={SUBSCRIPTION_CARD_HEADING_ID}
       onSubmit={handleSubmit}
-      actions={
-        <Button type="submit" variant="primary" disabled={isActionDisabled}>
-          {actionLabel}
-        </Button>
-      }
+      actions={<SubscriptionUpgradeButton />}
     >
-      <SubscriptionCardBody />
-      {upgradeError === null ? null : <ErrorBanner message={upgradeError} />}
+      <SubscriptionCardBodyContainer />
+      <SubscriptionUpgradeError />
     </ProfileCard>
   )
 }

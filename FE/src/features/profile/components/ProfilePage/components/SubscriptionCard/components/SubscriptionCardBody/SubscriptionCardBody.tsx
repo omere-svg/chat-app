@@ -1,15 +1,18 @@
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner.tsx'
-import { useSubscriptionContext } from '@/features/subscription/context/useSubscriptionContext.tsx'
 import {
   SUBSCRIPTION_CARD_CLASS,
   SUBSCRIPTION_CARD_TEXT,
 } from '../../SubscriptionCard.constants.ts'
+import type { SubscriptionCardBodyProps } from './SubscriptionCardBody.types.ts'
 
-export function SubscriptionCardBody(): React.ReactElement {
-  const { proPlan, proPriceLabel, isActive, isLoading, loadError, reload } =
-    useSubscriptionContext()
-
-  if (isLoading) {
+export function SubscriptionCardBody({
+  status,
+  planName,
+  priceLabel,
+  errorMessage,
+  onRetry,
+}: SubscriptionCardBodyProps): React.ReactElement {
+  if (status === 'loading') {
     return (
       <p className={SUBSCRIPTION_CARD_CLASS.detail} role="status">
         {SUBSCRIPTION_CARD_TEXT.loading}
@@ -17,11 +20,11 @@ export function SubscriptionCardBody(): React.ReactElement {
     )
   }
 
-  if (loadError !== null) {
-    return <ErrorBanner message={loadError} onRetry={reload} />
+  if (status === 'error') {
+    return <ErrorBanner message={errorMessage ?? ''} onRetry={onRetry} />
   }
 
-  if (isActive) {
+  if (status === 'active') {
     return (
       <p className={SUBSCRIPTION_CARD_CLASS.status} role="status">
         {SUBSCRIPTION_CARD_TEXT.activeStatus}
@@ -29,17 +32,15 @@ export function SubscriptionCardBody(): React.ReactElement {
     )
   }
 
-  if (proPlan === null) {
-    return (
-      <p className={SUBSCRIPTION_CARD_CLASS.detail}>{SUBSCRIPTION_CARD_TEXT.freeTagline}</p>
-    )
+  if (status === 'free') {
+    return <p className={SUBSCRIPTION_CARD_CLASS.detail}>{SUBSCRIPTION_CARD_TEXT.freeTagline}</p>
   }
 
   return (
     <>
-      <p className={SUBSCRIPTION_CARD_CLASS.planName}>{proPlan.name}</p>
-      {proPriceLabel === null ? null : (
-        <p className={SUBSCRIPTION_CARD_CLASS.price}>{proPriceLabel}</p>
+      <p className={SUBSCRIPTION_CARD_CLASS.planName}>{planName}</p>
+      {priceLabel === null ? null : (
+        <p className={SUBSCRIPTION_CARD_CLASS.price}>{priceLabel}</p>
       )}
       <p className={SUBSCRIPTION_CARD_CLASS.detail}>{SUBSCRIPTION_CARD_TEXT.freeTagline}</p>
     </>
