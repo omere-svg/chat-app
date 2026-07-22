@@ -8,9 +8,8 @@ import {
   FORGOT_PASSWORD_ERROR_FALLBACK,
   FORGOT_PASSWORD_TEXT,
 } from '../ForgotPasswordScreen.constants.ts'
-import type { UseRequestPasswordResetValue } from '../ForgotPasswordScreen.types.ts'
 
-export function useRequestPasswordReset(): UseRequestPasswordResetValue {
+export function useRequestPasswordReset() {
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -19,6 +18,8 @@ export function useRequestPasswordReset(): UseRequestPasswordResetValue {
 
   const trimmedEmail = email.trim()
   const canSubmit = isValidEmail(trimmedEmail)
+  const areInputsDisabled = isSubmitting
+  const isSubmitDisabled = !canSubmit || isSubmitting
   const submitLabel = isSubmitting
     ? FORGOT_PASSWORD_TEXT.submittingLabel
     : FORGOT_PASSWORD_TEXT.submitLabel
@@ -45,9 +46,9 @@ export function useRequestPasswordReset(): UseRequestPasswordResetValue {
   return {
     email,
     setEmail,
-    isSubmitting,
+    areInputsDisabled,
+    isSubmitDisabled,
     errorMessage,
-    canSubmit,
     submitLabel,
     handleSubmit,
   }

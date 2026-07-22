@@ -1,5 +1,6 @@
 export const FORGOT_PASSWORD_CLASS = {
-  form: 'forgot-password-screen',
+  screen: 'forgot-password-screen',
+  form: 'forgot-password-form',
   subtitle: 'forgot-password-screen__subtitle',
   footer: 'forgot-password-screen__footer',
   footerLink: 'forgot-password-screen__footer-link',

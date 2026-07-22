@@ -9,12 +9,15 @@ import {
   parseConfirmPasswordResetResult,
   parseConversationsResponse,
   parseCreateConversationResponse,
+  parseCreatePaymentSessionResult,
   parseKnowledgeDocumentsResponse,
   parseMessagesResponse,
+  parsePlansResult,
   parsePreviousEmailsResponse,
   parseRequestEmailChangeResult,
   parseRequestPasswordResetResult,
   parseSendMessageResponse,
+  parseSubscriptionResult,
   parseUploadKnowledgeDocumentResponse,
   parseUserResponse,
 } from './parseApiResponse.ts'
@@ -31,7 +34,11 @@ import type {
   ConversationsResponse,
   CreateConversationRequest,
   CreateConversationResponse,
+  CreatePaymentSessionRequest,
+  CreatePaymentSessionResult,
+  GetSubscriptionResult,
   KnowledgeDocumentsResponse,
+  ListPlansResult,
   LoginRequest,
   MessagesResponse,
   RequestEmailChangeRequest,
@@ -142,6 +149,23 @@ class ApiClient {
     request: ConfirmPasswordResetRequest,
   ): Promise<ConfirmPasswordResetResult> {
     return this.request(endpoints.passwordResetConfirm, parseConfirmPasswordResetResult, {
+      method: 'POST',
+      body: request,
+    })
+  }
+
+  async listPlans(): Promise<ListPlansResult> {
+    return this.request(endpoints.plans, parsePlansResult)
+  }
+
+  async getSubscription(): Promise<GetSubscriptionResult> {
+    return this.request(endpoints.subscription, parseSubscriptionResult)
+  }
+
+  async createPaymentSession(
+    request: CreatePaymentSessionRequest,
+  ): Promise<CreatePaymentSessionResult> {
+    return this.request(endpoints.createPaymentSession, parseCreatePaymentSessionResult, {
       method: 'POST',
       body: request,
     })

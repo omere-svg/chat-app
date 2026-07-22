@@ -1,9 +1,5 @@
-import type { ReactNode, RefObject } from 'react'
+import type { ReactNode } from 'react'
 
-export type MessageThreadProps = {
-  header: ReactNode
-  knowledgePanel: ReactNode
-  body: ReactNode
-  composer: ReactNode
-  scrollContainerRef?: RefObject<HTMLDivElement | null>
+export type MessageThreadProviderProps = {
+  children: ReactNode
 }

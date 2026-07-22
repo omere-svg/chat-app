@@ -1,0 +1,20 @@
+.subscription-card__plan-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.subscription-card__price {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.subscription-card__detail {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.subscription-card__status {
+  margin: 0;
+  font-weight: 600;
+}

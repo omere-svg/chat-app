@@ -14,7 +14,6 @@ import {
   resetPasswordReducer,
 } from '../utils/resetPasswordReducer.ts'
 import type { ResetPasswordFailureReason } from '../ResetPasswordScreen.types.ts'
-import type { UseResetPasswordValue } from '../context/useResetPasswordContext.types.ts'
 
 const CODE_PATTERN = new RegExp(`^\\d{${RESET_CODE_LENGTH.toString()}}$`)
 
@@ -33,7 +32,7 @@ function failureReasonFor(error: unknown): ResetPasswordFailureReason {
   return RESET_PASSWORD_FAILURE_REASON.retryable
 }
 
-export function useResetPassword(): UseResetPasswordValue {
+export function useResetPassword() {
   const location = useLocation()
   const navigate = useNavigate()
   const email = readEmail(location.state)
@@ -50,6 +49,8 @@ export function useResetPassword(): UseResetPasswordValue {
 
   const canSubmit =
     email.length > 0 && CODE_PATTERN.test(code.trim()) && newPassword.length > 0
+  const areInputsDisabled = state.isSubmitting
+  const isSubmitDisabled = !canSubmit || state.isSubmitting
   const submitLabel = state.isSubmitting
     ? RESET_PASSWORD_TEXT.submittingLabel
     : RESET_PASSWORD_TEXT.submitLabel
@@ -77,12 +78,12 @@ export function useResetPassword(): UseResetPasswordValue {
     setCode,
     setNewPassword,
     status: state.status,
-    isSubmitting: state.isSubmitting,
+    areInputsDisabled,
+    isSubmitDisabled,
     errorMessage:
       state.failureReason === null
         ? null
         : RESET_PASSWORD_TEXT.failure[state.failureReason],
-    canSubmit,
     submitLabel,
     handleSubmit,
   }

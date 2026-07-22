@@ -4,9 +4,20 @@ import type { ValidationError } from 'class-validator'
 import { DEFAULT_ATLAS_VECTOR_INDEX } from '../modules/knowledge-rag/atlas/vector-index.config.js'
 import {
   DEFAULT_EMAIL_CHANGE_JWT_EXPIRES_IN,
+  DEFAULT_PAYMENT_PROVIDER_KIND,
+  DEFAULT_PAYMENT_QUEUE_KIND,
+  PAYMENT_PROVIDER_KINDS,
+  PAYMENT_QUEUE_KINDS,
   REQUIRED_EMAIL_INTEGRATION_KEYS,
+  REQUIRED_RAPYD_KEYS,
+  REQUIRED_SQS_KEYS,
 } from './environment.constants.js'
-import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
+import type {
+  AppEnvironment,
+  NodeEnvironment,
+  PaymentProviderKind,
+  PaymentQueueKind,
+} from './environment.types.js'
 
 const MIN_JWT_SECRET_LENGTH = 32
 const MIN_TCP_PORT = 1
@@ -119,6 +130,34 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @IsOptional()
   @IsString()
   SES_SOURCE_EMAIL!: string
+
+  @IsOptional()
+  @IsIn(PAYMENT_PROVIDER_KINDS)
+  PAYMENT_PROVIDER_KIND!: PaymentProviderKind
+
+  @IsOptional()
+  @IsString()
+  RAPYD_ACCESS_KEY!: string
+
+  @IsOptional()
+  @IsString()
+  RAPYD_SECRET_KEY!: string
+
+  @IsOptional()
+  @IsString()
+  RAPYD_BASE_URL!: string
+
+  @IsOptional()
+  @IsString()
+  RAPYD_WEBHOOK_SECRET!: string
+
+  @IsOptional()
+  @IsIn(PAYMENT_QUEUE_KINDS)
+  PAYMENT_QUEUE_KIND!: PaymentQueueKind
+
+  @IsOptional()
+  @IsString()
+  SQS_PAYMENT_QUEUE_URL!: string
 }
 
 const REQUIRED_STORAGE_KEYS: readonly (keyof AppEnvironment)[] = [
@@ -145,6 +184,25 @@ function assertEmailIntegrationConfiguredInProduction(environment: AppEnvironmen
   }
 
   const missingKeys = REQUIRED_EMAIL_INTEGRATION_KEYS.filter((key) => environment[key] === '')
+  if (missingKeys.length > 0) {
+    throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
+  }
+}
+
+function assertPaymentConfiguredInProduction(environment: AppEnvironment): void {
+  if (environment.NODE_ENV !== 'production') {
+    return
+  }
+
+  const requiredKeys: (keyof AppEnvironment)[] = []
+  if (environment.PAYMENT_PROVIDER_KIND === 'rapyd') {
+    requiredKeys.push(...REQUIRED_RAPYD_KEYS)
+  }
+  if (environment.PAYMENT_QUEUE_KIND === 'sqs') {
+    requiredKeys.push(...REQUIRED_SQS_KEYS)
+  }
+
+  const missingKeys = requiredKeys.filter((key) => environment[key] === '')
   if (missingKeys.length > 0) {
     throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
   }
@@ -198,10 +256,18 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     AVATAR_CDN_BASE_URL: candidateEnvironment.AVATAR_CDN_BASE_URL ?? '',
     SES_REGION: candidateEnvironment.SES_REGION ?? '',
     SES_SOURCE_EMAIL: candidateEnvironment.SES_SOURCE_EMAIL ?? '',
+    PAYMENT_PROVIDER_KIND: candidateEnvironment.PAYMENT_PROVIDER_KIND ?? DEFAULT_PAYMENT_PROVIDER_KIND,
+    RAPYD_ACCESS_KEY: candidateEnvironment.RAPYD_ACCESS_KEY ?? '',
+    RAPYD_SECRET_KEY: candidateEnvironment.RAPYD_SECRET_KEY ?? '',
+    RAPYD_BASE_URL: candidateEnvironment.RAPYD_BASE_URL ?? '',
+    RAPYD_WEBHOOK_SECRET: candidateEnvironment.RAPYD_WEBHOOK_SECRET ?? '',
+    PAYMENT_QUEUE_KIND: candidateEnvironment.PAYMENT_QUEUE_KIND ?? DEFAULT_PAYMENT_QUEUE_KIND,
+    SQS_PAYMENT_QUEUE_URL: candidateEnvironment.SQS_PAYMENT_QUEUE_URL ?? '',
   }
 
   assertStorageConfiguredInProduction(resolvedEnvironment)
   assertEmailIntegrationConfiguredInProduction(resolvedEnvironment)
+  assertPaymentConfiguredInProduction(resolvedEnvironment)
 
   return resolvedEnvironment
 }

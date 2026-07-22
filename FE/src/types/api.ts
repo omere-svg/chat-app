@@ -1,4 +1,4 @@
-import type { ConversationPreview, Message, User } from './domain.ts'
+import type { ConversationPreview, Message, Plan, Subscription, User } from './domain.ts'
 import type {
   EMAIL_CHANGE_REQUEST_STATUS,
   PASSWORD_RESET_CONFIRM_STATUS,
@@ -75,6 +75,20 @@ export type ConfirmPasswordResetRequest = {
 
 export type ConfirmPasswordResetResult = {
   status: typeof PASSWORD_RESET_CONFIRM_STATUS
+}
+
+export type ListPlansResult = {
+  plans: Plan[]
+}
+
+export type GetSubscriptionResult = Subscription
+
+export type CreatePaymentSessionRequest = {
+  planCode: string
+}
+
+export type CreatePaymentSessionResult = {
+  checkoutUrl: string
 }
 
 export type RequestAvatarUploadRequest = {

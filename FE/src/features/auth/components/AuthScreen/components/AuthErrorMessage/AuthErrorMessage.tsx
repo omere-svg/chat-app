@@ -1,13 +1,17 @@
 import { AUTH_ERROR_CLASS } from './AuthErrorMessage.constants.ts'
-import type { AuthErrorMessageProps } from './AuthErrorMessage.types.ts'
+import { useAuthScreenContext } from '../../context/useAuthScreenContext.tsx'
 import './AuthErrorMessage.css'
 
-export function AuthErrorMessage({
-  message,
-}: AuthErrorMessageProps): React.ReactElement {
+export function AuthErrorMessage(): React.ReactElement | null {
+  const { errorMessage } = useAuthScreenContext()
+
+  if (errorMessage === null) {
+    return null
+  }
+
   return (
     <p className={AUTH_ERROR_CLASS.message} role="alert">
-      {message}
+      {errorMessage}
     </p>
   )
 }

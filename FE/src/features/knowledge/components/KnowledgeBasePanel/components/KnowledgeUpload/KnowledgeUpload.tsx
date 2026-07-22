@@ -1,19 +1,16 @@
 import { ACCEPTED_UPLOAD_ACCEPT } from '@/features/knowledge/constants/knowledge.ts'
+import { useKnowledgeContext } from '../../context/useKnowledgeContext.tsx'
 import { useFileSelect } from './hooks/useFileSelect.ts'
 import {
   KNOWLEDGE_UPLOAD_CLASS,
   KNOWLEDGE_UPLOAD_INPUT_ID,
   KNOWLEDGE_UPLOAD_TEXT,
 } from './KnowledgeUpload.constants.ts'
-import type { KnowledgeUploadProps } from './KnowledgeUpload.types.ts'
 import './KnowledgeUpload.css'
 
-export function KnowledgeUpload({
-  isUploading,
-  uploadError,
-  onUploadFile,
-}: KnowledgeUploadProps): React.ReactElement {
-  const handleFileChange = useFileSelect({ onUploadFile })
+export function KnowledgeUpload(): React.ReactElement {
+  const { isUploading, uploadError, uploadFile } = useKnowledgeContext()
+  const handleFileChange = useFileSelect({ onUploadFile: uploadFile })
 
   return (
     <div className={KNOWLEDGE_UPLOAD_CLASS.upload}>

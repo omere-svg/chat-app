@@ -10,6 +10,10 @@ export type PreviousEmailsCardProps = {
   children: ReactNode
 }
 
+export type PreviousEmailsProviderProps = {
+  children: ReactNode
+}
+
 export type PreviousEmailsState = {
   previousEmails: string[]
   isLoading: boolean

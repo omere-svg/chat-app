@@ -1,15 +1,3 @@
-import type { FormEvent } from 'react'
-import type { ResetPasswordStatus } from '../ResetPasswordScreen.types.ts'
+import type { useResetPassword } from '../hooks/useResetPassword.ts'
 
-export type UseResetPasswordValue = {
-  code: string
-  newPassword: string
-  setCode: (value: string) => void
-  setNewPassword: (value: string) => void
-  status: ResetPasswordStatus
-  isSubmitting: boolean
-  errorMessage: string | null
-  canSubmit: boolean
-  submitLabel: string
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
-}
+export type UseResetPasswordValue = ReturnType<typeof useResetPassword>

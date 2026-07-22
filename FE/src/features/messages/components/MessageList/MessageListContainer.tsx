@@ -1,11 +1,11 @@
+import { useMessageThreadContext } from '../MessageThread/context/useMessageThreadContext.tsx'
 import { MessageBubbleContainer } from '../MessageBubble/MessageBubbleContainer.tsx'
 import { MessageList } from './MessageList.tsx'
-import type { MessageListContainerProps } from './MessageList.types.ts'
 
-export function MessageListContainer({
-  messages,
-}: MessageListContainerProps): React.ReactElement {
-  const items = messages.map((message) => (
+export function MessageListContainer(): React.ReactElement {
+  const { threadMessages } = useMessageThreadContext()
+
+  const items = threadMessages.map((message) => (
     <MessageBubbleContainer
       key={'clientMessageId' in message ? message.clientMessageId : message.id}
       message={message}

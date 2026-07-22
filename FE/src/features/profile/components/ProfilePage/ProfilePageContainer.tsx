@@ -2,6 +2,7 @@ import { AvatarCardContainer } from './components/AvatarCard/AvatarCardContainer
 import { EmailChangeRequestCardContainer } from './components/EmailChangeRequestCard/EmailChangeRequestCardContainer.tsx'
 import { NameCardContainer } from './components/NameCard/NameCardContainer.tsx'
 import { PreviousEmailsCardContainer } from './components/PreviousEmailsCard/PreviousEmailsCardContainer.tsx'
+import { SubscriptionCardContainer } from './components/SubscriptionCard/SubscriptionCardContainer.tsx'
 import { ProfilePage } from './ProfilePage.tsx'
 
 export function ProfilePageContainer(): React.ReactElement {
@@ -11,6 +12,7 @@ export function ProfilePageContainer(): React.ReactElement {
       nameCard={<NameCardContainer />}
       emailChangeCard={<EmailChangeRequestCardContainer />}
       previousEmailsCard={<PreviousEmailsCardContainer />}
+      subscriptionCard={<SubscriptionCardContainer />}
     />
   )
 }

@@ -19,6 +19,10 @@ import { RequestEmailChangeModule } from '../request-email-change/request-email-
 import { ConfirmEmailChangeModule } from '../confirm-email-change/confirm-email-change.module.js'
 import { RequestPasswordResetModule } from '../request-password-reset/request-password-reset.module.js'
 import { ConfirmPasswordResetModule } from '../confirm-password-reset/confirm-password-reset.module.js'
+import { ListPlansModule } from '../list-plans/list-plans.module.js'
+import { GetSubscriptionModule } from '../get-subscription/get-subscription.module.js'
+import { CreatePaymentSessionModule } from '../create-payment-session/create-payment-session.module.js'
+import { ReceivePaymentWebhookModule } from '../receive-payment-webhook/receive-payment-webhook.module.js'
 import { AuthController } from './auth.controller.js'
 import { CurrentUserController } from './current-user.controller.js'
 import { EmailChangeController } from './email-change.controller.js'
@@ -27,6 +31,7 @@ import { AvatarController } from './avatar.controller.js'
 import { ConversationsController } from './conversations.controller.js'
 import { MessagesController } from './messages.controller.js'
 import { KnowledgeDocumentsController } from './knowledge-documents.controller.js'
+import { PlansController } from './plans.controller.js'
 import { ConversationParticipantGuard } from './guard/conversation-participant.guard.js'
 
 @Module({
@@ -51,6 +56,10 @@ import { ConversationParticipantGuard } from './guard/conversation-participant.g
     ConfirmEmailChangeModule,
     RequestPasswordResetModule,
     ConfirmPasswordResetModule,
+    ListPlansModule,
+    GetSubscriptionModule,
+    CreatePaymentSessionModule,
+    ReceivePaymentWebhookModule,
   ],
   controllers: [
     AuthController,
@@ -61,6 +70,7 @@ import { ConversationParticipantGuard } from './guard/conversation-participant.g
     ConversationsController,
     MessagesController,
     KnowledgeDocumentsController,
+    PlansController,
   ],
   providers: [ConversationParticipantGuard],
 })

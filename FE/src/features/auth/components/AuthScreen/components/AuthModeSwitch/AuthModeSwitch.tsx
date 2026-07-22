@@ -1,23 +1,20 @@
 import { AUTH_MODE_SWITCH_CLASS } from './AuthModeSwitch.constants.ts'
-import type { AuthModeSwitchProps } from './AuthModeSwitch.types.ts'
+import { useAuthScreenContext } from '../../context/useAuthScreenContext.tsx'
 import './AuthModeSwitch.css'
 
-export function AuthModeSwitch({
-  prompt,
-  cta,
-  disabled,
-  onToggle,
-}: AuthModeSwitchProps): React.ReactElement {
+export function AuthModeSwitch(): React.ReactElement {
+  const { copy, isSubmitting, toggleMode } = useAuthScreenContext()
+
   return (
     <p className={AUTH_MODE_SWITCH_CLASS.text}>
-      {prompt}{' '}
+      {copy.switchPrompt}{' '}
       <button
         type="button"
         className={AUTH_MODE_SWITCH_CLASS.button}
-        disabled={disabled}
-        onClick={onToggle}
+        disabled={isSubmitting}
+        onClick={toggleMode}
       >
-        {cta}
+        {copy.switchCta}
       </button>
     </p>
   )

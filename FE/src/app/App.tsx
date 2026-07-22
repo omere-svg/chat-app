@@ -6,6 +6,7 @@ import { ProfilePageContainer } from '../features/profile/components/ProfilePage
 import { EmailChangeConfirmScreenContainer } from '../features/email-change/components/EmailChangeConfirmScreen/EmailChangeConfirmScreenContainer.tsx'
 import { ForgotPasswordScreenContainer } from '../features/password-reset/components/ForgotPasswordScreen/ForgotPasswordScreenContainer.tsx'
 import { ResetPasswordScreenContainer } from '../features/password-reset/components/ResetPasswordScreen/ResetPasswordScreenContainer.tsx'
+import { SubscriptionCallbackScreenContainer } from '../features/subscription/components/SubscriptionCallbackScreen/SubscriptionCallbackScreenContainer.tsx'
 import { ChatLayoutContainer } from './components/ChatLayout/ChatLayoutContainer.tsx'
 import {
   CHAT_ROUTE,
@@ -14,6 +15,7 @@ import {
   LOGIN_ROUTE,
   PROFILE_ROUTE,
   RESET_PASSWORD_ROUTE,
+  SUBSCRIPTION_CALLBACK_ROUTE,
 } from './constants/routes.ts'
 
 function App(): React.ReactElement {
@@ -58,6 +60,16 @@ function App(): React.ReactElement {
         path={RESET_PASSWORD_ROUTE}
         element={
           isAuthenticated ? <Navigate to={CHAT_ROUTE} replace /> : <ResetPasswordScreenContainer />
+        }
+      />
+      <Route
+        path={SUBSCRIPTION_CALLBACK_ROUTE}
+        element={
+          isAuthenticated ? (
+            <SubscriptionCallbackScreenContainer />
+          ) : (
+            <Navigate to={LOGIN_ROUTE} replace />
+          )
         }
       />
       <Route
