@@ -1,25 +1,21 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type { OnModuleInit } from '@nestjs/common'
-import { CONVERSATION_REPOSITORY } from '../conversations/conversation.repository.js'
-import { MESSAGE_REPOSITORY } from '../messages/message.repository.js'
-import { PasswordHasher } from '../users/password-hasher.js'
-import { USER_REPOSITORY } from '../users/user.repository.js'
+import { ConversationsService } from '../conversations/conversations.service.js'
+import { MessagesService } from '../messages/messages.service.js'
+import { UsersService } from '../users/users.service.js'
 import { CHAT_SEED, DEMO_USERS, DEMO_USER_PASSWORD } from '../../shared/seed/chat-seed.js'
-import type { ConversationRepository } from '../conversations/conversation.repository.js'
-import type { MessageRepository } from '../messages/message.repository.js'
-import type { UserRepository } from '../users/user.repository.js'
 import type { AppEnvironment } from '../../config/environment.types.js'
+import type { MessageRecord } from '../messages/types/message.entity.js'
 
 @Injectable()
 export class DemoDataSeeder implements OnModuleInit {
   private readonly logger = new Logger(DemoDataSeeder.name)
 
   constructor(
-    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
-    @Inject(CONVERSATION_REPOSITORY) private readonly conversationRepository: ConversationRepository,
-    @Inject(MESSAGE_REPOSITORY) private readonly messageRepository: MessageRepository,
-    private readonly passwordHasher: PasswordHasher,
+    private readonly usersService: UsersService,
+    private readonly conversationsService: ConversationsService,
+    private readonly messagesService: MessagesService,
     private readonly configService: ConfigService<AppEnvironment, true>,
   ) {}
 
@@ -28,54 +24,27 @@ export class DemoDataSeeder implements OnModuleInit {
       return
     }
 
-    await this.seedUsers()
-    await this.seedConversations()
-    await this.seedMessages()
+    const seededUsers = await this.usersService.seedDemoUsersIfEmpty(DEMO_USERS, DEMO_USER_PASSWORD)
+    if (seededUsers > 0) {
+      this.logger.log(`Seeded ${seededUsers.toString()} demo users`)
+    }
+
+    const seededConversations = await this.conversationsService.seedIfEmpty(CHAT_SEED.conversations)
+    if (seededConversations > 0) {
+      this.logger.log(`Seeded ${seededConversations.toString()} demo conversations`)
+    }
+
+    const seededMessages = await this.messagesService.seedIfEmpty(this.collectSeedMessages())
+    if (seededMessages > 0) {
+      this.logger.log(`Seeded ${seededMessages.toString()} demo messages`)
+    }
   }
 
-  private async seedUsers(): Promise<void> {
-    if (!(await this.userRepository.isEmpty())) {
-      return
+  private collectSeedMessages(): MessageRecord[] {
+    const messages: MessageRecord[] = []
+    for (const conversationMessages of CHAT_SEED.messagesByConversationId.values()) {
+      messages.push(...conversationMessages)
     }
-
-    const passwordHash = await this.passwordHasher.hash(DEMO_USER_PASSWORD)
-    for (const demoUser of DEMO_USERS) {
-      await this.userRepository.insert({
-        id: demoUser.id,
-        email: demoUser.email,
-        firstName: demoUser.firstName,
-        lastName: demoUser.lastName,
-        passwordHash,
-        avatar: null,
-        previousEmails: [],
-      })
-    }
-    this.logger.log(`Seeded ${DEMO_USERS.length.toString()} demo users`)
-  }
-
-  private async seedConversations(): Promise<void> {
-    if (!(await this.conversationRepository.isEmpty())) {
-      return
-    }
-
-    for (const conversation of CHAT_SEED.conversations) {
-      await this.conversationRepository.insert(conversation)
-    }
-    this.logger.log(`Seeded ${CHAT_SEED.conversations.length.toString()} demo conversations`)
-  }
-
-  private async seedMessages(): Promise<void> {
-    if (!(await this.messageRepository.isEmpty())) {
-      return
-    }
-
-    let seededCount = 0
-    for (const messages of CHAT_SEED.messagesByConversationId.values()) {
-      for (const message of messages) {
-        await this.messageRepository.insert(message)
-        seededCount += 1
-      }
-    }
-    this.logger.log(`Seeded ${seededCount.toString()} demo messages`)
+    return messages
   }
 }

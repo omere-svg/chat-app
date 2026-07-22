@@ -18,6 +18,17 @@ export class MessagesService {
     @Inject(MESSAGE_REPOSITORY) private readonly messageRepository: MessageRepository,
   ) {}
 
+  async seedIfEmpty(messages: readonly MessageRecord[]): Promise<number> {
+    if (!(await this.messageRepository.isEmpty())) {
+      return 0
+    }
+
+    for (const message of messages) {
+      await this.messageRepository.insert(message)
+    }
+    return messages.length
+  }
+
   async listMessages(
     conversationId: string,
     query: ListMessagesQueryDto,
