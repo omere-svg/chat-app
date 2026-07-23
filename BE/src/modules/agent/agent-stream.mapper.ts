@@ -1,6 +1,6 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { AGENT_EVENT, AGENT_NODE } from './constants.js'
-import { extractTextContent } from './agent-events.js'
+import { extractTextContent } from './message-content.js'
 import type { BaseMessage, MessageContent } from '@langchain/core/messages'
 import type { StreamEvent } from '@langchain/core/tracers/log_stream'
 import type { MessageCitation } from '../../modules/messages/types/message.entity.js'

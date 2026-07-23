@@ -5,7 +5,7 @@ import {
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
   NON_WHITESPACE_PATTERN,
-} from '../../../shared/validation/field-constraints.constant.js'
+} from '../../../shared/validation/field-constraints.constants.js'
 
 export class SignupDto {
   @IsEmail()

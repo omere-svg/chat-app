@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
-import { fullName } from '@/types/domain.utils.ts'
+import { getFullName } from '@/types/domain.utils.ts'
 import type {
   SidebarUserChipContextValue,
   SidebarUserChipProviderProps,
@@ -14,7 +14,7 @@ export function SidebarUserChipProvider({
   const { currentUser } = useAuth()
 
   const value: SidebarUserChipContextValue = {
-    userName: currentUser ? fullName(currentUser) : '',
+    userName: currentUser ? getFullName(currentUser) : '',
     avatarUrl: currentUser?.avatarUrl ?? null,
   }
 

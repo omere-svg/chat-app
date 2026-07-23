@@ -17,7 +17,7 @@ export const EMAIL_CHANGE_CONFIRM_TEXT = {
   backToProfile: 'Back to profile',
 } as const
 
-export const CONFIRM_EMAIL_TOKEN_PARAM = 'token'
+export const EMAIL_CHANGE_CONFIRM_TOKEN_PARAM = 'token'
 
 export const EMAIL_CHANGE_CONFIRM_CLASS = {
   screen: 'email-change-confirm-screen',

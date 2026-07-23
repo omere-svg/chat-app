@@ -2,8 +2,8 @@ import { Catch, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
 import type { Response } from 'express'
 import { AppException } from './app.exception.js'
-import { ERROR_CODES } from './error-codes.constant.js'
-import type { ErrorCode } from './error-codes.constant.js'
+import { ERROR_CODES } from './error-codes.constants.js'
+import type { ErrorCode } from './error-codes.constants.js'
 import type { StructuredErrorResponse } from './types/structured-error-response.js'
 
 const KNOWN_ERROR_CODES: ReadonlySet<string> = new Set<string>(Object.values(ERROR_CODES))

@@ -4,7 +4,7 @@ import { CONVERSATION_ITEM_TEXT } from '../ConversationListItem.constants.ts'
 import {
   badgeLabelForType,
   conversationItemClassName,
-} from '../ConversationListItem.utils.ts'
+} from '../ConversationListItem.presenters.ts'
 import type {
   ConversationItemContextValue,
   ConversationItemProviderProps,

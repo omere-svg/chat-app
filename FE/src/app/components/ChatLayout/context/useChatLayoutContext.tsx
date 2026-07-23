@@ -23,7 +23,7 @@ export function ChatLayoutProvider({
       : null
   const selectedConversationId = userSelectedConversationId ?? defaultConversationId
 
-  function handleConversationCreated(conversationId: string): void {
+  function selectCreatedConversation(conversationId: string): void {
     setUserSelectedConversationId(conversationId)
     reloadConversations({ quiet: true })
   }
@@ -34,7 +34,7 @@ export function ChatLayoutProvider({
     selectedConversationId,
     selectConversation: setUserSelectedConversationId,
     reloadConversations,
-    handleConversationCreated,
+    selectCreatedConversation,
   }
 
   return <ChatLayoutContext.Provider value={value}>{children}</ChatLayoutContext.Provider>

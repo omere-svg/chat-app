@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common'
 import { AppException } from '../../../shared/errors/app.exception.js'
-import { ERROR_CODES } from '../../../shared/errors/error-codes.constant.js'
+import { ERROR_CODES } from '../../../shared/errors/error-codes.constants.js'
 
 export class MissingAuthenticatedUserError extends AppException {
   constructor() {

@@ -1,5 +1,5 @@
 import { AIMessage } from '@langchain/core/messages'
-import { extractTextContent } from '../agent-events.js'
+import { extractTextContent } from '../message-content.js'
 import type { ChatOpenAI } from '@langchain/openai'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { AgentState, AgentStateUpdate } from '../types/agent-state.js'

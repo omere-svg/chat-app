@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { USER_COLLECTION_NAME, USER_EMAIL_INDEX_NAME } from '../src/modules/users/constants.js'
-import { migrateUserEmailIndex } from '../src/modules/users/user-email-index.mongo.repository.js'
+import { migrateUserEmailIndex } from '../src/modules/users/user-email-index.migration.js'
 
 async function main(): Promise<void> {
   const uri = process.env.MONGO_URI

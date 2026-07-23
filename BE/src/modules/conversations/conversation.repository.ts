@@ -9,7 +9,7 @@ export interface ConversationRepository {
 
   findByParticipantSortedByActivity(userId: string): Promise<ConversationRecord[]>
 
-  findByParticipantSet(participantIds: readonly string[]): Promise<ConversationRecord | null>
+  findByExactParticipants(participantIds: readonly string[]): Promise<ConversationRecord | null>
 
   insert(conversation: ConversationRecord): Promise<ConversationRecord>
 

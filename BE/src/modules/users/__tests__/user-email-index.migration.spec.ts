@@ -7,7 +7,7 @@ import {
   USER_EMAIL_COLLATION,
   USER_EMAIL_INDEX_NAME,
 } from '../constants.js'
-import { migrateUserEmailIndex } from '../user-email-index.mongo.repository.js'
+import { migrateUserEmailIndex } from '../user-email-index.migration.js'
 
 describe('migrateUserEmailIndex', () => {
   let mongoServer: MongoMemoryServer

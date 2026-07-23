@@ -4,7 +4,7 @@ import {
   MOCK_EMAIL_CHANGE_TOKEN_PREFIX,
 } from "./constants.ts";
 import { isValidEmail } from "../shared/validation/isValidEmail.ts";
-import { fullName } from "../types/domain.utils.ts";
+import { getFullName } from "../types/domain.utils.ts";
 import type {
   ConversationParticipant,
   ConversationPreview,
@@ -349,7 +349,7 @@ function deriveDirectTitle(conversation: ConversationPreview): string {
     .sort()
     .map((participantId) => {
       const user = findUserById(participantId);
-      return user ? fullName(user) : null;
+      return user ? getFullName(user) : null;
     });
   if (names.some((name) => name === null)) {
     return conversation.title;
@@ -398,7 +398,7 @@ export function clearUserAvatar(userId: string): StoredUser | null {
   return user;
 }
 
-export function userInConversation(
+export function isUserInConversation(
   userId: string,
   conversationId: string,
 ): boolean {

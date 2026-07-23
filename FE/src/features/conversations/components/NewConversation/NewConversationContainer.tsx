@@ -2,7 +2,7 @@ import { NewConversationActions } from './components/NewConversationActions/NewC
 import { NewConversationProvider } from './context/useNewConversationContext.tsx'
 import { NewConversationForm } from './NewConversationForm.tsx'
 
-export function NewConversationFormContainer(): React.ReactElement {
+export function NewConversationContainer(): React.ReactElement {
   return (
     <NewConversationProvider>
       <NewConversationForm />

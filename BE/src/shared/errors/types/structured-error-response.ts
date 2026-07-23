@@ -1,4 +1,4 @@
-import type { ErrorCode } from '../error-codes.constant.js'
+import type { ErrorCode } from '../error-codes.constants.js'
 
 export interface StructuredErrorResponse {
   error: {

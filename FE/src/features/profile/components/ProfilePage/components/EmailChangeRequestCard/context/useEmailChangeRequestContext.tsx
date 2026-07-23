@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { useRequestEmailChange } from '../hooks/useRequestEmailChange.ts'
+import { useEmailChangeRequest } from '../hooks/useEmailChangeRequest.ts'
 import type {
   EmailChangeRequestProviderProps,
   UseEmailChangeRequestValue,
@@ -10,7 +10,7 @@ const EmailChangeRequestContext = createContext<UseEmailChangeRequestValue | nul
 export function EmailChangeRequestProvider({
   children,
 }: EmailChangeRequestProviderProps): React.ReactElement {
-  const value = useRequestEmailChange()
+  const value = useEmailChangeRequest()
 
   return (
     <EmailChangeRequestContext.Provider value={value}>

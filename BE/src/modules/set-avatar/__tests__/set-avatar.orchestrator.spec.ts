@@ -54,7 +54,7 @@ describe('SetAvatarOrchestrator', () => {
       byteSize: 10,
     })
 
-    await expect(orchestrator.confirm('user-1', 'avatars/user-2')).rejects.toBeInstanceOf(
+    await expect(orchestrator.set('user-1', 'avatars/user-2')).rejects.toBeInstanceOf(
       AvatarKeyForbiddenError,
     )
     expect(headObject).not.toHaveBeenCalled()
@@ -63,7 +63,7 @@ describe('SetAvatarOrchestrator', () => {
   it('rejects when the uploaded object is missing', async () => {
     const { orchestrator, updateAvatar } = buildOrchestrator(null)
 
-    await expect(orchestrator.confirm('user-1', OWNED_KEY)).rejects.toBeInstanceOf(
+    await expect(orchestrator.set('user-1', OWNED_KEY)).rejects.toBeInstanceOf(
       AvatarObjectNotFoundError,
     )
     expect(updateAvatar).not.toHaveBeenCalled()
@@ -75,7 +75,7 @@ describe('SetAvatarOrchestrator', () => {
       byteSize: MAX_AVATAR_BYTES + 1,
     })
 
-    await expect(orchestrator.confirm('user-1', OWNED_KEY)).rejects.toBeInstanceOf(
+    await expect(orchestrator.set('user-1', OWNED_KEY)).rejects.toBeInstanceOf(
       AvatarTooLargeError,
     )
     expect(deleteObjectQuietly).toHaveBeenCalledWith(OWNED_KEY)
@@ -88,7 +88,7 @@ describe('SetAvatarOrchestrator', () => {
       byteSize: 10,
     })
 
-    await expect(orchestrator.confirm('user-1', OWNED_KEY)).rejects.toBeInstanceOf(
+    await expect(orchestrator.set('user-1', OWNED_KEY)).rejects.toBeInstanceOf(
       UnsupportedImageTypeError,
     )
     expect(deleteObjectQuietly).toHaveBeenCalledWith(OWNED_KEY)
@@ -100,7 +100,7 @@ describe('SetAvatarOrchestrator', () => {
       byteSize: 2048,
     })
 
-    const result = await orchestrator.confirm('user-1', OWNED_KEY)
+    const result = await orchestrator.set('user-1', OWNED_KEY)
 
     expect(resolve).toHaveBeenCalledWith(OWNED_KEY, expect.any(String))
     expect(updateAvatar).toHaveBeenCalledWith('user-1', { srcUrl: RESOLVED_URL, key: OWNED_KEY })

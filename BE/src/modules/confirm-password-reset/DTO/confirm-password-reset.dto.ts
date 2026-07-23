@@ -3,7 +3,7 @@ import {
   MAX_EMAIL_LENGTH,
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
-} from '../../../shared/validation/field-constraints.constant.js'
+} from '../../../shared/validation/field-constraints.constants.js'
 import { OTP_CODE_LENGTH } from '../../password-reset-otp/constants.js'
 import { NUMERIC_CODE_PATTERN } from '../constants.js'
 

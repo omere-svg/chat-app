@@ -19,7 +19,7 @@ export class SetAvatarOrchestrator {
     private readonly avatarUrlResolver: AvatarUrlResolver,
   ) {}
 
-  async confirm(userId: string, key: string): Promise<AvatarResult> {
+  async set(userId: string, key: string): Promise<AvatarResult> {
     if (!isAvatarKeyOwnedBy(userId, key)) {
       throw new AvatarKeyForbiddenError()
     }

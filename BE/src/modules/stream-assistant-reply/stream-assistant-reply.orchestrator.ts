@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { ERROR_CODES } from '../../shared/errors/error-codes.constant.js'
+import { ERROR_CODES } from '../../shared/errors/error-codes.constants.js'
 import { ConversationsService } from '../conversations/conversations.service.js'
 import { MessagesService } from '../messages/messages.service.js'
 import { ReplyStrategyRegistry } from '../agent/reply-strategy.registry.js'

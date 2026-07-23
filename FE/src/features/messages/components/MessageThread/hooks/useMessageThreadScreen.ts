@@ -6,7 +6,7 @@ import { useToast } from '@/features/toast/hooks/useToast.ts'
 import { useMessages } from '@/features/messages/hooks/useMessages.ts'
 import { getThreadScrollAnchorId } from '@/features/messages/utils/deriveThreadViewState.ts'
 import { ASSISTANT_DISPLAY_NAME, ASSISTANT_SENDER_ID } from '@/types/domain.constants.ts'
-import { fullName } from '@/types/domain.utils.ts'
+import { getFullName } from '@/types/domain.utils.ts'
 import type { SenderProfile } from '@/features/messages/context/senders.types.ts'
 import type { UseMessageThreadScreenValue } from '../context/useMessageThreadContext.types.ts'
 
@@ -29,14 +29,14 @@ export function useMessageThreadScreen(): UseMessageThreadScreenValue {
   for (const participant of selectedConversation?.participants ?? []) {
     sendersById.set(participant.id, {
       id: participant.id,
-      name: fullName(participant),
+      name: getFullName(participant),
       avatarUrl: participant.avatarUrl ?? null,
     })
   }
   if (currentUser) {
     sendersById.set(currentUser.id, {
       id: currentUser.id,
-      name: fullName(currentUser),
+      name: getFullName(currentUser),
       avatarUrl: currentUser.avatarUrl ?? null,
     })
   }

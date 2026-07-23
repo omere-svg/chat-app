@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMessageBubbleContext } from '../MessageBubble/context/useMessageBubbleContext.tsx'
 import { CitationItem } from './components/CitationItem/CitationItem.tsx'
 import { MessageCitations } from './MessageCitations.tsx'
-import { toPreview } from './MessageCitations.utils.ts'
+import { formatCitationPreview } from './MessageCitations.utils.ts'
 
 export function MessageCitationsContainer(): React.ReactElement | null {
   const { citations } = useMessageBubbleContext()
@@ -20,7 +20,7 @@ export function MessageCitationsContainer(): React.ReactElement | null {
         panelId={`citation-${citation.chunkId}`}
         documentName={citation.documentName}
         scoreLabel={`${Math.round(citation.score * 100).toString()}%`}
-        preview={toPreview(citation.text)}
+        preview={formatCitationPreview(citation.text)}
         text={citation.text}
         isOpen={isOpen}
         onToggle={() => setOpenChunkId(isOpen ? null : citation.chunkId)}

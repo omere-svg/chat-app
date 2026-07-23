@@ -36,7 +36,7 @@ export class MessagesController {
     @Headers('x-simulate-failure') simulateFailureHeader: string | undefined,
     @Res() response: Response,
   ): Promise<void> {
-    return this.sendMessageOrchestrator.handle(response, {
+    return this.sendMessageOrchestrator.sendMessageToResponse(response, {
       senderId: currentUser.id,
       conversation,
       sendMessageDto,

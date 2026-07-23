@@ -28,7 +28,7 @@ export class UploadDocumentOrchestrator {
   constructor(
     private readonly documentService: KnowledgeDocumentService,
     private readonly chunkService: KnowledgeChunkService,
-    @Inject(EMBEDDINGS_PROVIDER) private readonly embeddings: EmbeddingsProvider,
+    @Inject(EMBEDDINGS_PROVIDER) private readonly embeddingsProvider: EmbeddingsProvider,
     private readonly textChunker: TextChunker,
   ) {}
 
@@ -67,8 +67,8 @@ export class UploadDocumentOrchestrator {
       throw new NoExtractableTextError()
     }
 
-    const embeddings = await this.embeddings.embedDocuments(chunkTexts)
-    if (embeddings.length !== chunkTexts.length) {
+    const chunkEmbeddings = await this.embeddingsProvider.embedDocuments(chunkTexts)
+    if (chunkEmbeddings.length !== chunkTexts.length) {
       throw new EmbeddingCountMismatchError()
     }
 
@@ -81,7 +81,7 @@ export class UploadDocumentOrchestrator {
       documentName: file.originalname,
       chunkIndex,
       text: chunkText,
-      embedding: embeddings[chunkIndex] ?? [],
+      embedding: chunkEmbeddings[chunkIndex] ?? [],
     }))
 
     const documentRecord: KnowledgeDocumentRecord = {

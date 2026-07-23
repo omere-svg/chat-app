@@ -35,11 +35,11 @@ export class CreateConversationOrchestrator {
       case 'tutor':
         return this.createTutor(creatorUserId, createConversationDto.title)
       default:
-        return this.create(creatorUserId, createConversationDto)
+        return this.createDirect(creatorUserId, createConversationDto)
     }
   }
 
-  async create(
+  async createDirect(
     creatorUserId: string,
     createConversationDto: CreateConversationDto,
   ): Promise<ConversationPreview> {

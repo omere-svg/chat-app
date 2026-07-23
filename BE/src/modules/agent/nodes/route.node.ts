@@ -1,6 +1,6 @@
 import { MAX_TOOL_ROUNDS, RETRIEVE_KNOWLEDGE_TOOL } from '../constants.js'
 import { readAgentConfigurable } from '../agent.config.js'
-import { getToolCalls } from '../agent-events.js'
+import { getToolCalls } from '../message-content.js'
 import type { ChatOpenAI } from '@langchain/openai'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { AgentToolDefinition } from '../types/agent-tool.js'
