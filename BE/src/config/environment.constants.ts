@@ -1,8 +1,42 @@
 import type {
   AppEnvironment,
+  NodeEnvironment,
   PaymentProviderKind,
   PaymentQueueKind,
 } from './environment.types.js'
+
+export const MIN_JWT_SECRET_LENGTH = 32
+
+export const MIN_TCP_PORT = 1
+
+export const MAX_TCP_PORT = 65_535
+
+export const MIN_JWT_EXPIRY_SECONDS = 60
+
+export const MAX_JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30
+
+export const MIN_ASSISTANT_MAX_TOKENS = 256
+
+export const MAX_ASSISTANT_MAX_TOKENS = 16_384
+
+export const DEFAULT_ASSISTANT_MODEL = 'gpt-4o-mini'
+
+export const DEFAULT_ASSISTANT_MAX_TOKENS = 1024
+
+export const DEFAULT_EMBEDDINGS_MODEL = 'text-embedding-3-small'
+
+export const DEFAULT_AWS_REGION = 'us-east-1'
+
+export const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
+
+export const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
+
+export const REQUIRED_STORAGE_KEYS: readonly (keyof AppEnvironment)[] = [
+  'S3_AVATAR_BUCKET',
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
+  'AVATAR_CDN_BASE_URL',
+]
 
 export const DEFAULT_EMAIL_CHANGE_JWT_EXPIRES_IN = 60 * 30
 

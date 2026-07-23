@@ -8,7 +8,7 @@ import { EmailAlreadyRegisteredError } from './errors/email-already-registered.e
 import { UserNotFoundError } from './errors/user-not-found.error.js'
 import { UnknownParticipantEmailsError } from './errors/unknown-participant-emails.error.js'
 import { normalizeEmail } from '../../shared/validation/normalize-email.js'
-import type { DemoUserSeed } from '../../shared/seed/chat-seed.js'
+import type { DemoUserSeed } from '../../shared/seed/types/demo-user-seed.js'
 import type { UserRepository } from './user.repository.js'
 import type { User } from './types/user.js'
 import type { StoredAvatar } from './types/stored-avatar.js'

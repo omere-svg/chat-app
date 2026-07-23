@@ -3,14 +3,28 @@ import { IsIn, IsInt, IsOptional, IsString, IsUrl, Matches, Max, Min, MinLength,
 import type { ValidationError } from 'class-validator'
 import { DEFAULT_ATLAS_VECTOR_INDEX } from '../modules/knowledge-rag/atlas/vector-index.config.js'
 import {
+  DEFAULT_ASSISTANT_MAX_TOKENS,
+  DEFAULT_ASSISTANT_MODEL,
+  DEFAULT_AWS_REGION,
   DEFAULT_EMAIL_CHANGE_JWT_EXPIRES_IN,
+  DEFAULT_EMBEDDINGS_MODEL,
+  DEFAULT_NODE_ENV,
   DEFAULT_PAYMENT_PROVIDER_KIND,
   DEFAULT_PAYMENT_QUEUE_KIND,
+  MAX_ASSISTANT_MAX_TOKENS,
+  MAX_JWT_EXPIRY_SECONDS,
+  MAX_TCP_PORT,
+  MIN_ASSISTANT_MAX_TOKENS,
+  MIN_JWT_EXPIRY_SECONDS,
+  MIN_JWT_SECRET_LENGTH,
+  MIN_TCP_PORT,
+  NODE_ENVIRONMENTS,
   PAYMENT_PROVIDER_KINDS,
   PAYMENT_QUEUE_KINDS,
   REQUIRED_EMAIL_INTEGRATION_KEYS,
   REQUIRED_RAPYD_KEYS,
   REQUIRED_SQS_KEYS,
+  REQUIRED_STORAGE_KEYS,
 } from './environment.constants.js'
 import type {
   AppEnvironment,
@@ -18,22 +32,6 @@ import type {
   PaymentProviderKind,
   PaymentQueueKind,
 } from './environment.types.js'
-
-const MIN_JWT_SECRET_LENGTH = 32
-const MIN_TCP_PORT = 1
-const MAX_TCP_PORT = 65_535
-const MIN_JWT_EXPIRY_SECONDS = 60
-const MAX_JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30
-
-const MIN_ASSISTANT_MAX_TOKENS = 256
-const MAX_ASSISTANT_MAX_TOKENS = 16_384
-const DEFAULT_ASSISTANT_MODEL = 'gpt-4o-mini'
-const DEFAULT_ASSISTANT_MAX_TOKENS = 1024
-const DEFAULT_EMBEDDINGS_MODEL = 'text-embedding-3-small'
-const DEFAULT_AWS_REGION = 'us-east-1'
-
-const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
-const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
 
 class EnvironmentVariablesSchema implements AppEnvironment {
   @IsOptional()
@@ -159,13 +157,6 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @IsString()
   SQS_PAYMENT_QUEUE_URL!: string
 }
-
-const REQUIRED_STORAGE_KEYS: readonly (keyof AppEnvironment)[] = [
-  'S3_AVATAR_BUCKET',
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
-  'AVATAR_CDN_BASE_URL',
-]
 
 function assertStorageConfiguredInProduction(environment: AppEnvironment): void {
   if (environment.NODE_ENV !== 'production') {
