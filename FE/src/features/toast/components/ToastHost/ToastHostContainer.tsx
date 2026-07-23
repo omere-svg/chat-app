@@ -6,7 +6,7 @@ export function ToastHostContainer(): React.ReactElement {
   const { toastNotifications } = useToast()
 
   const toastItems = toastNotifications.map((toast) => (
-    <ToastItemContainer key={toast.id} id={toast.id} />
+    <ToastItemContainer key={toast.id} toast={toast} />
   ))
 
   return <ToastStack>{toastItems}</ToastStack>

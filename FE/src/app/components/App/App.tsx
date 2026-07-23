@@ -4,7 +4,6 @@ import { ProfilePage } from '@/features/profile/components/ProfilePage/ProfilePa
 import { EmailChangeConfirmScreenContainer } from '@/features/email-change/components/EmailChangeConfirmScreen/EmailChangeConfirmScreenContainer.tsx'
 import { ForgotPasswordScreenContainer } from '@/features/password-reset/components/ForgotPasswordScreen/ForgotPasswordScreenContainer.tsx'
 import { ResetPasswordScreenContainer } from '@/features/password-reset/components/ResetPasswordScreen/ResetPasswordScreenContainer.tsx'
-import { SubscriptionCallbackScreenContainer } from '@/features/subscription/components/SubscriptionCallbackScreen/SubscriptionCallbackScreenContainer.tsx'
 import { ChatLayoutContainer } from '@/app/components/ChatLayout/ChatLayoutContainer.tsx'
 import {
   CHAT_ROUTE,
@@ -13,7 +12,6 @@ import {
   LOGIN_ROUTE,
   PROFILE_ROUTE,
   RESET_PASSWORD_ROUTE,
-  SUBSCRIPTION_CALLBACK_ROUTE,
   WILDCARD_ROUTE,
 } from '@/app/constants/routes.ts'
 import { DefaultRedirect } from './components/DefaultRedirect/DefaultRedirect.tsx'
@@ -62,14 +60,6 @@ export function App(): React.ReactElement {
           <RedirectWhenAuthenticated>
             <ResetPasswordScreenContainer />
           </RedirectWhenAuthenticated>
-        }
-      />
-      <Route
-        path={SUBSCRIPTION_CALLBACK_ROUTE}
-        element={
-          <RequireAuth>
-            <SubscriptionCallbackScreenContainer />
-          </RequireAuth>
         }
       />
       <Route path={WILDCARD_ROUTE} element={<DefaultRedirect />} />

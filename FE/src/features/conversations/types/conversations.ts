@@ -12,5 +12,5 @@ export type ReloadConversationsOptions = {
 
 export type UseConversationsValue = {
   conversationsState: ConversationsViewState
-  reloadConversations: (options?: ReloadConversationsOptions) => void
+  reloadConversations: (options?: ReloadConversationsOptions) => Promise<void>
 }

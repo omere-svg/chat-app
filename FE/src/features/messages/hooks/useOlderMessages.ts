@@ -1,65 +1,58 @@
-import type { Dispatch, RefObject } from "react";
-import { MESSAGE_PAGE_LIMIT } from "@/api/constants.ts";
-import { apiClient, ApiError } from "@/api/apiClient.ts";
-import { MESSAGE_ERROR } from "../constants/messages.ts";
-import type {
-  MessagesAction,
-  MessagesState,
-} from "../utils/messageReducer.ts";
+import type { Dispatch, RefObject } from 'react'
+import { MESSAGE_PAGE_LIMIT } from '@/api/constants.ts'
+import { apiClient, ApiError } from '@/api/apiClient.ts'
+import { MESSAGE_ERROR } from '../constants/messages.ts'
+import type { MessagesAction, MessagesState } from '../types/messagesState.ts'
+import type { UseOlderMessagesValue } from '../types/messageThread.ts'
 
 export function useOlderMessages(
   conversationId: string | null,
   state: MessagesState,
   dispatch: Dispatch<MessagesAction>,
   activeConversationIdRef: RefObject<string | null>,
-): {
-  loadOlderMessages: () => void;
-  hasMoreOlderMessages: boolean;
-  isLoadingOlderMessages: boolean;
-  loadOlderMessagesError: string | null;
-} {
+): UseOlderMessagesValue {
   function loadOlderMessages(): void {
     if (
       !conversationId ||
       !state.nextCursor ||
-      state.status === "loading-more"
+      state.status === 'loading-more'
     ) {
-      return;
+      return
     }
 
-    const targetConversationId = conversationId;
-    const olderMessagesCursor = state.nextCursor;
+    const targetConversationId = conversationId
+    const olderMessagesCursor = state.nextCursor
 
     void (async (): Promise<void> => {
-      dispatch({ type: "FETCH_MORE_START" });
+      dispatch({ type: 'FETCH_MORE_START' })
       try {
         const { messages, nextCursor } = await apiClient.getMessages(
           targetConversationId,
           { cursor: olderMessagesCursor, limit: MESSAGE_PAGE_LIMIT },
-        );
+        )
         if (activeConversationIdRef.current !== targetConversationId) {
-          return;
+          return
         }
         dispatch({
-          type: "FETCH_MORE_SUCCESS",
+          type: 'FETCH_MORE_SUCCESS',
           messages,
           nextCursor,
-        });
+        })
       } catch (err) {
         if (activeConversationIdRef.current !== targetConversationId) {
-          return;
+          return
         }
         const errorMessage =
-          err instanceof ApiError ? err.message : MESSAGE_ERROR.loadOlder;
-        dispatch({ type: "FETCH_MORE_ERROR", error: errorMessage });
+          err instanceof ApiError ? err.message : MESSAGE_ERROR.loadOlder
+        dispatch({ type: 'FETCH_MORE_ERROR', error: errorMessage })
       }
-    })();
+    })()
   }
 
   return {
     loadOlderMessages,
     hasMoreOlderMessages: state.nextCursor !== null,
-    isLoadingOlderMessages: state.status === "loading-more",
+    isLoadingOlderMessages: state.status === 'loading-more',
     loadOlderMessagesError: state.loadMoreError,
-  };
+  }
 }

@@ -7,7 +7,7 @@ import { AppModule } from './app.module.js'
 import type { AppEnvironment } from './config/environment.types.js'
 
 async function bootstrap(): Promise<void> {
-  const application = await NestFactory.create(AppModule, { rawBody: true })
+  const application = await NestFactory.create(AppModule)
   const configService = application.get<ConfigService<AppEnvironment, true>>(ConfigService)
 
   applyGlobalApiContract(application)

@@ -1,4 +1,3 @@
-import { ACCEPTED_UPLOAD_LABEL } from '@/features/knowledge/constants/knowledge.ts'
 import {
   KNOWLEDGE_PANEL_HEADER_CLASS,
   KNOWLEDGE_PANEL_HEADER_TEXT,
@@ -12,8 +11,7 @@ export function KnowledgePanelHeader(): React.ReactElement {
         {KNOWLEDGE_PANEL_HEADER_TEXT.title}
       </h3>
       <p className={KNOWLEDGE_PANEL_HEADER_CLASS.hint}>
-        Upload {ACCEPTED_UPLOAD_LABEL} files. The tutor answers only from these
-        documents.
+        {KNOWLEDGE_PANEL_HEADER_TEXT.hint}
       </p>
     </header>
   )

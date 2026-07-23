@@ -4,5 +4,5 @@ import { useForgotPasswordContext } from '../../../../context/useForgotPasswordC
 export function ForgotPasswordError(): React.ReactElement {
   const { errorMessage } = useForgotPasswordContext()
 
-  return <ErrorBanner message={errorMessage ?? ''} />
+  return <ErrorBanner message={errorMessage!} />
 }

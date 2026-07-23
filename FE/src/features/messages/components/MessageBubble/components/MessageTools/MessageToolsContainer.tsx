@@ -14,9 +14,9 @@ export function MessageToolsContainer(): React.ReactElement | null {
     <MessageToolItem
       key={toolView.key}
       label={toolView.label}
-      isDone={toolView.isDone}
+      className={toolView.className}
     />
   ))
 
-  return <MessageTools items={items} />
+  return <MessageTools>{items}</MessageTools>
 }

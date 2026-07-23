@@ -4,5 +4,5 @@ import { useResetPasswordContext } from '../../../../context/useResetPasswordCon
 export function ResetPasswordError(): React.ReactElement {
   const { errorMessage } = useResetPasswordContext()
 
-  return <ErrorBanner message={errorMessage ?? ''} />
+  return <ErrorBanner message={errorMessage!} />
 }

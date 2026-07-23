@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
-import { fullName } from '@/types/domain.ts'
+import { fullName } from '@/types/domain.utils.ts'
 import type {
   SidebarUserChipContextValue,
   SidebarUserChipProviderProps,

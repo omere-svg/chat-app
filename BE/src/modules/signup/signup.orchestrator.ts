@@ -15,8 +15,8 @@ export class SignupOrchestrator {
     const userRecord = await this.usersService.createUser({
       email: signupDto.email,
       password: signupDto.password,
-      firstName: signupDto.firstName.trim(),
-      lastName: signupDto.lastName.trim(),
+      firstName: signupDto.firstName,
+      lastName: signupDto.lastName,
     })
 
     const token = await this.authTokenService.issue(userRecord)

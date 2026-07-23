@@ -5,10 +5,11 @@ import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import { isValidEmail } from '@/shared/validation/isValidEmail.ts'
 import { useProfileForm } from '@/features/profile/components/ProfilePage/hooks/useProfileForm.ts'
 import { EMAIL_CHANGE_REQUEST_CARD_TEXT } from '../EmailChangeRequestCard.constants.ts'
+import { SEND_CONFIRMATION_BUTTON_TEXT } from '../components/SendConfirmationButton/SendConfirmationButton.constants.ts'
 
 export function useRequestEmailChange() {
   const { currentUser } = useAuth()
-  const { isSaving, status, runSave } = useProfileForm()
+  const { isSaving, statusView, runSave } = useProfileForm()
 
   const [newEmail, setNewEmail] = useState('')
 
@@ -36,7 +37,10 @@ export function useRequestEmailChange() {
     setNewEmail,
     isSaving,
     canSubmit,
-    status,
+    statusView,
+    submitLabel: isSaving
+      ? SEND_CONFIRMATION_BUTTON_TEXT.submitting
+      : SEND_CONFIRMATION_BUTTON_TEXT.submit,
     handleSubmit,
   }
 }

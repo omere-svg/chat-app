@@ -4,7 +4,7 @@ import {
   MOCK_EMAIL_CHANGE_TOKEN_PREFIX,
 } from "./constants.ts";
 import { isValidEmail } from "../shared/validation/isValidEmail.ts";
-import { fullName } from "../types/domain.ts";
+import { fullName } from "../types/domain.utils.ts";
 import type {
   ConversationParticipant,
   ConversationPreview,

@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 import type { ThreadMessage } from '@/types/domain.ts'
 import type { SenderProfile } from '@/features/messages/context/senders.types.ts'
-import type { ThreadViewState } from '@/features/messages/hooks/useMessages.ts'
+import type { ThreadViewState } from '@/features/messages/types/threadViewState.ts'
 
 export type UseMessageThreadScreenValue = {
   threadState: ThreadViewState
@@ -21,4 +21,5 @@ export type UseMessageThreadScreenValue = {
   isReady: boolean
   isSendingMessage: boolean
   isComposerDisabled: boolean
+  isSendDisabled: boolean
 }

@@ -1,6 +1,5 @@
+import type { KnowledgeDocument } from '@/types/api.ts'
+
 export type KnowledgeDocumentItemProps = {
-  filename: string
-  meta: string
-  isDeleting: boolean
-  onDelete: () => void
+  document: KnowledgeDocument
 }

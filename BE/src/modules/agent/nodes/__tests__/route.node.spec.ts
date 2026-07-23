@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages'
 import { routeDecision } from '../route.node.js'
 import { RETRIEVE_KNOWLEDGE_TOOL } from '../../constants.js'
-import type { AgentState } from '../../agent.state.js'
+import type { AgentState } from '../../types/agent-state.js'
 
 function stateEndingWith(...messages: AgentState['messages']): AgentState {
   return { messages, retrievedChunks: [], groundingEmpty: false, toolRounds: 0 }

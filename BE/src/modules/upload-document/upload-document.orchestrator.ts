@@ -16,6 +16,7 @@ import { FileTooLargeError } from './errors/file-too-large.error.js'
 import { UnsupportedDocumentError } from './errors/unsupported-document.error.js'
 import { EmptyDocumentError } from './errors/empty-document.error.js'
 import { NoExtractableTextError } from './errors/no-extractable-text.error.js'
+import { EmbeddingCountMismatchError } from './errors/embedding-count-mismatch.error.js'
 import type { EmbeddingsProvider } from '../embeddings/types/embeddings-provider.js'
 import type { UploadedFile } from '../knowledge-rag/types/uploaded-file.js'
 import type { KnowledgeChunkRecord } from '../knowledge-chunk/types/knowledge-chunk.entity.js'
@@ -68,7 +69,7 @@ export class UploadDocumentOrchestrator {
 
     const embeddings = await this.embeddings.embedDocuments(chunkTexts)
     if (embeddings.length !== chunkTexts.length) {
-      throw new Error('Embedding provider returned a different number of vectors than chunks')
+      throw new EmbeddingCountMismatchError()
     }
 
     const documentId = `kdoc-${randomUUID()}`

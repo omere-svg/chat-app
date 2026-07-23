@@ -13,31 +13,7 @@ export type ConversationParticipant = {
   avatarUrl?: string | null
 }
 
-export type SubscriptionStatus = 'active' | 'none'
-
-export type Plan = {
-  code: string
-  name: string
-  amount: number
-  currency: string
-  interval: string
-}
-
-export type Subscription = {
-  status: SubscriptionStatus
-  planCode: string | null
-  activatedAt: string | null
-}
-
-export function fullName(user: Pick<User, 'firstName' | 'lastName'>): string {
-  return `${user.firstName} ${user.lastName}`.trim().replace(/\s+/g, ' ')
-}
-
 export type ConversationType = 'direct' | 'assistant' | 'tutor'
-
-export const ASSISTANT_SENDER_ID = 'assistant'
-
-export const ASSISTANT_DISPLAY_NAME = 'Assistant'
 
 export type Citation = {
   chunkId: string

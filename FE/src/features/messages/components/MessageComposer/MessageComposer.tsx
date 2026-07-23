@@ -1,23 +1,26 @@
 import { Button } from '@/shared/components/Button/Button.tsx'
+import { useMessageThreadContext } from '../MessageThread/context/useMessageThreadContext.tsx'
 import { useComposerKeyDown } from './hooks/useComposerKeyDown.ts'
 import {
   MESSAGE_COMPOSER_CLASS,
   MESSAGE_COMPOSER_ROWS,
   MESSAGE_COMPOSER_TEXT,
 } from './MessageComposer.constants.ts'
-import type { MessageComposerProps } from './MessageComposer.types.ts'
 import './MessageComposer.css'
 
-export function MessageComposer({
-  messageDraft,
-  onMessageDraftChange,
-  onSendMessage,
-  disabled = false,
-}: MessageComposerProps): React.ReactElement {
-  const handleKeyDown = useComposerKeyDown({
-    disabled,
+export function MessageComposer(): React.ReactElement {
+  const {
     messageDraft,
-    onSendMessage,
+    onMessageDraftChange,
+    handleSendMessage,
+    isComposerDisabled,
+    isSendDisabled,
+  } = useMessageThreadContext()
+
+  const handleKeyDown = useComposerKeyDown({
+    disabled: isComposerDisabled,
+    messageDraft,
+    onSendMessage: handleSendMessage,
   })
 
   return (
@@ -29,13 +32,13 @@ export function MessageComposer({
         onKeyDown={handleKeyDown}
         placeholder={MESSAGE_COMPOSER_TEXT.placeholder}
         rows={MESSAGE_COMPOSER_ROWS}
-        disabled={disabled}
+        disabled={isComposerDisabled}
         aria-label={MESSAGE_COMPOSER_TEXT.inputAriaLabel}
       />
       <Button
         variant="primary"
-        disabled={disabled || !messageDraft.trim()}
-        onClick={onSendMessage}
+        disabled={isSendDisabled}
+        onClick={handleSendMessage}
       >
         {MESSAGE_COMPOSER_TEXT.send}
       </Button>

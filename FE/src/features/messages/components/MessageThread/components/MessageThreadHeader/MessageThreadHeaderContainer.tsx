@@ -8,5 +8,5 @@ export function MessageThreadHeaderContainer(): React.ReactElement | null {
     return null
   }
 
-  return <MessageThreadHeader title={conversationTitle} />
+  return <MessageThreadHeader />
 }

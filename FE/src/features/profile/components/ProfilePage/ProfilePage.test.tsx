@@ -23,14 +23,6 @@ afterEach(() => {
 describe('ProfilePage', () => {
   it('renders the name card, email change card, previous emails, and back link', async () => {
     vi.spyOn(apiClient, 'getPreviousEmails').mockResolvedValue(['prev@example.com'])
-    vi.spyOn(apiClient, 'getSubscription').mockResolvedValue({
-      status: 'none',
-      planCode: null,
-      activatedAt: null,
-    })
-    vi.spyOn(apiClient, 'listPlans').mockResolvedValue({
-      plans: [{ code: 'pro', name: 'Pro', amount: 9.99, currency: 'USD', interval: 'month' }],
-    })
 
     render(
       <MemoryRouter>

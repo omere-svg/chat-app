@@ -3,9 +3,9 @@ import { ConversationsService } from '../conversations/conversations.service.js'
 import { UsersService } from '../users/users.service.js'
 import { ConversationParticipantsMapper } from '../../shared/conversation-participants/conversation-participants.mapper.js'
 import {
-  toConversationParticipantView,
-  toConversationPreview,
-} from '../conversations/conversation.mapper.js'
+  buildConversationPreview,
+  resolveConversationParticipants,
+} from '../conversations/conversation-preview.helper.js'
 import type { ConversationPreview } from '../conversations/types/conversation-preview.js'
 import type { ConversationRecord } from '../conversations/types/conversation.entity.js'
 import type { User } from '../users/types/user.js'
@@ -31,14 +31,8 @@ export class ListConversationsOrchestrator {
     conversation: ConversationRecord,
     usersById: Map<string, User>,
   ): ConversationPreview {
-    const participants = conversation.participantIds
-      .map((participantId) => usersById.get(participantId))
-      .filter((participant): participant is User => participant !== undefined)
-
-    const preview = toConversationPreview(
-      conversation,
-      participants.map(toConversationParticipantView),
-    )
+    const participants = resolveConversationParticipants(conversation, usersById)
+    const preview = buildConversationPreview(conversation, participants)
 
     if (
       conversation.type === 'direct' &&

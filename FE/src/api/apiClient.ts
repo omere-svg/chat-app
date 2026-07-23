@@ -10,19 +10,17 @@ import {
   parseConfirmPasswordResetResult,
   parseConversationsResponse,
   parseCreateConversationResponse,
-  parseCreatePaymentSessionResult,
   parseKnowledgeDocumentsResponse,
   parseMessagesResponse,
-  parsePlansResult,
   parsePreviousEmailsResponse,
   parseRequestEmailChangeResult,
   parseRequestPasswordResetResult,
   parseSendMessageResponse,
-  parseSubscriptionResult,
   parseUploadKnowledgeDocumentResponse,
   parseUserResponse,
 } from './parseApiResponse.ts'
-import type { AssistantStreamHandlers } from './assistantStream.ts'
+import type { AssistantStreamHandlers } from './assistantStream.types.ts'
+import type { RequestOptions } from './apiClient.types.ts'
 import type {
   ApiErrorPayload,
   AuthResponse,
@@ -35,11 +33,7 @@ import type {
   ConversationsResponse,
   CreateConversationRequest,
   CreateConversationResponse,
-  CreatePaymentSessionRequest,
-  CreatePaymentSessionResult,
-  GetSubscriptionResult,
   KnowledgeDocumentsResponse,
-  ListPlansResult,
   LoginRequest,
   MessagesResponse,
   RequestEmailChangeRequest,
@@ -55,11 +49,6 @@ import type {
 import type { User } from '../types/domain.ts'
 
 export { ApiError } from './apiError.ts'
-
-type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
-  body?: unknown
-}
 
 class ApiClient {
   private token: string | null = null
@@ -138,23 +127,6 @@ class ApiClient {
     request: ConfirmPasswordResetRequest,
   ): Promise<ConfirmPasswordResetResult> {
     return this.request(endpoints.passwordResetConfirm, parseConfirmPasswordResetResult, {
-      method: 'POST',
-      body: request,
-    })
-  }
-
-  async listPlans(): Promise<ListPlansResult> {
-    return this.request(endpoints.plans, parsePlansResult)
-  }
-
-  async getSubscription(): Promise<GetSubscriptionResult> {
-    return this.request(endpoints.subscription, parseSubscriptionResult)
-  }
-
-  async createPaymentSession(
-    request: CreatePaymentSessionRequest,
-  ): Promise<CreatePaymentSessionResult> {
-    return this.request(endpoints.createPaymentSession, parseCreatePaymentSessionResult, {
       method: 'POST',
       body: request,
     })

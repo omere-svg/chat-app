@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import type { HydratedDocument } from 'mongoose'
+import { KNOWLEDGE_DOCUMENTS_COLLECTION } from './constants.js'
 import type { IngestionStatus } from './types/knowledge-document.entity.js'
 
-@Schema({ collection: 'knowledge_documents', versionKey: false })
+@Schema({ collection: KNOWLEDGE_DOCUMENTS_COLLECTION, versionKey: false })
 export class KnowledgeDocumentDocument {
   @Prop({ type: String, required: true })
   _id!: string
@@ -28,8 +28,6 @@ export class KnowledgeDocumentDocument {
   @Prop({ type: Date, required: true })
   createdAt!: Date
 }
-
-export type KnowledgeDocumentHydratedDocument = HydratedDocument<KnowledgeDocumentDocument>
 
 export const KnowledgeDocumentSchema = SchemaFactory.createForClass(KnowledgeDocumentDocument)
 

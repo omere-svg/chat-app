@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormStatus } from '@/features/profile/types/formStatus.ts'
 import { errorMessageFrom } from '@/features/profile/utils/errorMessage.ts'
+import { toFormStatusView } from '../components/FormStatusMessage/FormStatusMessage.utils.ts'
 import type { ProfileSaveRunner, UseProfileFormValue } from '../types/profileForm.ts'
 
 export function useProfileForm(): UseProfileFormValue {
@@ -20,5 +21,10 @@ export function useProfileForm(): UseProfileFormValue {
     }
   }
 
-  return { isSaving, status, runSave }
+  return {
+    isSaving,
+    status,
+    statusView: status ? toFormStatusView(status) : null,
+    runSave,
+  }
 }

@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import type { HydratedDocument } from 'mongoose'
 import { KNOWLEDGE_CHUNKS_COLLECTION } from './constants.js'
 
 @Schema({ collection: KNOWLEDGE_CHUNKS_COLLECTION, versionKey: false })
@@ -25,8 +24,6 @@ export class KnowledgeChunkDocument {
   @Prop({ type: [Number], required: true })
   embedding!: number[]
 }
-
-export type KnowledgeChunkHydratedDocument = HydratedDocument<KnowledgeChunkDocument>
 
 export const KnowledgeChunkSchema = SchemaFactory.createForClass(KnowledgeChunkDocument)
 

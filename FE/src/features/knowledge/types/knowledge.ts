@@ -5,7 +5,7 @@ export type UseKnowledgePanelValue = {
   isLoading: boolean
   loadError: string | null
   isUploading: boolean
-  uploadError: string | null
+  actionError: string | null
   deletingDocumentId: string | null
   uploadFile: (file: File) => void
   deleteDocument: (documentId: string) => void

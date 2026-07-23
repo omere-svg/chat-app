@@ -3,16 +3,11 @@ import type { ConversationDocument } from './conversation.schema.js'
 import type {
   ConversationLastMessage,
   ConversationRecord,
-  ConversationType,
 } from './types/conversation.entity.js'
 import type { ConversationPreview } from './types/conversation-preview.js'
 import type { ConversationParticipantView } from './types/conversation-participant-view.js'
 import type { User } from '../users/types/user.js'
 import type { MessageRecord } from '../messages/types/message.entity.js'
-
-export function isAssistantReplyType(type: ConversationType): boolean {
-  return type === 'assistant' || type === 'tutor'
-}
 
 export function toLastMessageSnapshot(message: MessageRecord): ConversationLastMessage {
   return { body: message.body, senderId: message.senderId, createdAt: message.createdAt }

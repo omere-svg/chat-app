@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import type { HydratedDocument } from 'mongoose'
 
 import { DEFAULT_CONVERSATION_TYPE } from './constants.js'
 import type { ConversationType } from './types/conversation.entity.js'
@@ -44,8 +43,6 @@ export class ConversationDocument {
   @Prop({ type: Date, required: true })
   createdAt!: Date
 }
-
-export type ConversationHydratedDocument = HydratedDocument<ConversationDocument>
 
 export const ConversationSchema = SchemaFactory.createForClass(ConversationDocument)
 

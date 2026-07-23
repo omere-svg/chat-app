@@ -11,7 +11,6 @@ export function MessageThreadBodyContainer(): React.ReactElement {
     threadState,
     senders,
     hasMoreOlderMessages,
-    isLoadingOlderMessages,
     loadOlderMessages,
     loadOlderMessagesError,
     refetchMessages,
@@ -19,7 +18,7 @@ export function MessageThreadBodyContainer(): React.ReactElement {
 
   const loadMore =
     hasMoreOlderMessages && threadState.status === 'success' ? (
-      <LoadMoreButton loading={isLoadingOlderMessages} onClick={loadOlderMessages} />
+      <LoadMoreButton />
     ) : null
 
   const loadError = loadOlderMessagesError ? (

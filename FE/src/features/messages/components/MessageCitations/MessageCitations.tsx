@@ -7,15 +7,17 @@ import './MessageCitations.css'
 
 export function MessageCitations({
   count,
-  items,
+  children,
 }: MessageCitationsProps): React.ReactElement {
   return (
     <section
       className={MESSAGE_CITATIONS_CLASS.section}
       aria-label={MESSAGE_CITATIONS_TEXT.ariaLabel}
     >
-      <p className={MESSAGE_CITATIONS_CLASS.label}>Sources ({count})</p>
-      <ul className={MESSAGE_CITATIONS_CLASS.list}>{items}</ul>
+      <p className={MESSAGE_CITATIONS_CLASS.label}>
+        {MESSAGE_CITATIONS_TEXT.sourcesLabel(count)}
+      </p>
+      <ul className={MESSAGE_CITATIONS_CLASS.list}>{children}</ul>
     </section>
   )
 }

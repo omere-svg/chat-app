@@ -1,7 +1,7 @@
 import type {
   PreviousEmailsAction,
   PreviousEmailsState,
-} from '../PreviousEmailsCard.types.ts'
+} from './previousEmailsReducer.types.ts'
 
 export const initialPreviousEmailsState: PreviousEmailsState = {
   previousEmails: [],

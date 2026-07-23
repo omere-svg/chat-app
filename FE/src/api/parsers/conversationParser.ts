@@ -1,4 +1,5 @@
 import { MalformedResponseError } from '../malformedResponseError.ts'
+import { CONVERSATION_TYPES } from './conversationParser.constants.ts'
 import { isRecord, readNullableString, readString, readStringArray } from './primitives.ts'
 import type {
   ConversationsResponse,
@@ -9,8 +10,6 @@ import type {
   ConversationPreview,
   ConversationType,
 } from '../../types/domain.ts'
-
-const CONVERSATION_TYPES: readonly ConversationType[] = ['direct', 'assistant', 'tutor']
 
 function parseParticipant(value: unknown, context: string): ConversationParticipant {
   if (!isRecord(value)) {
@@ -52,9 +51,10 @@ function parseConversationLastMessage(value: unknown): ConversationPreview['last
 
 function readConversationType(value: Record<string, unknown>): ConversationType {
   const candidate = value.type
-  return CONVERSATION_TYPES.includes(candidate as ConversationType)
-    ? (candidate as ConversationType)
-    : 'direct'
+  if (!CONVERSATION_TYPES.includes(candidate as ConversationType)) {
+    throw new MalformedResponseError('conversation.type')
+  }
+  return candidate as ConversationType
 }
 
 function parseConversationPreview(value: unknown): ConversationPreview {

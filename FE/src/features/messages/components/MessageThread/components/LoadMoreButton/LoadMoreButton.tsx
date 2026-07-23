@@ -1,22 +1,23 @@
+import { useMessageThreadContext } from '../../context/useMessageThreadContext.tsx'
 import {
   LOAD_MORE_BUTTON_CLASS,
   LOAD_MORE_BUTTON_TEXT,
 } from './LoadMoreButton.constants.ts'
-import type { LoadMoreButtonProps } from './LoadMoreButton.types.ts'
 import './LoadMoreButton.css'
 
-export function LoadMoreButton({
-  loading,
-  onClick,
-}: LoadMoreButtonProps): React.ReactElement {
+export function LoadMoreButton(): React.ReactElement {
+  const { isLoadingOlderMessages, loadOlderMessages } = useMessageThreadContext()
+
   return (
     <button
       type="button"
       className={LOAD_MORE_BUTTON_CLASS.button}
-      onClick={onClick}
-      disabled={loading}
+      onClick={loadOlderMessages}
+      disabled={isLoadingOlderMessages}
     >
-      {loading ? LOAD_MORE_BUTTON_TEXT.loading : LOAD_MORE_BUTTON_TEXT.idle}
+      {isLoadingOlderMessages
+        ? LOAD_MORE_BUTTON_TEXT.loading
+        : LOAD_MORE_BUTTON_TEXT.idle}
     </button>
   )
 }

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { FORGOT_PASSWORD_ROUTE } from '@/app/constants/routes.ts'
 import {
-  RESET_CODE_LENGTH,
+  RESET_CODE_PATTERN,
   RESET_PASSWORD_ERROR_CODE,
   RESET_PASSWORD_FAILURE_REASON,
   RESET_PASSWORD_TEXT,
@@ -14,8 +14,6 @@ import {
   resetPasswordReducer,
 } from '../utils/resetPasswordReducer.ts'
 import type { ResetPasswordFailureReason } from '../ResetPasswordScreen.types.ts'
-
-const CODE_PATTERN = new RegExp(`^\\d{${RESET_CODE_LENGTH.toString()}}$`)
 
 function readEmail(state: unknown): string {
   if (typeof state === 'object' && state !== null && 'email' in state) {
@@ -48,7 +46,7 @@ export function useResetPassword() {
   }, [email, navigate])
 
   const canSubmit =
-    email.length > 0 && CODE_PATTERN.test(code.trim()) && newPassword.length > 0
+    email.length > 0 && RESET_CODE_PATTERN.test(code.trim()) && newPassword.length > 0
   const areInputsDisabled = state.isSubmitting
   const isSubmitDisabled = !canSubmit || state.isSubmitting
   const submitLabel = state.isSubmitting

@@ -1,13 +1,12 @@
 import { FormStatusMessage } from '../../../FormStatusMessage/FormStatusMessage.tsx'
-import { toFormStatusView } from '../../../FormStatusMessage/FormStatusMessage.utils.ts'
 import { useProfileNameContext } from '../../context/useProfileNameContext.tsx'
 
 export function NameStatus(): React.ReactElement | null {
-  const { status } = useProfileNameContext()
+  const { statusView } = useProfileNameContext()
 
-  if (status === null) {
+  if (statusView === null) {
     return null
   }
 
-  return <FormStatusMessage {...toFormStatusView(status)} />
+  return <FormStatusMessage {...statusView} />
 }

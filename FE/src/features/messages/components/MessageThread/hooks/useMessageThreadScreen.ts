@@ -5,11 +5,8 @@ import { useChatLayout } from '@/app/components/ChatLayout/context/useChatLayout
 import { useToast } from '@/features/toast/hooks/useToast.ts'
 import { useMessages } from '@/features/messages/hooks/useMessages.ts'
 import { getThreadScrollAnchorId } from '@/features/messages/utils/deriveThreadViewState.ts'
-import {
-  ASSISTANT_DISPLAY_NAME,
-  ASSISTANT_SENDER_ID,
-  fullName,
-} from '@/types/domain.ts'
+import { ASSISTANT_DISPLAY_NAME, ASSISTANT_SENDER_ID } from '@/types/domain.constants.ts'
+import { fullName } from '@/types/domain.utils.ts'
 import type { SenderProfile } from '@/features/messages/context/senders.types.ts'
 import type { UseMessageThreadScreenValue } from '../context/useMessageThreadContext.types.ts'
 
@@ -88,6 +85,9 @@ export function useMessageThreadScreen(): UseMessageThreadScreenValue {
   const isReady =
     threadState.status === 'success' || threadState.status === 'empty'
 
+  const isComposerDisabled = isSendingMessage || !selectedConversationId
+  const isSendDisabled = isComposerDisabled || messageDraft.trim().length === 0
+
   return {
     threadState,
     threadMessages,
@@ -105,6 +105,7 @@ export function useMessageThreadScreen(): UseMessageThreadScreenValue {
     handleSendMessage,
     isReady,
     isSendingMessage,
-    isComposerDisabled: isSendingMessage || !selectedConversationId,
+    isComposerDisabled,
+    isSendDisabled,
   }
 }

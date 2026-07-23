@@ -1,6 +1,5 @@
 import { IsString, MaxLength, MinLength } from 'class-validator'
-
-const MAX_AVATAR_KEY_LENGTH = 512
+import { MAX_AVATAR_KEY_LENGTH } from '../constants.js'
 
 export class SetAvatarDto {
   @IsString()

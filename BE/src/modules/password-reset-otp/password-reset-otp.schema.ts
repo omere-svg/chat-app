@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import type { HydratedDocument } from 'mongoose'
 import {
   PASSWORD_RESET_OTP_COLLECTION_NAME,
   PASSWORD_RESET_OTP_EXPIRY_INDEX_NAME,
@@ -26,8 +25,6 @@ export class PasswordResetOtpDocument {
   @Prop({ type: Date, required: true })
   createdAt!: Date
 }
-
-export type PasswordResetOtpHydratedDocument = HydratedDocument<PasswordResetOtpDocument>
 
 export const PasswordResetOtpSchema = SchemaFactory.createForClass(PasswordResetOtpDocument)
 

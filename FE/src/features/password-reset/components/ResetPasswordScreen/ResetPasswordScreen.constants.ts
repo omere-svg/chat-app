@@ -27,4 +27,6 @@ export const RESET_PASSWORD_FAILURE_REASON = {
 
 export const RESET_CODE_LENGTH = 6
 
+export const RESET_CODE_PATTERN = new RegExp(`^\\d{${RESET_CODE_LENGTH.toString()}}$`)
+
 export const RESET_PASSWORD_ERROR_CODE = 'PASSWORD_RESET_CODE_INVALID'

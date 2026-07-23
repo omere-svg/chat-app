@@ -1,29 +1,17 @@
-import type { ConversationType, ThreadMessage } from "@/types/domain.ts";
-import { type ThreadViewState } from "../utils/deriveThreadViewState.ts";
-import { useAssistantStream } from "./useAssistantStream.ts";
-import { useMessageThread } from "./useMessageThread.ts";
-import { useOlderMessages } from "./useOlderMessages.ts";
-import { useSendMessage } from "./useSendMessage.ts";
-
-export type { ThreadViewState } from "../utils/deriveThreadViewState.ts";
+import type { ConversationType } from '@/types/domain.ts'
+import type { UseMessagesValue } from '../types/messageThread.ts'
+import { useAssistantStream } from './useAssistantStream.ts'
+import { useMessageThread } from './useMessageThread.ts'
+import { useOlderMessages } from './useOlderMessages.ts'
+import { useSendMessage } from './useSendMessage.ts'
 
 export function useMessages(
   conversationId: string | null,
   currentUserId: string,
   onSendError: (errorMessage: string) => void,
   onSendSuccess?: () => void,
-  conversationType: ConversationType = "direct",
-): {
-  threadState: ThreadViewState;
-  threadMessages: ThreadMessage[];
-  hasMoreOlderMessages: boolean;
-  isLoadingOlderMessages: boolean;
-  loadOlderMessagesError: string | null;
-  loadOlderMessages: () => void;
-  sendMessage: (messageContent: string) => Promise<boolean>;
-  isSendingMessage: boolean;
-  refetchMessages: () => void;
-} {
+  conversationType: ConversationType = 'direct',
+): UseMessagesValue {
   const {
     state,
     dispatch,
@@ -31,19 +19,14 @@ export function useMessages(
     threadState,
     threadMessages,
     refetchMessages,
-  } = useMessageThread(conversationId);
+  } = useMessageThread(conversationId)
 
   const {
     loadOlderMessages,
     hasMoreOlderMessages,
     isLoadingOlderMessages,
     loadOlderMessagesError,
-  } = useOlderMessages(
-    conversationId,
-    state,
-    dispatch,
-    activeConversationIdRef,
-  );
+  } = useOlderMessages(conversationId, state, dispatch, activeConversationIdRef)
 
   const { sendMessage: sendHumanMessage, isSendingMessage: isSendingHumanMessage } =
     useSendMessage(
@@ -54,7 +37,7 @@ export function useMessages(
       state,
       dispatch,
       activeConversationIdRef,
-    );
+    )
 
   const { sendMessage: sendAssistantMessage, isStreaming } = useAssistantStream(
     conversationId,
@@ -64,10 +47,10 @@ export function useMessages(
     state,
     dispatch,
     activeConversationIdRef,
-  );
+  )
 
   const isStreamingConversation =
-    conversationType === "assistant" || conversationType === "tutor";
+    conversationType === 'assistant' || conversationType === 'tutor'
 
   return {
     threadState,
@@ -81,5 +64,5 @@ export function useMessages(
       ? isStreaming || state.pending.length > 0
       : isSendingHumanMessage,
     refetchMessages,
-  };
+  }
 }

@@ -5,13 +5,13 @@ import {
 import type { MessageToolsProps } from './MessageTools.types.ts'
 import './MessageTools.css'
 
-export function MessageTools({ items }: MessageToolsProps): React.ReactElement {
+export function MessageTools({ children }: MessageToolsProps): React.ReactElement {
   return (
     <ul
       className={MESSAGE_TOOLS_CLASS.list}
       aria-label={MESSAGE_TOOLS_TEXT.ariaLabel}
     >
-      {items}
+      {children}
     </ul>
   )
 }

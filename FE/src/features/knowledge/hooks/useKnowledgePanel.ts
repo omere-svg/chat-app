@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { apiClient, ApiError } from '@/api/apiClient.ts'
-import { KNOWLEDGE_ERROR, KNOWLEDGE_MESSAGE } from '../constants/knowledge.ts'
-import type { UseKnowledgePanelValue } from '../types/knowledge.ts'
 import {
+  KNOWLEDGE_ERROR,
+  KNOWLEDGE_MESSAGE,
+  MAX_UPLOAD_BYTES,
   initialKnowledgePanelState,
-  knowledgePanelReducer,
-} from '../utils/knowledgePanelReducer.ts'
-import { MAX_UPLOAD_BYTES, hasAcceptedExtension } from '../utils/uploadLimits.ts'
+} from '../constants/knowledge.ts'
+import type { UseKnowledgePanelValue } from '../types/knowledge.ts'
+import { knowledgePanelReducer } from '../utils/knowledgePanelReducer.ts'
+import { hasAcceptedExtension } from '../utils/uploadLimits.ts'
 
 export function useKnowledgePanel(): UseKnowledgePanelValue {
   const [state, dispatch] = useReducer(
@@ -74,7 +76,7 @@ export function useKnowledgePanel(): UseKnowledgePanelValue {
     isLoading: state.isLoading,
     loadError: state.loadError,
     isUploading: state.isUploading,
-    uploadError: state.actionError,
+    actionError: state.actionError,
     deletingDocumentId: state.deletingDocumentId,
     uploadFile: (file) => void uploadFile(file),
     deleteDocument: (documentId) => void deleteDocument(documentId),

@@ -1,4 +1,4 @@
-import { ProfileCard } from '../ProfileCard/ProfileCard.tsx'
+import { ProfileCard } from '@/shared/components/ProfileCard/ProfileCard.tsx'
 import { CurrentEmail } from './components/CurrentEmail/CurrentEmail.tsx'
 import { EmailChangeRequestStatus } from './components/EmailChangeRequestStatus/EmailChangeRequestStatus.tsx'
 import { NewEmailField } from './components/NewEmailField/NewEmailField.tsx'

@@ -1,0 +1,1 @@
+export const MAX_AVATAR_KEY_LENGTH = 512

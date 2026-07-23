@@ -13,4 +13,8 @@ export type MessageBubbleContextValue = {
   tools: string[]
   completedTools: string[]
   citations: Citation[]
+  metaStatusLabel: string
+  metaIsLive: boolean
+  metaTimeLabel: string
+  metaDateTime: string
 }

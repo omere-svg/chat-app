@@ -1,12 +1,13 @@
 import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import { useProfileForm } from '@/features/profile/components/ProfilePage/hooks/useProfileForm.ts'
-import { fullName } from '@/types/domain.ts'
+import { fullName } from '@/types/domain.utils.ts'
 import {
   ALLOWED_AVATAR_CONTENT_TYPES,
   AVATAR_CARD_TEXT,
   MAX_AVATAR_BYTES,
 } from '../AvatarCard.constants.ts'
+import { REMOVE_AVATAR_TEXT } from '../components/RemoveAvatarButton/RemoveAvatarButton.constants.ts'
 
 function isAllowedContentType(contentType: string): boolean {
   return (ALLOWED_AVATAR_CONTENT_TYPES as readonly string[]).includes(contentType)
@@ -14,7 +15,7 @@ function isAllowedContentType(contentType: string): boolean {
 
 export function useProfileAvatar() {
   const { currentUser, updateCurrentUser } = useAuth()
-  const { isSaving, status, runSave } = useProfileForm()
+  const { isSaving, statusView, runSave } = useProfileForm()
 
   const name = currentUser ? fullName(currentUser) : ''
   const avatarUrl = currentUser?.avatarUrl ?? null
@@ -64,8 +65,9 @@ export function useProfileAvatar() {
     avatarUrl,
     isSaving,
     canRemove: avatarUrl !== null,
+    removeLabel: isSaving ? REMOVE_AVATAR_TEXT.removing : REMOVE_AVATAR_TEXT.remove,
     uploadFile,
     removeAvatar,
-    status,
+    statusView,
   }
 }

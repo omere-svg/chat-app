@@ -1,3 +1,0 @@
-export const SQS_MAX_MESSAGES_PER_RECEIVE = 10
-
-export const SQS_WAIT_TIME_SECONDS = 20

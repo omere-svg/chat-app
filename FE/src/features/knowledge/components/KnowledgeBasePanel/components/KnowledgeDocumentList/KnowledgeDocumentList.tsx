@@ -3,7 +3,7 @@ import type { KnowledgeDocumentListProps } from './KnowledgeDocumentList.types.t
 import './KnowledgeDocumentList.css'
 
 export function KnowledgeDocumentList({
-  items,
+  children,
 }: KnowledgeDocumentListProps): React.ReactElement {
-  return <ul className={KNOWLEDGE_DOCUMENT_LIST_CLASS.list}>{items}</ul>
+  return <ul className={KNOWLEDGE_DOCUMENT_LIST_CLASS.list}>{children}</ul>
 }

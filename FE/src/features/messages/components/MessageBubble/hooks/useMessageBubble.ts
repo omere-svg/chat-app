@@ -3,6 +3,8 @@ import { useSenders } from '@/features/messages/context/useSendersContext.tsx'
 import { UNKNOWN_SENDER_NAME } from '@/features/messages/context/senders.constants.ts'
 import type { ThreadMessage } from '@/types/domain.ts'
 import type { MessageBubbleContextValue } from '../context/useMessageBubbleContext.types.ts'
+import { MESSAGE_META_TEXT } from '../components/MessageMeta/MessageMeta.constants.ts'
+import { formatClockTime } from '../components/MessageMeta/MessageMeta.utils.ts'
 import {
   extractCitations,
   isPendingMessage,
@@ -10,6 +12,13 @@ import {
   messageBubbleClassName,
   messageRowClassName,
 } from '../MessageBubble.utils.ts'
+
+function deriveMetaStatusLabel(isPending: boolean, body: string): string {
+  if (isPending) {
+    return MESSAGE_META_TEXT.pending
+  }
+  return body.length === 0 ? MESSAGE_META_TEXT.thinking : MESSAGE_META_TEXT.typing
+}
 
 export function useMessageBubble(message: ThreadMessage): MessageBubbleContextValue {
   const { currentUser } = useAuth()
@@ -36,5 +45,9 @@ export function useMessageBubble(message: ThreadMessage): MessageBubbleContextVa
     tools: streaming?.annotations?.tools ?? [],
     completedTools: streaming?.annotations?.completedTools ?? [],
     citations: extractCitations(message, streaming),
+    metaStatusLabel: deriveMetaStatusLabel(isPending, message.body),
+    metaIsLive: isStreaming,
+    metaTimeLabel: formatClockTime(message.createdAt),
+    metaDateTime: message.createdAt,
   }
 }

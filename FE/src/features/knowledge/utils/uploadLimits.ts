@@ -1,5 +1,4 @@
-export const ACCEPTED_UPLOAD_EXTENSIONS = ['.txt', '.md', '.markdown'] as const
-export const MAX_UPLOAD_BYTES = 1_000_000
+import { ACCEPTED_UPLOAD_EXTENSIONS } from '../constants/knowledge.ts'
 
 export function hasAcceptedExtension(filename: string): boolean {
   const lower = filename.toLowerCase()

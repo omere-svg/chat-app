@@ -1,13 +1,12 @@
+import { useMessageBubbleContext } from '../../../../context/useMessageBubbleContext.tsx'
 import { MESSAGE_META_CLASS } from '../../MessageMeta.constants.ts'
-import type { MessageMetaTimeProps } from './MessageMetaTime.types.ts'
 
-export function MessageMetaTime({
-  label,
-  dateTime,
-}: MessageMetaTimeProps): React.ReactElement {
+export function MessageMetaTime(): React.ReactElement {
+  const { metaTimeLabel, metaDateTime } = useMessageBubbleContext()
+
   return (
-    <time className={MESSAGE_META_CLASS.time} dateTime={dateTime}>
-      {label}
+    <time className={MESSAGE_META_CLASS.time} dateTime={metaDateTime}>
+      {metaTimeLabel}
     </time>
   )
 }
