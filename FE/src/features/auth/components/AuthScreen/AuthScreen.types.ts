@@ -11,7 +11,6 @@ export type AuthCopy = {
 
 export type UseAuthScreenValue = {
   isSignup: boolean
-  subtitle: string
   copy: AuthCopy
   email: string
   password: string

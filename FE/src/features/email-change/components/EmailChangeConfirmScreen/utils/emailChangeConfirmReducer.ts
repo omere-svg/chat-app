@@ -1,21 +1,21 @@
 import type {
-  ConfirmEmailChangeAction,
-  ConfirmEmailChangeState,
+  EmailChangeConfirmAction,
+  EmailChangeConfirmState,
 } from '../EmailChangeConfirmScreen.types.ts'
 
-export const initialConfirmEmailChangeState: ConfirmEmailChangeState = {
+export const initialEmailChangeConfirmState: EmailChangeConfirmState = {
   status: 'pending',
   newEmail: '',
   failureReason: null,
 }
 
-export function confirmEmailChangeReducer(
-  state: ConfirmEmailChangeState,
-  action: ConfirmEmailChangeAction,
-): ConfirmEmailChangeState {
+export function emailChangeConfirmReducer(
+  state: EmailChangeConfirmState,
+  action: EmailChangeConfirmAction,
+): EmailChangeConfirmState {
   switch (action.type) {
     case 'PENDING':
-      return initialConfirmEmailChangeState
+      return initialEmailChangeConfirmState
     case 'SUCCESS':
       return {
         status: 'success',

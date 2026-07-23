@@ -1,4 +1,4 @@
-import { useAuthScreenContext } from '@/features/auth/components/AuthScreen/context/useAuthScreenContext.tsx'
+import { useAuthScreenContext } from '../../context/useAuthScreenContext.tsx'
 import { AuthNameFields } from './AuthNameFields.tsx'
 
 export function AuthNameFieldsContainer(): React.ReactElement | null {

@@ -3,7 +3,7 @@ import { LOGIN_ROUTE } from '@/app/constants/routes.ts'
 import {
   RESET_PASSWORD_CLASS,
   RESET_PASSWORD_TEXT,
-} from '../../../../ResetPasswordScreen.constants.ts'
+} from '../../ResetPasswordScreen.constants.ts'
 
 export function ResetPasswordFooter(): React.ReactElement {
   return (

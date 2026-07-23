@@ -8,9 +8,9 @@ import {
   EMAIL_CHANGE_CONFIRM_TEXT,
 } from '../EmailChangeConfirmScreen.constants.ts'
 import {
-  confirmEmailChangeReducer,
-  initialConfirmEmailChangeState,
-} from '../utils/confirmEmailChangeReducer.ts'
+  emailChangeConfirmReducer,
+  initialEmailChangeConfirmState,
+} from '../utils/emailChangeConfirmReducer.ts'
 
 function failureReasonFor(error: unknown) {
   if (error instanceof ApiError) {
@@ -24,13 +24,13 @@ function failureReasonFor(error: unknown) {
   return EMAIL_CHANGE_CONFIRM_FAILURE_REASON.retryable
 }
 
-export function useConfirmEmailChange() {
+export function useEmailChangeConfirm() {
   const [searchParams] = useSearchParams()
   const { currentUser, updateCurrentUser } = useAuth()
 
   const [state, dispatch] = useReducer(
-    confirmEmailChangeReducer,
-    initialConfirmEmailChangeState,
+    emailChangeConfirmReducer,
+    initialEmailChangeConfirmState,
   )
   const processedToken = useRef<string | null | undefined>(undefined)
   const latestRequestId = useRef(0)
@@ -91,5 +91,5 @@ export function useConfirmEmailChange() {
       ? EMAIL_CHANGE_CONFIRM_TEXT.failure[state.failureReason]
       : ''
 
-  return { ...state, failureMessage }
+  return { status: state.status, newEmail: state.newEmail, failureMessage }
 }

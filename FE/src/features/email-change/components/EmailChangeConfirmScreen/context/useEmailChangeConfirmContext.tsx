@@ -1,15 +1,15 @@
 import { createContext, useContext } from 'react'
-import { useConfirmEmailChange } from '../hooks/useConfirmEmailChange.ts'
+import { useEmailChangeConfirm } from '../hooks/useEmailChangeConfirm.ts'
 import type { EmailChangeConfirmProviderProps } from '../EmailChangeConfirmScreen.types.ts'
-import type { UseConfirmEmailChangeValue } from './useEmailChangeConfirmContext.types.ts'
+import type { UseEmailChangeConfirmValue } from './useEmailChangeConfirmContext.types.ts'
 
 const EmailChangeConfirmContext =
-  createContext<UseConfirmEmailChangeValue | null>(null)
+  createContext<UseEmailChangeConfirmValue | null>(null)
 
 export function EmailChangeConfirmProvider({
   children,
 }: EmailChangeConfirmProviderProps): React.ReactElement {
-  const value = useConfirmEmailChange()
+  const value = useEmailChangeConfirm()
 
   return (
     <EmailChangeConfirmContext.Provider value={value}>
@@ -18,7 +18,7 @@ export function EmailChangeConfirmProvider({
   )
 }
 
-export function useEmailChangeConfirmContext(): UseConfirmEmailChangeValue {
+export function useEmailChangeConfirmContext(): UseEmailChangeConfirmValue {
   const context = useContext(EmailChangeConfirmContext)
   if (context === null) {
     throw new Error(

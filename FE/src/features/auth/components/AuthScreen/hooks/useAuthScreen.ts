@@ -62,7 +62,6 @@ export function useAuthScreen(): UseAuthScreenValue {
 
   return {
     isSignup,
-    subtitle: copy.title,
     copy,
     email,
     password,

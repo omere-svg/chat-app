@@ -5,7 +5,7 @@ import { ResetPasswordCodeField } from './components/ResetPasswordCodeField/Rese
 import { ResetPasswordNewPasswordField } from './components/ResetPasswordNewPasswordField/ResetPasswordNewPasswordField.tsx'
 import { ResetPasswordErrorContainer } from './components/ResetPasswordError/ResetPasswordErrorContainer.tsx'
 import { ResetPasswordSubmit } from './components/ResetPasswordSubmit/ResetPasswordSubmit.tsx'
-import { ResetPasswordFooter } from './components/ResetPasswordFooter/ResetPasswordFooter.tsx'
+import { ResetPasswordFooter } from '../ResetPasswordFooter/ResetPasswordFooter.tsx'
 import './ResetPasswordForm.css'
 
 export function ResetPasswordForm(): React.ReactElement {
