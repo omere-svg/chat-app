@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-sqs'
 import type { ConfigService } from '@nestjs/config'
 import { SQS_MAX_MESSAGES_PER_RECEIVE, SQS_WAIT_TIME_SECONDS } from './constants.js'
-import { parsePaymentEventMessage } from './payment-event.parser.js'
+import { parsePaymentEventMessage } from './payment-event-queue.parser.js'
 import type { AppEnvironment } from '../../config/environment.types.js'
 import type { PaymentWebhookEvent } from '../payment-provider/types/payment-webhook-event.js'
 import type { PaymentEventQueue, ReceivedPaymentEvent } from './types/payment-event-queue.js'

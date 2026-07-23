@@ -32,7 +32,6 @@ export class CreatePaymentSessionOrchestrator {
 
   async createSession(
     userId: string,
-    customerEmail: string,
     { planCode }: CreatePaymentSessionDto,
   ): Promise<CreatePaymentSessionResult> {
     const plan = await this.planService.findByCode(planCode)
@@ -52,8 +51,6 @@ export class CreatePaymentSessionOrchestrator {
       amount: plan.amount,
       currency: plan.currency,
       planCode: plan.code,
-      planName: plan.name,
-      customerEmail,
       successUrl,
       cancelUrl,
     })

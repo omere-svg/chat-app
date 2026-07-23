@@ -73,7 +73,7 @@ describe('CreatePaymentSessionOrchestrator', () => {
   it('starts checkout with the DB price and persists a pending session', async () => {
     const { orchestrator, createSession, createCheckoutSession } = buildOrchestrator()
 
-    const result = await orchestrator.createSession('user-1', 'user@example.com', {
+    const result = await orchestrator.createSession('user-1', {
       planCode: 'pro',
     })
 
@@ -97,7 +97,7 @@ describe('CreatePaymentSessionOrchestrator', () => {
     const { orchestrator, createSession } = buildOrchestrator({ plan: null })
 
     await expect(
-      orchestrator.createSession('user-1', 'user@example.com', { planCode: 'ghost' }),
+      orchestrator.createSession('user-1', { planCode: 'ghost' }),
     ).rejects.toBeInstanceOf(PlanNotFoundError)
     expect(createSession).not.toHaveBeenCalled()
   })
@@ -106,7 +106,7 @@ describe('CreatePaymentSessionOrchestrator', () => {
     const { orchestrator, createSession } = buildOrchestrator({ isActive: true })
 
     await expect(
-      orchestrator.createSession('user-1', 'user@example.com', { planCode: 'pro' }),
+      orchestrator.createSession('user-1', { planCode: 'pro' }),
     ).rejects.toBeInstanceOf(AlreadySubscribedError)
     expect(createSession).not.toHaveBeenCalled()
   })
@@ -117,7 +117,7 @@ describe('CreatePaymentSessionOrchestrator', () => {
     })
 
     await expect(
-      orchestrator.createSession('user-1', 'user@example.com', { planCode: 'pro' }),
+      orchestrator.createSession('user-1', { planCode: 'pro' }),
     ).rejects.toBeInstanceOf(PaymentProviderError)
     expect(createSession).not.toHaveBeenCalled()
   })

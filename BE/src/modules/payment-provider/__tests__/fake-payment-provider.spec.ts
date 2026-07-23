@@ -10,8 +10,6 @@ describe('FakePaymentProvider', () => {
       amount: 9.99,
       currency: 'USD',
       planCode: 'pro',
-      planName: 'Pro',
-      customerEmail: 'user@example.com',
       successUrl: 'https://app.example/subscription/callback?status=success',
       cancelUrl: 'https://app.example/subscription/callback?status=cancelled',
     })

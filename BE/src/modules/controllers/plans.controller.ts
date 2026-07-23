@@ -44,7 +44,6 @@ export class PlansController {
   ): Promise<CreatePaymentSessionResult> {
     return this.createPaymentSessionOrchestrator.createSession(
       currentUser.id,
-      currentUser.email,
       createPaymentSessionDto,
     )
   }
