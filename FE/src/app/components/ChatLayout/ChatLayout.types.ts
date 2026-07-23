@@ -11,7 +11,7 @@ export type ChatLayoutContextValue = {
   selectedConversationId: string | null
   selectConversation: (conversationId: string) => void
   reloadConversations: (options?: ReloadConversationsOptions) => void
-  handleConversationCreated: (conversationId: string) => void
+  selectCreatedConversation: (conversationId: string) => void
 }
 
 export type ChatLayoutProviderProps = {

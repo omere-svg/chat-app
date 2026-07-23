@@ -35,7 +35,7 @@ export class MongoConversationRepository implements ConversationRepository {
     return documents.map(toConversationRecord)
   }
 
-  async findByParticipantSet(
+  async findByExactParticipants(
     participantIds: readonly string[],
   ): Promise<ConversationRecord | null> {
     const document = await this.conversationModel

@@ -18,7 +18,7 @@ function setChatLayout(overrides: Partial<ChatLayoutContextValue>): void {
     selectedConversationId: null,
     selectConversation: vi.fn(),
     reloadConversations: vi.fn(),
-    handleConversationCreated: vi.fn(),
+    selectCreatedConversation: vi.fn(),
     ...overrides,
   })
 }

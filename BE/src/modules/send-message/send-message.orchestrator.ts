@@ -10,7 +10,7 @@ import { SIMULATE_FAILURE_HEADER_VALUE } from './constants.js'
 import type { Response } from 'express'
 import type { AppEnvironment } from '../../config/environment.types.js'
 import type { MessageRecord } from '../messages/types/message.entity.js'
-import type { HandleSendMessageInput, SendMessageInput } from './types/send-message-input.js'
+import type { SendMessageRequestInput, SendMessageInput } from './types/send-message-input.js'
 
 @Injectable()
 export class SendMessageOrchestrator {
@@ -21,9 +21,9 @@ export class SendMessageOrchestrator {
     private readonly configService: ConfigService<AppEnvironment, true>,
   ) {}
 
-  async handle(
+  async sendMessageToResponse(
     response: Response,
-    { senderId, conversation, sendMessageDto, simulateFailureHeader }: HandleSendMessageInput,
+    { senderId, conversation, sendMessageDto, simulateFailureHeader }: SendMessageRequestInput,
   ): Promise<void> {
     if (isAssistantReplyType(conversation.type)) {
       await this.streamAssistantReplyOrchestrator.streamToResponse(response, {

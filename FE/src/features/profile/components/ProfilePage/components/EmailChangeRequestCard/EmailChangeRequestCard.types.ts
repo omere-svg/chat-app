@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import type { useRequestEmailChange } from './hooks/useRequestEmailChange.ts'
+import type { useEmailChangeRequest } from './hooks/useEmailChangeRequest.ts'
 
-export type UseEmailChangeRequestValue = ReturnType<typeof useRequestEmailChange>
+export type UseEmailChangeRequestValue = ReturnType<typeof useEmailChangeRequest>
 
 export type EmailChangeRequestProviderProps = {
   children: ReactNode

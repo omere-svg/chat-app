@@ -35,7 +35,7 @@ export class AvatarController {
     @CurrentUser() currentUser: User,
     @Body() setAvatarDto: SetAvatarDto,
   ): Promise<AvatarResult> {
-    return this.setAvatarOrchestrator.confirm(currentUser.id, setAvatarDto.key)
+    return this.setAvatarOrchestrator.set(currentUser.id, setAvatarDto.key)
   }
 
   @Delete()

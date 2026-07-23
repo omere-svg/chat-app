@@ -2,7 +2,7 @@ import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator'
 import {
   MAX_EMAIL_LENGTH,
   MAX_PASSWORD_LENGTH,
-} from '../../../shared/validation/field-constraints.constant.js'
+} from '../../../shared/validation/field-constraints.constants.js'
 import { MIN_LOGIN_PASSWORD_LENGTH } from '../constants.js'
 
 export class LoginDto {

@@ -61,7 +61,7 @@ export class ConversationsService {
     participantIds,
   }: CreateConversationRecordInput): Promise<ConversationRecord> {
     if (type === 'direct') {
-      const existingConversation = await this.conversationRepository.findByParticipantSet(participantIds)
+      const existingConversation = await this.conversationRepository.findByExactParticipants(participantIds)
       if (existingConversation !== null) {
         throw new ConversationConflictError(existingConversation.id)
       }

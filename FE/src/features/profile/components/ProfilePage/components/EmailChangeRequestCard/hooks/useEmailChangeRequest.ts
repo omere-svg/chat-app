@@ -7,7 +7,7 @@ import { useProfileForm } from '@/features/profile/components/ProfilePage/hooks/
 import { EMAIL_CHANGE_REQUEST_CARD_TEXT } from '../EmailChangeRequestCard.constants.ts'
 import { SEND_CONFIRMATION_BUTTON_TEXT } from '../components/SendConfirmationButton/SendConfirmationButton.constants.ts'
 
-export function useRequestEmailChange() {
+export function useEmailChangeRequest() {
   const { currentUser } = useAuth()
   const { isSaving, statusView, runSave } = useProfileForm()
 

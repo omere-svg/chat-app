@@ -17,7 +17,7 @@ import {
   setUserAvatar,
   toPublicUser,
   updateUserName,
-  userInConversation,
+  isUserInConversation,
   verifyCredentials,
 } from './db.ts'
 import { jsonApiError } from './jsonApiError.ts'
@@ -31,7 +31,7 @@ const MOCK_ALLOWED_AVATAR_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/web
 
 const MOCK_AVATAR_STORAGE_ORIGIN = 'https://mock-avatar-storage.local'
 
-function bearerToken(request: Request): string | null {
+function readBearerToken(request: Request): string | null {
   const auth = request.headers.get('Authorization')
   if (!auth?.startsWith('Bearer ')) return null
   return auth.slice(7)
@@ -95,7 +95,7 @@ export const handlers = [
   }),
 
   http.get(endpoints.currentUser, ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     const user = userId ? findUserById(userId) : null
     if (!user) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
@@ -104,7 +104,7 @@ export const handlers = [
   }),
 
   http.patch(endpoints.updateProfile, async ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -126,7 +126,7 @@ export const handlers = [
   }),
 
   http.get(endpoints.previousEmails, ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -138,7 +138,7 @@ export const handlers = [
   }),
 
   http.post(endpoints.emailChangeRequest, async ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -179,7 +179,7 @@ export const handlers = [
   }),
 
   http.post(endpoints.avatarUploadUrl, async ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -201,7 +201,7 @@ export const handlers = [
   http.post(MOCK_AVATAR_STORAGE_ORIGIN, () => new HttpResponse(null, { status: 204 })),
 
   http.put(endpoints.avatar, async ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -218,7 +218,7 @@ export const handlers = [
   }),
 
   http.delete(endpoints.avatar, ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -230,7 +230,7 @@ export const handlers = [
   }),
 
   http.get(endpoints.conversations, ({ request }) => {
-    const userId = resolveUserId(bearerToken(request))
+    const userId = resolveUserId(readBearerToken(request))
     if (!userId) {
       return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
     }
@@ -240,7 +240,7 @@ export const handlers = [
   http.get(
     endpoints.conversationMessagesPattern,
     ({ request, params }) => {
-      const userId = resolveUserId(bearerToken(request))
+      const userId = resolveUserId(readBearerToken(request))
       if (!userId) {
         return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
       }
@@ -249,7 +249,7 @@ export const handlers = [
       if (!conversationId) {
         return jsonApiError(404, 'CONVERSATION_NOT_FOUND', 'Conversation not found')
       }
-      if (!userInConversation(userId, conversationId)) {
+      if (!isUserInConversation(userId, conversationId)) {
         return jsonApiError(403, 'FORBIDDEN', 'Not a participant in this conversation')
       }
 
@@ -268,7 +268,7 @@ export const handlers = [
   http.post(
     endpoints.conversationMessagesPattern,
     async ({ request, params }) => {
-      const userId = resolveUserId(bearerToken(request))
+      const userId = resolveUserId(readBearerToken(request))
       if (!userId) {
         return jsonApiError(401, 'UNAUTHORIZED', 'Missing or invalid token')
       }
@@ -277,7 +277,7 @@ export const handlers = [
       if (!conversationId) {
         return jsonApiError(404, 'CONVERSATION_NOT_FOUND', 'Conversation not found')
       }
-      if (!userInConversation(userId, conversationId)) {
+      if (!isUserInConversation(userId, conversationId)) {
         return jsonApiError(403, 'FORBIDDEN', 'Not a participant in this conversation')
       }
 

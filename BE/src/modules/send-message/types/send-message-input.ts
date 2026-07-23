@@ -8,7 +8,7 @@ export interface SendMessageInput {
   simulateFailureRequested: boolean
 }
 
-export interface HandleSendMessageInput {
+export interface SendMessageRequestInput {
   senderId: string
   conversation: ConversationRecord
   sendMessageDto: SendMessageDto

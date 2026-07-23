@@ -1,7 +1,7 @@
 import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import { useProfileForm } from '@/features/profile/components/ProfilePage/hooks/useProfileForm.ts'
-import { fullName } from '@/types/domain.utils.ts'
+import { getFullName } from '@/types/domain.utils.ts'
 import {
   ALLOWED_AVATAR_CONTENT_TYPES,
   AVATAR_CARD_TEXT,
@@ -17,7 +17,7 @@ export function useProfileAvatar() {
   const { currentUser, updateCurrentUser } = useAuth()
   const { isSaving, statusView, runSave } = useProfileForm()
 
-  const name = currentUser ? fullName(currentUser) : ''
+  const name = currentUser ? getFullName(currentUser) : ''
   const avatarUrl = currentUser?.avatarUrl ?? null
 
   function uploadFile(file: File): void {

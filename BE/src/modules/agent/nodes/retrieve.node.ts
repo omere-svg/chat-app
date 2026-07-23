@@ -2,7 +2,7 @@ import { HumanMessage, ToolMessage } from '@langchain/core/messages'
 import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { AGENT_EVENT, RETRIEVE_KNOWLEDGE_TOOL } from '../constants.js'
 import { readAgentConfigurable } from '../agent.config.js'
-import { extractTextContent, getToolCalls } from '../agent-events.js'
+import { extractTextContent, getToolCalls } from '../message-content.js'
 import { toCitation } from '../citation.mapper.js'
 import {
   TUTOR_RETRIEVAL_MIN_SCORE,

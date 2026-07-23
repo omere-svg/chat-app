@@ -4,7 +4,7 @@ import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import {
   EMAIL_CHANGE_CONFIRM_FAILURE_REASON,
-  CONFIRM_EMAIL_TOKEN_PARAM,
+  EMAIL_CHANGE_CONFIRM_TOKEN_PARAM,
   EMAIL_CHANGE_CONFIRM_TEXT,
 } from '../EmailChangeConfirmScreen.constants.ts'
 import {
@@ -37,7 +37,7 @@ export function useEmailChangeConfirm() {
   const latestCurrentUser = useRef(currentUser)
   const latestUpdateCurrentUser = useRef(updateCurrentUser)
 
-  const token = searchParams.get(CONFIRM_EMAIL_TOKEN_PARAM)
+  const token = searchParams.get(EMAIL_CHANGE_CONFIRM_TOKEN_PARAM)
 
   useLayoutEffect(() => {
     latestCurrentUser.current = currentUser

@@ -48,7 +48,7 @@ describe('CreateConversationOrchestrator', () => {
   it('persists a direct preview with the creator included among participants', async () => {
     const { orchestrator, create } = buildOrchestrator(creator)
 
-    const preview = await orchestrator.create(creator.id, createDto)
+    const preview = await orchestrator.createDirect(creator.id, createDto)
 
     expect(create).toHaveBeenCalledWith({
       type: 'direct',
@@ -61,7 +61,7 @@ describe('CreateConversationOrchestrator', () => {
   it('throws Unauthorized when the authenticated creator cannot be found', async () => {
     const { orchestrator, create } = buildOrchestrator(null)
 
-    await expect(orchestrator.create(creator.id, createDto)).rejects.toBeInstanceOf(
+    await expect(orchestrator.createDirect(creator.id, createDto)).rejects.toBeInstanceOf(
       CreatorNotFoundError,
     )
     expect(create).not.toHaveBeenCalled()

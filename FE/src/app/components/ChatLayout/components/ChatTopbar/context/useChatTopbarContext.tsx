@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
-import { fullName } from '@/types/domain.utils.ts'
+import { getFullName } from '@/types/domain.utils.ts'
 import type {
   ChatTopbarContextValue,
   ChatTopbarProviderProps,
@@ -14,7 +14,7 @@ export function ChatTopbarProvider({
   const { currentUser, logout } = useAuth()
 
   const value: ChatTopbarContextValue = {
-    userName: currentUser ? fullName(currentUser) : '',
+    userName: currentUser ? getFullName(currentUser) : '',
     avatarUrl: currentUser?.avatarUrl ?? null,
     logout,
   }

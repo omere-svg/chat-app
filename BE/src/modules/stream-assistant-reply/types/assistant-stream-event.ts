@@ -1,5 +1,5 @@
 import type { MessageCitation, MessageRecord } from '../../messages/types/message.entity.js'
-import type { ErrorCode } from '../../../shared/errors/error-codes.constant.js'
+import type { ErrorCode } from '../../../shared/errors/error-codes.constants.js'
 
 export type AssistantStreamEvent =
   | { event: 'user_message'; data: { message: MessageRecord } }

@@ -2,7 +2,7 @@ import { IsString, Matches, MaxLength } from 'class-validator'
 import {
   MAX_NAME_LENGTH,
   NON_WHITESPACE_PATTERN,
-} from '../../../shared/validation/field-constraints.constant.js'
+} from '../../../shared/validation/field-constraints.constants.js'
 
 export class UpdateProfileDto {
   @IsString()

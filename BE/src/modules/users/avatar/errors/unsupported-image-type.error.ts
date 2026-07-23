@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common'
 import { AppException } from '../../../../shared/errors/app.exception.js'
-import { ERROR_CODES } from '../../../../shared/errors/error-codes.constant.js'
+import { ERROR_CODES } from '../../../../shared/errors/error-codes.constants.js'
 import { ALLOWED_AVATAR_CONTENT_TYPES } from '../constants.js'
 
 export class UnsupportedImageTypeError extends AppException {

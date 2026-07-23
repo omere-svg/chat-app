@@ -11,8 +11,8 @@ const NewConversationContext = createContext<UseNewConversationValue | null>(nul
 export function NewConversationProvider({
   children,
 }: NewConversationProviderProps): React.ReactElement {
-  const { handleConversationCreated } = useChatLayout()
-  const value = useNewConversation(handleConversationCreated)
+  const { selectCreatedConversation } = useChatLayout()
+  const value = useNewConversation(selectCreatedConversation)
 
   return (
     <NewConversationContext.Provider value={value}>
