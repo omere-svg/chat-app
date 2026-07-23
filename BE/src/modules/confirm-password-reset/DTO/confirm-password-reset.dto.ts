@@ -5,8 +5,7 @@ import {
   MIN_PASSWORD_LENGTH,
 } from '../../../shared/validation/field-constraints.constant.js'
 import { OTP_CODE_LENGTH } from '../../password-reset-otp/constants.js'
-
-const NUMERIC_CODE_PATTERN = /^\d+$/
+import { NUMERIC_CODE_PATTERN } from '../constants.js'
 
 export class ConfirmPasswordResetDto {
   @IsEmail()
