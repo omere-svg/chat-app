@@ -73,11 +73,19 @@ type Citation = {
 ```ts
 type ConversationType = 'direct' | 'assistant' | 'tutor' // 'tutor' = RAG over the user's knowledge base
 
+type ConversationParticipant = {
+  id: string
+  firstName: string
+  lastName: string
+  avatarUrl?: string | null
+}
+
 type ConversationPreview = {
   id: string
   type: ConversationType
   title: string
   participantIds: string[]
+  participants: ConversationParticipant[] // resolved participant identities for rendering
   lastMessage: Pick<Message, 'body' | 'createdAt' | 'senderId'> | null
   updatedAt: string // ISO 8601 — sort key for conversation list
 }
@@ -89,12 +97,12 @@ type ConversationPreview = {
 
 ### `POST /api/auth/login`
 
-Mock login — pick a user identity. No password.
+Authenticate with email + password.
 
 **Request**
 
 ```ts
-{ userId: string }
+{ email: string; password: string }
 ```
 
 **Response `200`**
@@ -410,6 +418,7 @@ Pre-stream failures (auth, participant, validation) are returned as normal JSON 
 event: user_message   data: { "message": Message }          // the persisted user message
 event: token          data: { "text": string }              // assistant reply delta (repeated)
 event: tool           data: { "name": string }              // a tool the assistant invoked
+event: tool_result    data: { "name": string }              // a tool the assistant finished running
 event: citations      data: { "citations": Citation[] }     // tutor only — sources, before tokens
 event: done           data: { "message": Message }          // the persisted assistant reply
 event: error          data: { "code": "ASSISTANT_UNAVAILABLE", "message": string }
