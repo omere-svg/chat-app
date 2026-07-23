@@ -11,3 +11,7 @@ export type UseToastValue = {
   showErrorToast: (message: string) => void
   dismissToast: (toastId: string) => void
 }
+
+export type ToastState = {
+  notifications: ToastNotification[]
+}

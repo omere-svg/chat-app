@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { apiClient } from '@/api/apiClient.ts'
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
 import { isValidEmail } from '@/shared/validation/isValidEmail.ts'
-import { useProfileForm } from '../../../hooks/useProfileForm.ts'
+import { useProfileForm } from '@/features/profile/components/ProfilePage/hooks/useProfileForm.ts'
 import { EMAIL_CHANGE_REQUEST_CARD_TEXT } from '../EmailChangeRequestCard.constants.ts'
 
 export function useRequestEmailChange() {
@@ -34,7 +34,7 @@ export function useRequestEmailChange() {
     newEmail,
     currentEmail,
     setNewEmail,
-    isSubmitting: isSaving,
+    isSaving,
     canSubmit,
     status,
     handleSubmit,

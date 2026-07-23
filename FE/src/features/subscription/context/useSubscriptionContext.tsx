@@ -19,18 +19,12 @@ export function SubscriptionProvider({
 
   const isActive = subscription?.status === SUBSCRIPTION_ACTIVE_STATUS
 
-  const upgrade = (): void => {
-    if (proPlan !== null) {
-      void upgradeWithPlan(proPlan.code)
-    }
-  }
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault()
     if (isActive || isUpgrading || proPlan === null) {
       return
     }
-    upgrade()
+    void upgradeWithPlan(proPlan.code)
   }
 
   const value: SubscriptionContextValue = {

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { apiClient } from '@/api/apiClient.ts'
-import { SUBSCRIPTION_TEXT } from '../constants.ts'
+import { SUBSCRIPTION_TEXT } from '../constants/subscription.ts'
 
 export function useUpgradeSubscription() {
   const [isUpgrading, setIsUpgrading] = useState(false)

@@ -7,7 +7,7 @@ import {
   SUBSCRIPTION_CALLBACK_STATUS_PARAM,
   SUBSCRIPTION_POLL_INTERVAL_MS,
   SUBSCRIPTION_POLL_MAX_ATTEMPTS,
-} from '../../../constants.ts'
+} from '../../../constants/subscription.ts'
 import {
   SUBSCRIPTION_CALLBACK_FAILURE_REASON,
   SUBSCRIPTION_CALLBACK_TEXT,

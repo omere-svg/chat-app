@@ -1,17 +1,8 @@
-import { SUBSCRIPTION_TEXT } from '../constants.ts'
-import type { Plan, Subscription } from '@/types/domain.ts'
-
-export type SubscriptionStatusState = {
-  subscription: Subscription | null
-  proPlan: Plan | null
-  isLoading: boolean
-  loadError: string | null
-}
-
-export type SubscriptionStatusAction =
-  | { type: 'LOAD_START' }
-  | { type: 'LOAD_SUCCESS'; subscription: Subscription; proPlan: Plan | null }
-  | { type: 'LOAD_ERROR' }
+import { SUBSCRIPTION_TEXT } from '../constants/subscription.ts'
+import type {
+  SubscriptionStatusAction,
+  SubscriptionStatusState,
+} from '../types/subscriptionStatus.ts'
 
 export const initialSubscriptionStatusState: SubscriptionStatusState = {
   subscription: null,

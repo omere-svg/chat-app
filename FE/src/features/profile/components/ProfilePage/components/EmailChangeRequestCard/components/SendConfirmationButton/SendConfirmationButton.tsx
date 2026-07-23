@@ -3,12 +3,12 @@ import { useEmailChangeRequestContext } from '../../context/useEmailChangeReques
 import { SEND_CONFIRMATION_BUTTON_TEXT } from './SendConfirmationButton.constants.ts'
 
 export function SendConfirmationButton(): React.ReactElement {
-  const { canSubmit, isSubmitting } = useEmailChangeRequestContext()
+  const { canSubmit, isSaving } = useEmailChangeRequestContext()
 
-  const label = isSubmitting
+  const label = isSaving
     ? SEND_CONFIRMATION_BUTTON_TEXT.submitting
     : SEND_CONFIRMATION_BUTTON_TEXT.submit
-  const isDisabled = !canSubmit || isSubmitting
+  const isDisabled = !canSubmit || isSaving
 
   return (
     <Button type="submit" variant="primary" disabled={isDisabled}>
