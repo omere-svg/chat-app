@@ -8,9 +8,9 @@ import type { MessageMetadata, MessageRecord } from './types/message.entity.js'
 import type {
   CreateAssistantReplyInput,
   CreateMessageInput,
+  ListMessagesInput,
   MessagePageResponse,
 } from './types/message-service.types.js'
-import type { ListMessagesQueryDto } from './DTO/list-messages-query.dto.js'
 
 @Injectable()
 export class MessagesService {
@@ -31,10 +31,10 @@ export class MessagesService {
 
   async listMessages(
     conversationId: string,
-    query: ListMessagesQueryDto,
+    { cursor, limit }: ListMessagesInput,
   ): Promise<MessagePageResponse> {
-    const limit = query.limit ?? DEFAULT_MESSAGE_PAGE_SIZE
-    const result = await this.messageRepository.findMessagePage(conversationId, query.cursor, limit)
+    const pageSize = limit ?? DEFAULT_MESSAGE_PAGE_SIZE
+    const result = await this.messageRepository.findMessagePage(conversationId, cursor, pageSize)
 
     if (result.outcome === 'invalid-cursor') {
       throw new InvalidCursorError()
@@ -46,12 +46,13 @@ export class MessagesService {
   async createMessage({
     senderId,
     conversationId,
-    sendMessageDto,
+    body,
+    clientMessageId,
   }: CreateMessageInput): Promise<MessageRecord> {
-    if (sendMessageDto.clientMessageId !== undefined) {
+    if (clientMessageId !== undefined) {
       const alreadySentMessage = await this.messageRepository.findByClientMessageId(
         conversationId,
-        sendMessageDto.clientMessageId,
+        clientMessageId,
       )
       if (alreadySentMessage !== null) {
         return alreadySentMessage
@@ -62,11 +63,11 @@ export class MessagesService {
       id: `msg-${randomUUID()}`,
       conversationId,
       senderId,
-      body: sendMessageDto.body.trim(),
+      body: body.trim(),
       createdAt: new Date().toISOString(),
     }
 
-    return this.messageRepository.insert(message, sendMessageDto.clientMessageId)
+    return this.messageRepository.insert(message, clientMessageId)
   }
 
   async listRecentMessagesOldestFirst(

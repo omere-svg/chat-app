@@ -55,7 +55,8 @@ export class SendMessageOrchestrator {
     const message = await this.messagesService.createMessage({
       senderId,
       conversationId,
-      sendMessageDto,
+      body: sendMessageDto.body,
+      clientMessageId: sendMessageDto.clientMessageId,
     })
 
     await this.conversationsService.advanceLastMessageIfNewer(

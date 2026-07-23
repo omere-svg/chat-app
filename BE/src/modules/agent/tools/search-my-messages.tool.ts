@@ -4,6 +4,7 @@ import { MessagesService } from '../../../modules/messages/messages.service.js'
 import {
   SEARCH_MESSAGES_DEFAULT_LIMIT,
   SEARCH_MESSAGES_MAX_LIMIT,
+  SEARCH_MESSAGES_QUERY_MAX_LENGTH,
   TOOL_SNIPPET_MAX_LENGTH,
 } from './constants.js'
 import type { AgentTool, AgentToolContext, AgentToolDefinition } from '../types/agent-tool.js'
@@ -13,7 +14,7 @@ const inputSchema = z.object({
   query: z
     .string()
     .min(1)
-    .max(200)
+    .max(SEARCH_MESSAGES_QUERY_MAX_LENGTH)
     .describe('Text to search for within the signed-in user\'s own messages.'),
   limit: z
     .number()

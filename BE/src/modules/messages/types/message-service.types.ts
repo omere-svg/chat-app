@@ -1,15 +1,20 @@
 import type { MessageCitation, MessageRecord } from './message.entity.js'
-import type { SendMessageDto } from '../DTO/send-message.dto.js'
 
 export interface MessagePageResponse {
   messages: MessageRecord[]
   nextCursor: string | null
 }
 
+export interface ListMessagesInput {
+  cursor?: string
+  limit?: number
+}
+
 export interface CreateMessageInput {
   senderId: string
   conversationId: string
-  sendMessageDto: SendMessageDto
+  body: string
+  clientMessageId?: string
 }
 
 export interface CreateAssistantReplyInput {

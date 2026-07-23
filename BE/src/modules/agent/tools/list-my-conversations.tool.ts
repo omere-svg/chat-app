@@ -6,7 +6,7 @@ import {
   LIST_CONVERSATIONS_MAX_LIMIT,
   TOOL_SNIPPET_MAX_LENGTH,
 } from './constants.js'
-import type { ConversationType } from '../../../modules/conversations/types/conversation.entity.js'
+import type { ConversationRecord } from '../../../modules/conversations/types/conversation.entity.js'
 import type { AgentTool, AgentToolContext, AgentToolDefinition } from '../types/agent-tool.js'
 import type { ConversationToolView } from '../types/conversation-tool-view.js'
 
@@ -39,13 +39,7 @@ export class ListMyConversationsTool implements AgentTool {
   }
 }
 
-function toConversationToolView(conversation: {
-  id: string
-  type: ConversationType
-  title: string
-  lastActivityAt: string
-  lastMessage: { body: string } | null
-}): ConversationToolView {
+function toConversationToolView(conversation: ConversationRecord): ConversationToolView {
   return {
     id: conversation.id,
     type: conversation.type,
