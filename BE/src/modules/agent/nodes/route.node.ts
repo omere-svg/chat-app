@@ -4,7 +4,7 @@ import { getToolCalls } from '../agent-events.js'
 import type { ChatOpenAI } from '@langchain/openai'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { AgentToolDefinition } from '../types/agent-tool.js'
-import type { AgentState, AgentStateUpdate } from '../agent.state.js'
+import type { AgentState, AgentStateUpdate } from '../types/agent-state.js'
 
 export function createRouteNode(chatModel: ChatOpenAI) {
   return async function route(

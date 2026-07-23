@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { AppProviders } from './app/AppProviders.tsx'
+import { AppProviders } from './app/components/AppProviders/AppProviders.tsx'
 import { bootstrapAuthToken } from './features/auth/store/authStorage.ts'
 import './index.css'
 

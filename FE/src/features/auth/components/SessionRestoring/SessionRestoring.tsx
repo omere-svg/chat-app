@@ -1,8 +1,8 @@
-import '../AuthScreen/AuthScreen.css'
 import {
   SESSION_RESTORING_CLASS,
   SESSION_RESTORING_TEXT,
 } from './SessionRestoring.constants.ts'
+import './SessionRestoring.css'
 
 export function SessionRestoring(): React.ReactElement {
   return (

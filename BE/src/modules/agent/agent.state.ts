@@ -19,6 +19,3 @@ export const AgentStateAnnotation = Annotation.Root({
     default: () => 0,
   }),
 })
-
-export type AgentState = typeof AgentStateAnnotation.State
-export type AgentStateUpdate = typeof AgentStateAnnotation.Update

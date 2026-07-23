@@ -12,5 +12,5 @@ export function MessageListContainer(): React.ReactElement {
     />
   ))
 
-  return <MessageList items={items} />
+  return <MessageList>{items}</MessageList>
 }

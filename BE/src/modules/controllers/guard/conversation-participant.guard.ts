@@ -3,12 +3,7 @@ import type { CanActivate, ExecutionContext } from '@nestjs/common'
 import { AuthenticationRequiredError } from '../../auth/errors/authentication-required.error.js'
 import { ConversationNotFoundError } from '../../conversations/errors/conversation-not-found.error.js'
 import { ConversationsService } from '../../conversations/conversations.service.js'
-import type { ConversationRequest } from '../decorator/current-conversation.decorator.js'
-import type { User } from '../../users/types/user.js'
-
-interface ParticipantGuardRequest extends ConversationRequest {
-  user?: User
-}
+import type { ParticipantGuardRequest } from '../types/participant-guard-request.js'
 
 @Injectable()
 export class ConversationParticipantGuard implements CanActivate {

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { ProfilePageContainer } from './ProfilePageContainer.tsx'
+import { ProfilePage } from './ProfilePage.tsx'
 import { apiClient } from '@/api/apiClient.ts'
 import type { User } from '@/types/domain.ts'
 
@@ -20,21 +20,13 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('ProfilePageContainer', () => {
+describe('ProfilePage', () => {
   it('renders the name card, email change card, previous emails, and back link', async () => {
     vi.spyOn(apiClient, 'getPreviousEmails').mockResolvedValue(['prev@example.com'])
-    vi.spyOn(apiClient, 'getSubscription').mockResolvedValue({
-      status: 'none',
-      planCode: null,
-      activatedAt: null,
-    })
-    vi.spyOn(apiClient, 'listPlans').mockResolvedValue({
-      plans: [{ code: 'pro', name: 'Pro', amount: 9.99, currency: 'USD', interval: 'month' }],
-    })
 
     render(
       <MemoryRouter>
-        <ProfilePageContainer />
+        <ProfilePage />
       </MemoryRouter>,
     )
 

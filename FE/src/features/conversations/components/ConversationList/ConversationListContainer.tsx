@@ -24,5 +24,5 @@ export function ConversationListContainer(): React.ReactElement {
     <ConversationListItemContainer key={conversation.id} conversation={conversation} />
   ))
 
-  return <ConversationList items={items} />
+  return <ConversationList>{items}</ConversationList>
 }

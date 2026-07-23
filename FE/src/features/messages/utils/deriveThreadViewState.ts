@@ -1,13 +1,7 @@
 import type { ThreadMessage } from '@/types/domain.ts'
 import { MESSAGE_ERROR } from '../constants/messages.ts'
-import type { MessagesState } from './messageReducer.ts'
-
-export type ThreadViewState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'empty' }
-  | { status: 'success' }
-  | { status: 'error'; message: string }
+import type { MessagesState } from '../types/messagesState.ts'
+import type { ThreadViewState } from '../types/threadViewState.ts'
 
 export function deriveThreadViewState(
   conversationId: string | null,

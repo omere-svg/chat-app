@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { initialMessagesState, messageReducer } from './messageReducer.ts'
-import type { MessagesState } from './messageReducer.ts'
+import type { MessagesState } from '../types/messagesState.ts'
 import type { Citation, Message } from '@/types/domain.ts'
 
 const citations: Citation[] = [

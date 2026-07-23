@@ -1,5 +1,5 @@
 import type { Dispatch, FormEvent, ReactNode, SetStateAction } from 'react'
-import type { FormStatus } from '@/features/profile/types/formStatus.ts'
+import type { FormStatusMessageProps } from '../FormStatusMessage/FormStatusMessage.types.ts'
 
 export type UseProfileNameValue = {
   firstName: string
@@ -8,7 +8,7 @@ export type UseProfileNameValue = {
   setLastName: Dispatch<SetStateAction<string>>
   isSaving: boolean
   canSave: boolean
-  status: FormStatus
+  statusView: FormStatusMessageProps | null
   submitLabel: string
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void
 }

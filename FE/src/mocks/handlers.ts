@@ -238,7 +238,7 @@ export const handlers = [
   }),
 
   http.get(
-    `${endpoints.conversations}/:id/messages`,
+    endpoints.conversationMessagesPattern,
     ({ request, params }) => {
       const userId = resolveUserId(bearerToken(request))
       if (!userId) {
@@ -266,7 +266,7 @@ export const handlers = [
   ),
 
   http.post(
-    `${endpoints.conversations}/:id/messages`,
+    endpoints.conversationMessagesPattern,
     async ({ request, params }) => {
       const userId = resolveUserId(bearerToken(request))
       if (!userId) {

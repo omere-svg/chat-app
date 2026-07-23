@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { UsersService } from '../users/users.service.js'
 import { PasswordResetOtpService } from '../password-reset-otp/password-reset-otp.service.js'
+import { OTP_OUTCOME } from '../password-reset-otp/constants.js'
 import { InvalidResetCodeError } from './errors/invalid-reset-code.error.js'
 import { PASSWORD_RESET_CONFIRM_STATUS } from './constants.js'
 import type { ConfirmPasswordResetDto } from './DTO/confirm-password-reset.dto.js'
@@ -27,7 +28,7 @@ export class ConfirmPasswordResetOrchestrator {
       userId: user.id,
       code,
     })
-    if (verification.outcome !== 'valid') {
+    if (verification.outcome !== OTP_OUTCOME.valid) {
       throw new InvalidResetCodeError()
     }
 

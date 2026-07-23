@@ -4,8 +4,10 @@ import { MessagesService } from '../../../modules/messages/messages.service.js'
 import {
   SEARCH_MESSAGES_DEFAULT_LIMIT,
   SEARCH_MESSAGES_MAX_LIMIT,
-  TOOL_SNIPPET_MAX_LENGTH,
+  SEARCH_MESSAGES_QUERY_MAX_LENGTH,
 } from './constants.js'
+import { SEARCH_MY_MESSAGES_TOOL } from '../constants.js'
+import { toMessageSearchHit } from './message-search-hit.mapper.js'
 import type { AgentTool, AgentToolContext, AgentToolDefinition } from '../types/agent-tool.js'
 import type { MessageSearchHit } from '../types/message-search-hit.js'
 
@@ -13,7 +15,7 @@ const inputSchema = z.object({
   query: z
     .string()
     .min(1)
-    .max(200)
+    .max(SEARCH_MESSAGES_QUERY_MAX_LENGTH)
     .describe('Text to search for within the signed-in user\'s own messages.'),
   limit: z
     .number()
@@ -29,7 +31,7 @@ export class SearchMyMessagesTool implements AgentTool {
   constructor(private readonly messagesService: MessagesService) {}
 
   readonly definition: AgentToolDefinition = {
-    name: 'search_my_messages',
+    name: SEARCH_MY_MESSAGES_TOOL,
     description:
       "Search the signed-in user's own messages by keyword, most recent first. Use this " +
       'when the user asks what they said about something, or to find one of their past messages.',
@@ -43,10 +45,6 @@ export class SearchMyMessagesTool implements AgentTool {
       query,
       limit ?? SEARCH_MESSAGES_DEFAULT_LIMIT,
     )
-    return messages.map((message) => ({
-      conversationId: message.conversationId,
-      snippet: message.body.slice(0, TOOL_SNIPPET_MAX_LENGTH),
-      createdAt: message.createdAt,
-    }))
+    return messages.map(toMessageSearchHit)
   }
 }

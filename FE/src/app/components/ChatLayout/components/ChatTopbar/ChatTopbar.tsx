@@ -1,38 +1,13 @@
-import { Link } from 'react-router-dom'
-import { UserAvatarContainer } from '@/shared/components/UserAvatar/UserAvatarContainer.tsx'
-import {
-  CHAT_TOPBAR_CLASS,
-  CHAT_TOPBAR_ROUTE,
-  CHAT_TOPBAR_TEXT,
-} from './ChatTopbar.constants.ts'
-import type { ChatTopbarProps } from './ChatTopbar.types.ts'
+import { CHAT_TOPBAR_CLASS } from './ChatTopbar.constants.ts'
+import { TopbarIdentity } from './components/TopbarIdentity/TopbarIdentity.tsx'
+import { TopbarActions } from './components/TopbarActions/TopbarActions.tsx'
 import './ChatTopbar.css'
 
-export function ChatTopbar({
-  userName,
-  avatarUrl,
-  onLogout,
-}: ChatTopbarProps): React.ReactElement {
+export function ChatTopbar(): React.ReactElement {
   return (
     <header className={CHAT_TOPBAR_CLASS.topbar}>
-      <div className={CHAT_TOPBAR_CLASS.identity}>
-        <UserAvatarContainer name={userName} imageUrl={avatarUrl} size="sm" />
-        <span className={CHAT_TOPBAR_CLASS.user}>
-          {CHAT_TOPBAR_TEXT.signedInPrefix} {userName}
-        </span>
-      </div>
-      <div className={CHAT_TOPBAR_CLASS.actions}>
-        <Link to={CHAT_TOPBAR_ROUTE.profile} className={CHAT_TOPBAR_CLASS.action}>
-          {CHAT_TOPBAR_TEXT.profile}
-        </Link>
-        <button
-          type="button"
-          className={CHAT_TOPBAR_CLASS.action}
-          onClick={onLogout}
-        >
-          {CHAT_TOPBAR_TEXT.logout}
-        </button>
-      </div>
+      <TopbarIdentity />
+      <TopbarActions />
     </header>
   )
 }

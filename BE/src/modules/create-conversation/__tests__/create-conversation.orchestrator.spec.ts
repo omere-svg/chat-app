@@ -5,7 +5,7 @@ import { ConversationParticipantsMapper } from '../../../shared/conversation-par
 import type { ConversationsService } from '../../conversations/conversations.service.js'
 import type { UsersService } from '../../users/users.service.js'
 import type { ConversationRecord } from '../../conversations/types/conversation.entity.js'
-import type { CreateConversationDto } from '../../conversations/DTO/create-conversation.dto.js'
+import type { CreateConversationDto } from '../DTO/create-conversation.dto.js'
 import type { User } from '../../users/types/user.js'
 
 const creator: User = { id: 'user-1', email: 'creator@example.com', firstName: 'Creator', lastName: 'One', avatarUrl: null }

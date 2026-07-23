@@ -2,7 +2,8 @@ import { HumanMessage, ToolMessage } from '@langchain/core/messages'
 import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { AGENT_EVENT, RETRIEVE_KNOWLEDGE_TOOL } from '../constants.js'
 import { readAgentConfigurable } from '../agent.config.js'
-import { extractTextContent, getToolCalls, toCitation } from '../agent-events.js'
+import { extractTextContent, getToolCalls } from '../agent-events.js'
+import { toCitation } from '../citation.mapper.js'
 import {
   TUTOR_RETRIEVAL_MIN_SCORE,
   TUTOR_RETRIEVAL_TOP_K,
@@ -11,7 +12,7 @@ import { buildTutorContext } from '../../knowledge-rag/tutor/tutor-prompt.js'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { EmbeddingsProvider } from '../../embeddings/types/embeddings-provider.js'
 import type { VectorRetriever } from '../../knowledge-rag/types/vector-retriever.js'
-import type { AgentState, AgentStateUpdate } from '../agent.state.js'
+import type { AgentState, AgentStateUpdate } from '../types/agent-state.js'
 
 export function createRetrieveNode(
   embeddings: EmbeddingsProvider,

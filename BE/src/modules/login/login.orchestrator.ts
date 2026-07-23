@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service.js'
 import { AuthTokenService } from '../auth/auth-token.service.js'
 import { InvalidCredentialsError } from '../auth/errors/invalid-credentials.error.js'
 import type { AuthenticationResult } from '../auth/types/authentication-result.js'
-import type { LoginDto } from '../auth/DTO/login.dto.js'
+import type { LoginDto } from './DTO/login.dto.js'
 
 @Injectable()
 export class LoginOrchestrator {

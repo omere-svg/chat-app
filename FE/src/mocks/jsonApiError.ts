@@ -7,6 +7,10 @@ export function jsonApiError(
   message: string,
   details?: unknown,
 ): ReturnType<typeof HttpResponse.json> {
-  const payload: ApiErrorPayload = { code, message, details }
+  const payload: ApiErrorPayload = {
+    code,
+    message,
+    ...(details === undefined ? {} : { details }),
+  }
   return HttpResponse.json({ error: payload }, { status })
 }

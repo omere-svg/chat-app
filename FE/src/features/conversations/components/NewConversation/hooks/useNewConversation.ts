@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { apiClient, ApiError } from '@/api/apiClient.ts'
 import { CONVERSATIONS_ERROR } from '@/features/conversations/constants/conversations.ts'
 import { NEW_CONVERSATION_TEXT } from '../NewConversation.constants.ts'
@@ -70,6 +70,10 @@ export function useNewConversation(
     }
   }
 
+  function handleParticipantEmailChange(event: ChangeEvent<HTMLInputElement>): void {
+    setParticipantEmail(event.target.value)
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault()
     void createDirect()
@@ -80,12 +84,12 @@ export function useNewConversation(
 
   return {
     participantEmail,
-    setParticipantEmail,
+    handleParticipantEmailChange,
     isSubmitting,
     errorMessage,
     handleSubmit,
-    createAssistant,
-    createTutor,
+    handleCreateAssistant: () => void createAssistant(),
+    handleCreateTutor: () => void createTutor(),
     isSubmitDisabled: !canSubmit || isSubmitting,
     submitLabel: busyLabel ?? NEW_CONVERSATION_TEXT.submit,
     assistantLabel: busyLabel ?? NEW_CONVERSATION_TEXT.assistant,

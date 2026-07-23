@@ -1,10 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { ToastNotification } from '../types/toast.ts'
-
-type ToastState = {
-  notifications: ToastNotification[]
-}
+import type { ToastNotification, ToastState } from '../types/toast.ts'
 
 const initialState: ToastState = {
   notifications: [],

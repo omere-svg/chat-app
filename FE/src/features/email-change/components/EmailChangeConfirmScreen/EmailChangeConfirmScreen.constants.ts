@@ -5,7 +5,6 @@ export const EMAIL_CHANGE_CONFIRM_FAILURE_REASON = {
 } as const
 
 export const EMAIL_CHANGE_CONFIRM_TEXT = {
-  heading: 'Confirm email change',
   pending: 'Confirming your new email address…',
   successPrefix: 'Your email address is now ',
   failure: {
@@ -23,5 +22,4 @@ export const CONFIRM_EMAIL_TOKEN_PARAM = 'token'
 export const EMAIL_CHANGE_CONFIRM_CLASS = {
   screen: 'email-change-confirm-screen',
   card: 'email-change-confirm-screen__card',
-  heading: 'email-change-confirm-screen__heading',
 } as const

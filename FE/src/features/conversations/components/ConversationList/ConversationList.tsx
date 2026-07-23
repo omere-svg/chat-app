@@ -6,7 +6,7 @@ import type { ConversationListProps } from './ConversationList.types.ts'
 import './ConversationList.css'
 
 export function ConversationList({
-  items,
+  children,
 }: ConversationListProps): React.ReactElement {
   return (
     <div
@@ -14,7 +14,7 @@ export function ConversationList({
       role="listbox"
       aria-label={CONVERSATION_LIST_TEXT.ariaLabel}
     >
-      {items}
+      {children}
     </div>
   )
 }

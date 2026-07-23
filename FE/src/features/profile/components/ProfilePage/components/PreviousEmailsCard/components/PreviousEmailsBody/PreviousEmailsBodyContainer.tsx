@@ -1,6 +1,6 @@
 import { usePreviousEmailsContext } from '../../context/usePreviousEmailsContext.tsx'
 import { PREVIOUS_EMAILS_CARD_TEXT } from '../../PreviousEmailsCard.constants.ts'
-import { PreviousEmailItem } from '../PreviousEmailItem/PreviousEmailItem.tsx'
+import { PreviousEmailItem } from './components/PreviousEmailItem/PreviousEmailItem.tsx'
 import { PreviousEmailsList } from './components/PreviousEmailsList/PreviousEmailsList.tsx'
 import { PreviousEmailsMessage } from './components/PreviousEmailsMessage/PreviousEmailsMessage.tsx'
 

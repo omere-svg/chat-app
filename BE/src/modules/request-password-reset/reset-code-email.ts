@@ -1,9 +1,7 @@
-import { RESET_CODE_EMAIL_SUBJECT } from './constants.js'
+import { RESET_CODE_EMAIL_SUBJECT, SECONDS_PER_MINUTE } from './constants.js'
 import { OTP_TTL_SECONDS } from '../password-reset-otp/constants.js'
 import type { EmailMessage } from '../email-sender/types/email-message.js'
 import type { ResetCodeEmailInput } from './types/reset-code-email-input.js'
-
-const SECONDS_PER_MINUTE = 60
 
 export function buildResetCodeEmail({ to, code }: ResetCodeEmailInput): EmailMessage {
   const expiryMinutes = Math.floor(OTP_TTL_SECONDS / SECONDS_PER_MINUTE)

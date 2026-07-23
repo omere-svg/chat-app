@@ -4,7 +4,6 @@ import { validateEnvironment } from './config/environment.schema.js'
 import { DbModule } from './modules/db/db.module.js'
 import { ControllersModule } from './modules/controllers/controllers.module.js'
 import { DatabaseSeedModule } from './modules/database-seed/database-seed.module.js'
-import { PaymentEventConsumerModule } from './modules/payment-event-consumer/payment-event-consumer.module.js'
 
 @Module({
   imports: [
@@ -17,7 +16,6 @@ import { PaymentEventConsumerModule } from './modules/payment-event-consumer/pay
     DbModule,
     ControllersModule,
     DatabaseSeedModule,
-    PaymentEventConsumerModule,
   ],
 })
 export class AppModule {}

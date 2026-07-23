@@ -4,14 +4,7 @@ import type { Response } from 'express'
 import { AppException } from './app.exception.js'
 import { ERROR_CODES } from './error-codes.constant.js'
 import type { ErrorCode } from './error-codes.constant.js'
-
-interface StructuredErrorResponse {
-  error: {
-    code: ErrorCode
-    message: string
-    details?: unknown
-  }
-}
+import type { StructuredErrorResponse } from './types/structured-error-response.js'
 
 const KNOWN_ERROR_CODES: ReadonlySet<string> = new Set<string>(Object.values(ERROR_CODES))
 
@@ -22,7 +15,7 @@ const STATUS_TO_ERROR_CODE: Readonly<Record<number, ErrorCode>> = {
   [HttpStatus.UNAUTHORIZED]: ERROR_CODES.UNAUTHORIZED,
   [HttpStatus.FORBIDDEN]: ERROR_CODES.FORBIDDEN,
   [HttpStatus.NOT_FOUND]: ERROR_CODES.ROUTE_NOT_FOUND,
-  [HttpStatus.CONFLICT]: ERROR_CODES.CONVERSATION_CONFLICT,
+  [HttpStatus.CONFLICT]: ERROR_CODES.CONFLICT,
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -4,7 +4,7 @@ import { EMAIL_CHANGE_CONFIRM_FAILURE_REASON } from './EmailChangeConfirmScreen.
 export type EmailChangeConfirmFailureReason =
   (typeof EMAIL_CHANGE_CONFIRM_FAILURE_REASON)[keyof typeof EMAIL_CHANGE_CONFIRM_FAILURE_REASON]
 
-export type ConfirmEmailChangeState =
+export type EmailChangeConfirmState =
   | {
       status: 'pending'
       newEmail: ''
@@ -21,7 +21,7 @@ export type ConfirmEmailChangeState =
       failureReason: EmailChangeConfirmFailureReason
     }
 
-export type ConfirmEmailChangeAction =
+export type EmailChangeConfirmAction =
   | { type: 'PENDING' }
   | { type: 'SUCCESS'; newEmail: string }
   | { type: 'INVALID'; reason: EmailChangeConfirmFailureReason }

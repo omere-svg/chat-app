@@ -5,7 +5,7 @@ import { readAgentConfigurable } from '../agent.config.js'
 import { getToolCalls } from '../agent-events.js'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { AgentToolRegistry } from '../tools/agent-tool.registry.js'
-import type { AgentState, AgentStateUpdate } from '../agent.state.js'
+import type { AgentState, AgentStateUpdate } from '../types/agent-state.js'
 
 export function createToolCallNode(toolRegistry: AgentToolRegistry) {
   return async function toolCall(

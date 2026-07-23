@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common'
 import { CurrentUser } from '../auth/current-user.decorator.js'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js'
-import { CurrentUserOrchestrator } from '../current-user/current-user.orchestrator.js'
+import { UpdateProfileOrchestrator } from '../update-profile/update-profile.orchestrator.js'
 import { ListPreviousEmailsOrchestrator } from '../list-previous-emails/list-previous-emails.orchestrator.js'
-import { UpdateProfileDto } from '../users/DTO/update-profile.dto.js'
+import { UpdateProfileDto } from '../update-profile/DTO/update-profile.dto.js'
 import type { User } from '../users/types/user.js'
 import type { PreviousEmailsView } from '../list-previous-emails/types/previous-emails.view.js'
 
@@ -11,7 +11,7 @@ import type { PreviousEmailsView } from '../list-previous-emails/types/previous-
 @UseGuards(JwtAuthGuard)
 export class CurrentUserController {
   constructor(
-    private readonly currentUserOrchestrator: CurrentUserOrchestrator,
+    private readonly updateProfileOrchestrator: UpdateProfileOrchestrator,
     private readonly listPreviousEmailsOrchestrator: ListPreviousEmailsOrchestrator,
   ) {}
 
@@ -30,6 +30,6 @@ export class CurrentUserController {
     @CurrentUser() currentUser: User,
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<User> {
-    return this.currentUserOrchestrator.updateProfile(currentUser.id, updateProfileDto)
+    return this.updateProfileOrchestrator.updateProfile(currentUser.id, updateProfileDto)
   }
 }

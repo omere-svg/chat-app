@@ -1,5 +1,6 @@
 import { JwtService } from '@nestjs/jwt'
 import type { AccessTokenClaims } from './types/access-token-claims.js'
+import type { TokenSubject } from './types/token-subject.js'
 
 export class AuthTokenService {
   private readonly jwtService: JwtService
@@ -8,7 +9,7 @@ export class AuthTokenService {
     this.jwtService = new JwtService({ secret, signOptions: { expiresIn } })
   }
 
-  issue(user: { id: string; email: string }): Promise<string> {
+  issue(user: TokenSubject): Promise<string> {
     const claims: AccessTokenClaims = { sub: user.id, email: user.email }
     return this.jwtService.signAsync(claims)
   }

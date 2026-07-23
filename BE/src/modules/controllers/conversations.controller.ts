@@ -3,7 +3,7 @@ import { CurrentUser } from '../auth/current-user.decorator.js'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js'
 import { ListConversationsOrchestrator } from '../list-conversations/list-conversations.orchestrator.js'
 import { CreateConversationOrchestrator } from '../create-conversation/create-conversation.orchestrator.js'
-import { CreateConversationDto } from '../conversations/DTO/create-conversation.dto.js'
+import { CreateConversationDto } from '../create-conversation/DTO/create-conversation.dto.js'
 import type {
   ConversationCreatedResponse,
   ConversationListResponse,

@@ -24,6 +24,17 @@ export class ConversationsService {
     @Inject(CONVERSATION_REPOSITORY) private readonly conversationRepository: ConversationRepository,
   ) {}
 
+  async seedIfEmpty(conversations: readonly ConversationRecord[]): Promise<number> {
+    if (!(await this.conversationRepository.isEmpty())) {
+      return 0
+    }
+
+    for (const conversation of conversations) {
+      await this.conversationRepository.insert(conversation)
+    }
+    return conversations.length
+  }
+
   listForParticipant(userId: string): Promise<ConversationRecord[]> {
     return this.conversationRepository.findByParticipantSortedByActivity(userId)
   }

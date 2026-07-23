@@ -11,7 +11,7 @@ import {
   DEFAULT_ATLAS_VECTOR_INDEX,
   KNOWLEDGE_CHUNKS_COLLECTION,
   KNOWLEDGE_CHUNKS_VECTOR_INDEX_DEFINITION,
-} from '../src/knowledge/atlas/vector-index.config.js'
+} from '../src/modules/knowledge-rag/atlas/vector-index.config.js'
 
 async function main(): Promise<void> {
   const uri = process.env.MONGO_URI

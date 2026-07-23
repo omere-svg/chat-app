@@ -50,6 +50,7 @@ function buildOrchestrator(options: {
   const chunkService: Mocked<KnowledgeChunkService> = {
     insertMany: vi.fn().mockResolvedValue(undefined),
     deleteByDocumentForUser: vi.fn().mockResolvedValue(0),
+    retrieveSimilarForUser: vi.fn().mockResolvedValue([]),
     ...options.chunkService,
   }
   const chunkTexts = options.chunks ?? ['chunk one', 'chunk two']

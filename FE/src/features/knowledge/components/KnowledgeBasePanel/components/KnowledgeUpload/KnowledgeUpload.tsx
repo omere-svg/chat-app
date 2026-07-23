@@ -9,7 +9,7 @@ import {
 import './KnowledgeUpload.css'
 
 export function KnowledgeUpload(): React.ReactElement {
-  const { isUploading, uploadError, uploadFile } = useKnowledgeContext()
+  const { isUploading, actionError, uploadFile } = useKnowledgeContext()
   const handleFileChange = useFileSelect({ onUploadFile: uploadFile })
 
   return (
@@ -28,9 +28,9 @@ export function KnowledgeUpload(): React.ReactElement {
       >
         {isUploading ? KNOWLEDGE_UPLOAD_TEXT.uploading : KNOWLEDGE_UPLOAD_TEXT.idle}
       </label>
-      {uploadError ? (
+      {actionError ? (
         <p className={KNOWLEDGE_UPLOAD_CLASS.error} role="alert">
-          {uploadError}
+          {actionError}
         </p>
       ) : null}
     </div>

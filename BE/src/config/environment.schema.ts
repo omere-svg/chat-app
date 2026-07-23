@@ -3,37 +3,24 @@ import { IsIn, IsInt, IsOptional, IsString, IsUrl, Matches, Max, Min, MinLength,
 import type { ValidationError } from 'class-validator'
 import { DEFAULT_ATLAS_VECTOR_INDEX } from '../modules/knowledge-rag/atlas/vector-index.config.js'
 import {
+  DEFAULT_ASSISTANT_MAX_TOKENS,
+  DEFAULT_ASSISTANT_MODEL,
+  DEFAULT_AWS_REGION,
   DEFAULT_EMAIL_CHANGE_JWT_EXPIRES_IN,
-  DEFAULT_PAYMENT_PROVIDER_KIND,
-  DEFAULT_PAYMENT_QUEUE_KIND,
-  PAYMENT_PROVIDER_KINDS,
-  PAYMENT_QUEUE_KINDS,
+  DEFAULT_EMBEDDINGS_MODEL,
+  DEFAULT_NODE_ENV,
+  MAX_ASSISTANT_MAX_TOKENS,
+  MAX_JWT_EXPIRY_SECONDS,
+  MAX_TCP_PORT,
+  MIN_ASSISTANT_MAX_TOKENS,
+  MIN_JWT_EXPIRY_SECONDS,
+  MIN_JWT_SECRET_LENGTH,
+  MIN_TCP_PORT,
+  NODE_ENVIRONMENTS,
   REQUIRED_EMAIL_INTEGRATION_KEYS,
-  REQUIRED_RAPYD_KEYS,
-  REQUIRED_SQS_KEYS,
+  REQUIRED_STORAGE_KEYS,
 } from './environment.constants.js'
-import type {
-  AppEnvironment,
-  NodeEnvironment,
-  PaymentProviderKind,
-  PaymentQueueKind,
-} from './environment.types.js'
-
-const MIN_JWT_SECRET_LENGTH = 32
-const MIN_TCP_PORT = 1
-const MAX_TCP_PORT = 65_535
-const MIN_JWT_EXPIRY_SECONDS = 60
-const MAX_JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30
-
-const MIN_ASSISTANT_MAX_TOKENS = 256
-const MAX_ASSISTANT_MAX_TOKENS = 16_384
-const DEFAULT_ASSISTANT_MODEL = 'gpt-4o-mini'
-const DEFAULT_ASSISTANT_MAX_TOKENS = 1024
-const DEFAULT_EMBEDDINGS_MODEL = 'text-embedding-3-small'
-const DEFAULT_AWS_REGION = 'us-east-1'
-
-const NODE_ENVIRONMENTS: readonly NodeEnvironment[] = ['development', 'test', 'production']
-const DEFAULT_NODE_ENV: NodeEnvironment = 'development'
+import type { AppEnvironment, NodeEnvironment } from './environment.types.js'
 
 class EnvironmentVariablesSchema implements AppEnvironment {
   @IsOptional()
@@ -130,42 +117,7 @@ class EnvironmentVariablesSchema implements AppEnvironment {
   @IsOptional()
   @IsString()
   SES_SOURCE_EMAIL!: string
-
-  @IsOptional()
-  @IsIn(PAYMENT_PROVIDER_KINDS)
-  PAYMENT_PROVIDER_KIND!: PaymentProviderKind
-
-  @IsOptional()
-  @IsString()
-  RAPYD_ACCESS_KEY!: string
-
-  @IsOptional()
-  @IsString()
-  RAPYD_SECRET_KEY!: string
-
-  @IsOptional()
-  @IsString()
-  RAPYD_BASE_URL!: string
-
-  @IsOptional()
-  @IsString()
-  RAPYD_WEBHOOK_SECRET!: string
-
-  @IsOptional()
-  @IsIn(PAYMENT_QUEUE_KINDS)
-  PAYMENT_QUEUE_KIND!: PaymentQueueKind
-
-  @IsOptional()
-  @IsString()
-  SQS_PAYMENT_QUEUE_URL!: string
 }
-
-const REQUIRED_STORAGE_KEYS: readonly (keyof AppEnvironment)[] = [
-  'S3_AVATAR_BUCKET',
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
-  'AVATAR_CDN_BASE_URL',
-]
 
 function assertStorageConfiguredInProduction(environment: AppEnvironment): void {
   if (environment.NODE_ENV !== 'production') {
@@ -184,25 +136,6 @@ function assertEmailIntegrationConfiguredInProduction(environment: AppEnvironmen
   }
 
   const missingKeys = REQUIRED_EMAIL_INTEGRATION_KEYS.filter((key) => environment[key] === '')
-  if (missingKeys.length > 0) {
-    throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
-  }
-}
-
-function assertPaymentConfiguredInProduction(environment: AppEnvironment): void {
-  if (environment.NODE_ENV !== 'production') {
-    return
-  }
-
-  const requiredKeys: (keyof AppEnvironment)[] = []
-  if (environment.PAYMENT_PROVIDER_KIND === 'rapyd') {
-    requiredKeys.push(...REQUIRED_RAPYD_KEYS)
-  }
-  if (environment.PAYMENT_QUEUE_KIND === 'sqs') {
-    requiredKeys.push(...REQUIRED_SQS_KEYS)
-  }
-
-  const missingKeys = requiredKeys.filter((key) => environment[key] === '')
   if (missingKeys.length > 0) {
     throw new Error(`Invalid environment configuration: missing ${missingKeys.join(', ')}`)
   }
@@ -256,18 +189,10 @@ export function validateEnvironment(rawEnvironment: Record<string, unknown>): Ap
     AVATAR_CDN_BASE_URL: candidateEnvironment.AVATAR_CDN_BASE_URL ?? '',
     SES_REGION: candidateEnvironment.SES_REGION ?? '',
     SES_SOURCE_EMAIL: candidateEnvironment.SES_SOURCE_EMAIL ?? '',
-    PAYMENT_PROVIDER_KIND: candidateEnvironment.PAYMENT_PROVIDER_KIND ?? DEFAULT_PAYMENT_PROVIDER_KIND,
-    RAPYD_ACCESS_KEY: candidateEnvironment.RAPYD_ACCESS_KEY ?? '',
-    RAPYD_SECRET_KEY: candidateEnvironment.RAPYD_SECRET_KEY ?? '',
-    RAPYD_BASE_URL: candidateEnvironment.RAPYD_BASE_URL ?? '',
-    RAPYD_WEBHOOK_SECRET: candidateEnvironment.RAPYD_WEBHOOK_SECRET ?? '',
-    PAYMENT_QUEUE_KIND: candidateEnvironment.PAYMENT_QUEUE_KIND ?? DEFAULT_PAYMENT_QUEUE_KIND,
-    SQS_PAYMENT_QUEUE_URL: candidateEnvironment.SQS_PAYMENT_QUEUE_URL ?? '',
   }
 
   assertStorageConfiguredInProduction(resolvedEnvironment)
   assertEmailIntegrationConfiguredInProduction(resolvedEnvironment)
-  assertPaymentConfiguredInProduction(resolvedEnvironment)
 
   return resolvedEnvironment
 }

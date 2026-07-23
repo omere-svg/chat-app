@@ -1,7 +1,6 @@
 import { Type } from 'class-transformer'
 import { IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator'
-
-const MAX_PAGE_SIZE = 100
+import { MAX_MESSAGE_PAGE_SIZE } from '../constants.js'
 
 export class ListMessagesQueryDto {
   @IsOptional()
@@ -13,6 +12,6 @@ export class ListMessagesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(MAX_PAGE_SIZE)
+  @Max(MAX_MESSAGE_PAGE_SIZE)
   limit?: number
 }

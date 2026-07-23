@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { KNOWLEDGE_CHUNK_REPOSITORY } from './knowledge-chunk.repository.js'
 import type { KnowledgeChunkRepository } from './knowledge-chunk.repository.js'
-import type { KnowledgeChunkRecord } from './types/knowledge-chunk.entity.js'
+import type { KnowledgeChunkRecord, RetrievedChunk } from './types/knowledge-chunk.entity.js'
+import type { RetrieveSimilarParams } from './types/retrieve-similar-params.js'
 
 @Injectable()
 export class KnowledgeChunkService {
@@ -16,5 +17,15 @@ export class KnowledgeChunkService {
 
   deleteByDocumentForUser(userId: string, documentId: string): Promise<number> {
     return this.chunkRepository.deleteByDocumentForUser(userId, documentId)
+  }
+
+  async retrieveSimilarForUser({
+    userId,
+    queryEmbedding,
+    limit,
+    minScore,
+  }: RetrieveSimilarParams): Promise<RetrievedChunk[]> {
+    const chunks = await this.chunkRepository.searchSimilarForUser({ userId, queryEmbedding, limit })
+    return chunks.filter((chunk) => chunk.score >= minScore)
   }
 }

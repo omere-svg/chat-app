@@ -1,16 +1,11 @@
 import type { ReactNode } from 'react'
 
 export type MessageToolsProps = {
-  items: ReactNode
-}
-
-export type MessageToolsContainerProps = {
-  tools: string[]
-  completedTools: string[]
+  children: ReactNode
 }
 
 export type MessageToolView = {
   key: string
   label: string
-  isDone: boolean
+  className: string
 }

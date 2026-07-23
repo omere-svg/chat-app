@@ -1,32 +1,22 @@
-import { MESSAGE_META_TEXT } from './MessageMeta.constants.ts'
+import { useMessageBubbleContext } from '../../context/useMessageBubbleContext.tsx'
 import { MessageMeta } from './MessageMeta.tsx'
-import type { MessageMetaContainerProps } from './MessageMeta.types.ts'
-import { formatClockTime } from './MessageMeta.utils.ts'
+import { MessageMetaStatus } from './components/MessageMetaStatus/MessageMetaStatus.tsx'
+import { MessageMetaTime } from './components/MessageMetaTime/MessageMetaTime.tsx'
 
-export function MessageMetaContainer({
-  isPending,
-  isStreaming,
-  body,
-  createdAt,
-}: MessageMetaContainerProps): React.ReactElement {
-  if (isPending) {
-    return <MessageMeta variant="pending" label={MESSAGE_META_TEXT.pending} />
-  }
+export function MessageMetaContainer(): React.ReactElement {
+  const { isPending, isStreaming } = useMessageBubbleContext()
 
-  if (isStreaming) {
+  if (isPending || isStreaming) {
     return (
-      <MessageMeta
-        variant="streaming"
-        label={body.length === 0 ? MESSAGE_META_TEXT.thinking : MESSAGE_META_TEXT.typing}
-      />
+      <MessageMeta>
+        <MessageMetaStatus />
+      </MessageMeta>
     )
   }
 
   return (
-    <MessageMeta
-      variant="sent"
-      label={formatClockTime(createdAt)}
-      dateTime={createdAt}
-    />
+    <MessageMeta>
+      <MessageMetaTime />
+    </MessageMeta>
   )
 }

@@ -1,6 +1,6 @@
 import { useAuth } from '@/features/auth/hooks/useAuth.ts'
-import { fullName } from '@/types/domain.ts'
 import { SidebarUserChip } from './SidebarUserChip.tsx'
+import { SidebarUserChipProvider } from './context/useSidebarUserChipContext.tsx'
 
 export function SidebarUserChipContainer(): React.ReactElement | null {
   const { currentUser } = useAuth()
@@ -9,6 +9,8 @@ export function SidebarUserChipContainer(): React.ReactElement | null {
   }
 
   return (
-    <SidebarUserChip name={fullName(currentUser)} avatarUrl={currentUser.avatarUrl ?? null} />
+    <SidebarUserChipProvider>
+      <SidebarUserChip />
+    </SidebarUserChipProvider>
   )
 }

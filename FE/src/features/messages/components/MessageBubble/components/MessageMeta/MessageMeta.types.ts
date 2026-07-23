@@ -1,11 +1,5 @@
-export type MessageMetaProps =
-  | { variant: 'pending'; label: string }
-  | { variant: 'streaming'; label: string }
-  | { variant: 'sent'; label: string; dateTime: string }
+import type { ReactNode } from 'react'
 
-export type MessageMetaContainerProps = {
-  isPending: boolean
-  isStreaming: boolean
-  body: string
-  createdAt: string
+export type MessageMetaProps = {
+  children: ReactNode
 }

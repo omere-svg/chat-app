@@ -2,13 +2,9 @@ import { compareMessagesByCreatedAtAscending } from '../../modules/messages/mess
 import { toLastMessageSnapshot } from '../../modules/conversations/conversation.mapper.js'
 import type { ConversationRecord } from '../../modules/conversations/types/conversation.entity.js'
 import type { MessageRecord } from '../../modules/messages/types/message.entity.js'
-
-export interface DemoUserSeed {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-}
+import type { ChatSeed } from './types/chat-seed.js'
+import type { DemoUserSeed } from './types/demo-user-seed.js'
+import type { SeedConversationSpec } from './types/seed-conversation-spec.js'
 
 export const DEMO_USER_PASSWORD = 'password123'
 
@@ -17,14 +13,6 @@ export const DEMO_USERS: readonly DemoUserSeed[] = [
   { id: 'user-bob', email: 'bob@example.com', firstName: 'Bob', lastName: 'Brown' },
   { id: 'user-carol', email: 'carol@example.com', firstName: 'Carol', lastName: 'Clark' },
 ]
-
-interface SeedConversationSpec {
-  id: string
-  title: string
-  participantIds: string[]
-  messageCount: number
-  lastActivityMinutesAgo: number
-}
 
 const SEED_CONVERSATION_SPECS: readonly SeedConversationSpec[] = [
   {
@@ -74,11 +62,6 @@ function buildSeedMessages(spec: SeedConversationSpec): MessageRecord[] {
   }
 
   return messages.sort(compareMessagesByCreatedAtAscending)
-}
-
-export interface ChatSeed {
-  conversations: readonly ConversationRecord[]
-  messagesByConversationId: ReadonlyMap<string, readonly MessageRecord[]>
 }
 
 function buildChatSeed(): ChatSeed {

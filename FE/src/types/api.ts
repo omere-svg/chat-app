@@ -1,6 +1,13 @@
-import type { ConversationPreview, Message, Plan, Subscription, User } from './domain.ts'
+import type {
+  ConversationPreview,
+  ConversationType,
+  Message,
+  User,
+} from './domain.ts'
 import type {
   EMAIL_CHANGE_REQUEST_STATUS,
+  KNOWLEDGE_DOCUMENT_FAILED_STATUS,
+  KNOWLEDGE_DOCUMENT_READY_STATUS,
   PASSWORD_RESET_CONFIRM_STATUS,
   PASSWORD_RESET_REQUEST_STATUS,
 } from '../api/constants.ts'
@@ -8,7 +15,7 @@ import type {
 export type KnowledgeDocument = {
   id: string
   filename: string
-  status: 'ready' | 'failed'
+  status: typeof KNOWLEDGE_DOCUMENT_READY_STATUS | typeof KNOWLEDGE_DOCUMENT_FAILED_STATUS
   chunkCount: number
   byteSize: number
   createdAt: string
@@ -77,24 +84,6 @@ export type ConfirmPasswordResetResult = {
   status: typeof PASSWORD_RESET_CONFIRM_STATUS
 }
 
-export type ListPlansResult = {
-  plans: Plan[]
-}
-
-export type GetSubscriptionResult = Subscription
-
-export type CreatePaymentSessionRequest = {
-  planCode: string
-}
-
-export type CreatePaymentSessionResult = {
-  checkoutUrl: string
-}
-
-export type RequestAvatarUploadRequest = {
-  contentType: string
-}
-
 export type AvatarUploadTicket = {
   url: string
   fields: Record<string, string>
@@ -116,7 +105,7 @@ export type ConversationsResponse = {
 }
 
 export type CreateConversationRequest = {
-  type?: 'direct' | 'assistant' | 'tutor'
+  type?: ConversationType
   participantEmails?: string[]
   title?: string
 }
@@ -143,8 +132,4 @@ export type ApiErrorPayload = {
   code: string
   message: string
   details?: unknown
-}
-
-export type ApiErrorBody = {
-  error: ApiErrorPayload
 }

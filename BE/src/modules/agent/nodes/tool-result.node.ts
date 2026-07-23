@@ -2,7 +2,7 @@ import { ToolMessage } from '@langchain/core/messages'
 import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { AGENT_EVENT } from '../constants.js'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { AgentState, AgentStateUpdate } from '../agent.state.js'
+import type { AgentState, AgentStateUpdate } from '../types/agent-state.js'
 
 export function createToolResultNode() {
   return async function toolResult(

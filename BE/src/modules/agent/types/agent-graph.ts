@@ -1,6 +1,6 @@
 import type { BaseCheckpointSaver, CompiledStateGraph } from '@langchain/langgraph'
 import type { ChatOpenAI } from '@langchain/openai'
-import type { AgentState, AgentStateUpdate } from '../agent.state.js'
+import type { AgentState, AgentStateUpdate } from './agent-state.js'
 import type { EmbeddingsProvider } from '../../embeddings/types/embeddings-provider.js'
 import type { VectorRetriever } from '../../knowledge-rag/types/vector-retriever.js'
 import type { AgentToolRegistry } from '../tools/agent-tool.registry.js'

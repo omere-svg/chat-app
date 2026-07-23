@@ -11,6 +11,6 @@ import { MessagesService } from './messages.service.js'
     MessagesService,
     { provide: MESSAGE_REPOSITORY, useClass: MongoMessageRepository },
   ],
-  exports: [MessagesService, MESSAGE_REPOSITORY],
+  exports: [MessagesService],
 })
 export class MessagesModule {}

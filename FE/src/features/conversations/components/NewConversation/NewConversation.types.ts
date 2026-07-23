@@ -1,13 +1,13 @@
-import type { Dispatch, FormEvent, ReactNode, SetStateAction } from 'react'
+import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 
 export type UseNewConversationValue = {
   participantEmail: string
-  setParticipantEmail: Dispatch<SetStateAction<string>>
+  handleParticipantEmailChange: (event: ChangeEvent<HTMLInputElement>) => void
   isSubmitting: boolean
   errorMessage: string | null
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void
-  createAssistant: () => Promise<void>
-  createTutor: () => Promise<void>
+  handleCreateAssistant: () => void
+  handleCreateTutor: () => void
   isSubmitDisabled: boolean
   submitLabel: string
   assistantLabel: string

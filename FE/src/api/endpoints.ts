@@ -10,14 +10,12 @@ export const endpoints = {
   emailChangeConfirm: `${API_BASE}/email-change/confirm`,
   passwordResetRequest: `${API_BASE}/auth/password-reset/request`,
   passwordResetConfirm: `${API_BASE}/auth/password-reset/confirm`,
-  plans: `${API_BASE}/users/plans`,
-  subscription: `${API_BASE}/users/subscription`,
-  createPaymentSession: `${API_BASE}/users/plans/payment-session`,
   avatarUploadUrl: `${API_BASE}/me/avatar/upload-url`,
   avatar: `${API_BASE}/me/avatar`,
   conversations: `${API_BASE}/conversations`,
   conversationMessages: (id: string): string =>
     `${API_BASE}/conversations/${id}/messages`,
+  conversationMessagesPattern: `${API_BASE}/conversations/:id/messages`,
   knowledgeDocuments: `${API_BASE}/knowledge/documents`,
   knowledgeDocument: (id: string): string => `${API_BASE}/knowledge/documents/${id}`,
 } as const

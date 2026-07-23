@@ -4,16 +4,17 @@ import { ConversationsService } from '../conversations/conversations.service.js'
 import { UsersService } from '../users/users.service.js'
 import { ConversationParticipantsMapper } from '../../shared/conversation-participants/conversation-participants.mapper.js'
 import {
-  toConversationParticipantView,
-  toConversationPreview,
-} from '../conversations/conversation.mapper.js'
+  buildConversationPreview,
+  resolveConversationParticipants,
+} from '../conversations/conversation-preview.helper.js'
 import {
   DEFAULT_ASSISTANT_CONVERSATION_TITLE,
   DEFAULT_TUTOR_CONVERSATION_TITLE,
 } from '../conversations/constants.js'
 import type { ConversationRecord } from '../conversations/types/conversation.entity.js'
 import type { ConversationPreview } from '../conversations/types/conversation-preview.js'
-import type { CreateConversationDto } from '../conversations/DTO/create-conversation.dto.js'
+import type { AiConversationType } from '../conversations/types/ai-conversation-type.js'
+import type { CreateConversationDto } from './DTO/create-conversation.dto.js'
 import type { User } from '../users/types/user.js'
 
 @Injectable()
@@ -91,7 +92,7 @@ export class CreateConversationOrchestrator {
 
   private async createPrivateAiConversation(
     creatorUserId: string,
-    type: 'assistant' | 'tutor',
+    type: AiConversationType,
     requestedTitle: string | undefined,
     defaultTitle: string,
   ): Promise<ConversationPreview> {
@@ -119,11 +120,7 @@ export class CreateConversationOrchestrator {
       usersById.set(user.id, user)
     }
 
-    const participants = conversation.participantIds
-      .map((participantId) => usersById.get(participantId))
-      .filter((participant): participant is User => participant !== undefined)
-      .map(toConversationParticipantView)
-
-    return toConversationPreview(conversation, participants)
+    const participants = resolveConversationParticipants(conversation, usersById)
+    return buildConversationPreview(conversation, participants)
   }
 }

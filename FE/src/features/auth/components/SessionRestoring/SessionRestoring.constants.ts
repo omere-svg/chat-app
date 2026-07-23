@@ -1,6 +1,6 @@
 export const SESSION_RESTORING_CLASS = {
-  screen: 'auth-screen',
-  subtitle: 'auth-screen__subtitle',
+  screen: 'session-restoring',
+  subtitle: 'session-restoring__subtitle',
 } as const
 
 export const SESSION_RESTORING_TEXT = {

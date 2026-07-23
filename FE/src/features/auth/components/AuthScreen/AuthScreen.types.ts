@@ -11,7 +11,6 @@ export type AuthCopy = {
 
 export type UseAuthScreenValue = {
   isSignup: boolean
-  subtitle: string
   copy: AuthCopy
   email: string
   password: string
@@ -23,7 +22,7 @@ export type UseAuthScreenValue = {
   setLastName: Dispatch<SetStateAction<string>>
   isSubmitting: boolean
   errorMessage: string | null
-  canSubmit: boolean
+  isSubmitDisabled: boolean
   submitLabel: string
   passwordAutoComplete: string
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void

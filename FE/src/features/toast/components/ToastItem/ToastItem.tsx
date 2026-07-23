@@ -3,15 +3,13 @@ import {
   TOAST_DISMISS_SYMBOL,
   TOAST_ITEM_CLASS,
 } from './ToastItem.constants.ts'
-import type { ToastItemProps } from './ToastItem.types.ts'
+import { useToastItem } from './context/useToastItemContext.tsx'
 import { toastItemClassName } from './ToastItem.utils.ts'
 import './ToastItem.css'
 
-export function ToastItem({
-  variant,
-  message,
-  onDismiss,
-}: ToastItemProps): React.ReactElement {
+export function ToastItem(): React.ReactElement {
+  const { variant, message, onDismiss } = useToastItem()
+
   return (
     <div className={toastItemClassName(variant)} role="alert">
       <span>{message}</span>

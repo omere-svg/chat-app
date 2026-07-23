@@ -15,6 +15,6 @@ import { CONVERSATION_REPOSITORY } from './conversation.repository.js'
     ConversationsService,
     { provide: CONVERSATION_REPOSITORY, useClass: MongoConversationRepository },
   ],
-  exports: [ConversationsService, CONVERSATION_REPOSITORY],
+  exports: [ConversationsService],
 })
 export class ConversationsModule {}

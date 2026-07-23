@@ -8,6 +8,9 @@ export class ListMessagesOrchestrator {
   constructor(private readonly messagesService: MessagesService) {}
 
   list(conversationId: string, query: ListMessagesQueryDto): Promise<MessagePageResponse> {
-    return this.messagesService.listMessages(conversationId, query)
+    return this.messagesService.listMessages(conversationId, {
+      cursor: query.cursor,
+      limit: query.limit,
+    })
   }
 }

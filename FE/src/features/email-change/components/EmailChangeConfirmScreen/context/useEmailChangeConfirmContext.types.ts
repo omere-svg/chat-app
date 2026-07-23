@@ -1,5 +1,5 @@
-import type { useConfirmEmailChange } from '../hooks/useConfirmEmailChange.ts'
+import type { useEmailChangeConfirm } from '../hooks/useEmailChangeConfirm.ts'
 
-export type UseConfirmEmailChangeValue = ReturnType<
-  typeof useConfirmEmailChange
+export type UseEmailChangeConfirmValue = ReturnType<
+  typeof useEmailChangeConfirm
 >

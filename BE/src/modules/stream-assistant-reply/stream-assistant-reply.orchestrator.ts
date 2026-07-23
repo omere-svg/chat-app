@@ -67,7 +67,8 @@ export class StreamAssistantReplyOrchestrator {
       userMessage = await this.messagesService.createMessage({
         senderId: userId,
         conversationId: conversation.id,
-        sendMessageDto,
+        body: sendMessageDto.body,
+        clientMessageId: sendMessageDto.clientMessageId,
       })
       await this.conversationsService.setTitleIfStillDefault(
         conversation.id,

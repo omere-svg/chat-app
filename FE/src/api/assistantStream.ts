@@ -1,16 +1,8 @@
 import { isRecord, parseCitation, parseSendMessageResponse } from './parseApiResponse.ts'
 import type { ApiErrorPayload } from '../types/api.ts'
-import type { Citation, Message } from '../types/domain.ts'
+import type { AssistantStreamHandlers } from './assistantStream.types.ts'
 
-export type AssistantStreamHandlers = {
-  onUserMessage: (message: Message) => void
-  onToken: (text: string) => void
-  onTool: (name: string) => void
-  onToolResult: (name: string) => void
-  onCitations: (citations: Citation[]) => void
-  onDone: (message: Message) => void
-  onError: (error: ApiErrorPayload) => void
-}
+export type { AssistantStreamHandlers } from './assistantStream.types.ts'
 
 export async function consumeAssistantStream(
   response: Response,

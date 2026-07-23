@@ -1,12 +1,8 @@
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner.tsx'
 import { useResetPasswordContext } from '../../../../context/useResetPasswordContext.tsx'
 
-export function ResetPasswordError(): React.ReactElement | null {
+export function ResetPasswordError(): React.ReactElement {
   const { errorMessage } = useResetPasswordContext()
 
-  if (errorMessage === null) {
-    return null
-  }
-
-  return <ErrorBanner message={errorMessage} />
+  return <ErrorBanner message={errorMessage!} />
 }

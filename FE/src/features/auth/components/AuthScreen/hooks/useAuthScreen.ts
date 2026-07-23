@@ -26,6 +26,7 @@ export function useAuthScreen(): UseAuthScreenValue {
     email.trim().length > 0 &&
     password.length > 0 &&
     (!isSignup || (firstName.trim().length > 0 && lastName.trim().length > 0))
+  const isSubmitDisabled = !canSubmit || isSubmitting
   const submitLabel = isSubmitting ? `${copy.submitLabel}…` : copy.submitLabel
   const passwordAutoComplete = PASSWORD_AUTOCOMPLETE[mode]
 
@@ -61,7 +62,6 @@ export function useAuthScreen(): UseAuthScreenValue {
 
   return {
     isSignup,
-    subtitle: copy.title,
     copy,
     email,
     password,
@@ -73,7 +73,7 @@ export function useAuthScreen(): UseAuthScreenValue {
     setLastName,
     isSubmitting,
     errorMessage,
-    canSubmit,
+    isSubmitDisabled,
     submitLabel,
     passwordAutoComplete,
     handleSubmit,

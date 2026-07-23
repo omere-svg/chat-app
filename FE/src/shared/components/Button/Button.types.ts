@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type ButtonVariant = 'primary' | 'ghost'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 
 export type ButtonType = 'button' | 'submit'
 

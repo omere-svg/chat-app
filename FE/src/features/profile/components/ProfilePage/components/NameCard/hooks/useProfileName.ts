@@ -8,7 +8,7 @@ import type { UseProfileNameValue } from '../NameCard.types.ts'
 
 export function useProfileName(): UseProfileNameValue {
   const { currentUser, updateCurrentUser } = useAuth()
-  const { isSaving, status, runSave } = useProfileForm()
+  const { isSaving, statusView, runSave } = useProfileForm()
 
   const [firstName, setFirstName] = useState(currentUser?.firstName ?? '')
   const [lastName, setLastName] = useState(currentUser?.lastName ?? '')
@@ -45,7 +45,7 @@ export function useProfileName(): UseProfileNameValue {
     setLastName,
     isSaving,
     canSave,
-    status,
+    statusView,
     submitLabel: isSaving ? NAME_CARD_TEXT.saving : NAME_CARD_TEXT.save,
     handleSubmit,
   }

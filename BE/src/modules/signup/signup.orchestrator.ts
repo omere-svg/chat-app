@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { UsersService } from '../users/users.service.js'
 import { AuthTokenService } from '../auth/auth-token.service.js'
 import type { AuthenticationResult } from '../auth/types/authentication-result.js'
-import type { SignupDto } from '../auth/DTO/signup.dto.js'
+import type { SignupDto } from './DTO/signup.dto.js'
 
 @Injectable()
 export class SignupOrchestrator {
@@ -15,8 +15,8 @@ export class SignupOrchestrator {
     const userRecord = await this.usersService.createUser({
       email: signupDto.email,
       password: signupDto.password,
-      firstName: signupDto.firstName.trim(),
-      lastName: signupDto.lastName.trim(),
+      firstName: signupDto.firstName,
+      lastName: signupDto.lastName,
     })
 
     const token = await this.authTokenService.issue(userRecord)

@@ -8,6 +8,7 @@ import { EmailAlreadyRegisteredError } from './errors/email-already-registered.e
 import { UserNotFoundError } from './errors/user-not-found.error.js'
 import { UnknownParticipantEmailsError } from './errors/unknown-participant-emails.error.js'
 import { normalizeEmail } from '../../shared/validation/normalize-email.js'
+import type { DemoUserSeed } from '../../shared/seed/types/demo-user-seed.js'
 import type { UserRepository } from './user.repository.js'
 import type { User } from './types/user.js'
 import type { StoredAvatar } from './types/stored-avatar.js'
@@ -30,6 +31,29 @@ export class UsersService {
     return toUser(userRecord)
   }
 
+  async seedDemoUsersIfEmpty(
+    demoUsers: readonly DemoUserSeed[],
+    plainPassword: string,
+  ): Promise<number> {
+    if (!(await this.userRepository.isEmpty())) {
+      return 0
+    }
+
+    const passwordHash = await this.passwordHasher.hash(plainPassword)
+    for (const demoUser of demoUsers) {
+      await this.userRepository.insert({
+        id: demoUser.id,
+        email: demoUser.email,
+        firstName: demoUser.firstName,
+        lastName: demoUser.lastName,
+        passwordHash,
+        avatar: null,
+        previousEmails: [],
+      })
+    }
+    return demoUsers.length
+  }
+
   async createUser(createUserInput: CreateUserInput): Promise<UserRecord> {
     const normalizedEmail = normalizeEmail(createUserInput.email)
 
@@ -43,8 +67,8 @@ export class UsersService {
       id: `user-${randomUUID()}`,
       email: normalizedEmail,
       passwordHash,
-      firstName: createUserInput.firstName,
-      lastName: createUserInput.lastName,
+      firstName: createUserInput.firstName.trim(),
+      lastName: createUserInput.lastName.trim(),
       avatar: null,
       previousEmails: [],
       sessionsInvalidatedAt: null,

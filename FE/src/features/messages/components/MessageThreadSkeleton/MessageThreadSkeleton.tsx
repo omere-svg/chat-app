@@ -5,7 +5,7 @@ import {
 import type { MessageThreadSkeletonProps } from './MessageThreadSkeleton.types.ts'
 
 export function MessageThreadSkeleton({
-  rows,
+  children,
 }: MessageThreadSkeletonProps): React.ReactElement {
   return (
     <div
@@ -13,7 +13,7 @@ export function MessageThreadSkeleton({
       aria-busy="true"
       aria-label={MESSAGE_THREAD_SKELETON_TEXT.ariaLabel}
     >
-      {rows}
+      {children}
     </div>
   )
 }

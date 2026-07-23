@@ -3,7 +3,7 @@ import { useEmailChangeRequestContext } from '../../context/useEmailChangeReques
 import { NEW_EMAIL_FIELD, NEW_EMAIL_FIELD_TEXT } from './NewEmailField.constants.ts'
 
 export function NewEmailField(): React.ReactElement {
-  const { newEmail, setNewEmail, isSubmitting } = useEmailChangeRequestContext()
+  const { newEmail, setNewEmail, isSaving } = useEmailChangeRequestContext()
 
   return (
     <FormField
@@ -12,7 +12,7 @@ export function NewEmailField(): React.ReactElement {
       type={NEW_EMAIL_FIELD.type}
       autoComplete={NEW_EMAIL_FIELD.autoComplete}
       value={newEmail}
-      disabled={isSubmitting}
+      disabled={isSaving}
       onValueChange={setNewEmail}
     />
   )

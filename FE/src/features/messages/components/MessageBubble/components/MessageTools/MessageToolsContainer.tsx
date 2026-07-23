@@ -1,19 +1,22 @@
+import { useMessageBubbleContext } from '../../context/useMessageBubbleContext.tsx'
 import { MessageToolItem } from './components/MessageToolItem/MessageToolItem.tsx'
 import { MessageTools } from './MessageTools.tsx'
-import type { MessageToolsContainerProps } from './MessageTools.types.ts'
 import { buildToolViews } from './MessageTools.utils.ts'
 
-export function MessageToolsContainer({
-  tools,
-  completedTools,
-}: MessageToolsContainerProps): React.ReactElement {
+export function MessageToolsContainer(): React.ReactElement | null {
+  const { tools, completedTools } = useMessageBubbleContext()
+
+  if (tools.length === 0) {
+    return null
+  }
+
   const items = buildToolViews(tools, completedTools).map((toolView) => (
     <MessageToolItem
       key={toolView.key}
       label={toolView.label}
-      isDone={toolView.isDone}
+      className={toolView.className}
     />
   ))
 
-  return <MessageTools items={items} />
+  return <MessageTools>{items}</MessageTools>
 }

@@ -3,8 +3,6 @@ export const MESSAGE_BUBBLE_CLASS = {
   own: 'message-bubble--own',
   pending: 'message-bubble--pending',
   streaming: 'message-bubble--streaming',
-  body: 'message-bubble__body',
-  cursor: 'message-bubble__cursor',
 } as const
 
 export const MESSAGE_ROW_CLASS = {

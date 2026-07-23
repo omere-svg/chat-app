@@ -1,15 +1,12 @@
+import { ConversationBadge } from './components/ConversationBadge/ConversationBadge.tsx'
+import { useConversationItemContext } from './context/useConversationItemContext.tsx'
 import { CONVERSATION_ITEM_CLASS } from './ConversationListItem.constants.ts'
-import type { ConversationListItemProps } from './ConversationListItem.types.ts'
 import './ConversationListItem.css'
 
-export function ConversationListItem({
-  title,
-  badge,
-  preview,
-  isSelected,
-  className,
-  onSelect,
-}: ConversationListItemProps): React.ReactElement {
+export function ConversationListItem(): React.ReactElement {
+  const { title, preview, isSelected, className, onSelect } =
+    useConversationItemContext()
+
   return (
     <button
       type="button"
@@ -20,7 +17,7 @@ export function ConversationListItem({
     >
       <span className={CONVERSATION_ITEM_CLASS.title}>
         {title}
-        {badge}
+        <ConversationBadge />
       </span>
       <span className={CONVERSATION_ITEM_CLASS.preview}>{preview}</span>
     </button>

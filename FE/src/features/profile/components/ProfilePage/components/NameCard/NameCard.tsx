@@ -1,4 +1,4 @@
-import { ProfileCard } from '../ProfileCard/ProfileCard.tsx'
+import { ProfileCard } from '@/shared/components/ProfileCard/ProfileCard.tsx'
 import { NameFirstNameField } from './components/NameFirstNameField/NameFirstNameField.tsx'
 import { NameLastNameField } from './components/NameLastNameField/NameLastNameField.tsx'
 import { NameStatus } from './components/NameStatus/NameStatus.tsx'

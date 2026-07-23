@@ -1,3 +1,4 @@
 export type MessageSkeletonRowProps = {
-  isRight: boolean
+  className: string
+  width: string
 }
