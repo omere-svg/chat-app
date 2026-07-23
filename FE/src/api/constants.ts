@@ -11,3 +11,7 @@ export const SUBSCRIPTION_ACTIVE_STATUS = 'active'
 export const SUBSCRIPTION_NONE_STATUS = 'none'
 
 export const PRO_PLAN_CODE = 'pro'
+
+export const KNOWLEDGE_DOCUMENT_READY_STATUS = 'ready'
+
+export const KNOWLEDGE_DOCUMENT_FAILED_STATUS = 'failed'

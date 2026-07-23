@@ -1,3 +1,7 @@
+import {
+  KNOWLEDGE_DOCUMENT_FAILED_STATUS,
+  KNOWLEDGE_DOCUMENT_READY_STATUS,
+} from '../constants.ts'
 import { MalformedResponseError } from '../malformedResponseError.ts'
 import { isRecord, readNumber, readString } from './primitives.ts'
 import type {
@@ -11,7 +15,10 @@ function parseKnowledgeDocument(value: unknown): KnowledgeDocument {
     throw new MalformedResponseError('knowledgeDocument')
   }
   const status = readString(value, 'status', 'knowledgeDocument')
-  if (status !== 'ready' && status !== 'failed') {
+  if (
+    status !== KNOWLEDGE_DOCUMENT_READY_STATUS &&
+    status !== KNOWLEDGE_DOCUMENT_FAILED_STATUS
+  ) {
     throw new MalformedResponseError('knowledgeDocument.status')
   }
   return {

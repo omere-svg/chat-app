@@ -11,7 +11,7 @@ describe('parseConfirmEmailChangeResponse', () => {
     }
 
     expect(() => parseConfirmEmailChangeResponse(userWithoutEmail)).toThrow(
-      'Malformed server response at user.email',
+      'Malformed server response at confirmEmailChangeResponse.email',
     )
   })
 })

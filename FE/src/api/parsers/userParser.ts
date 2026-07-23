@@ -49,10 +49,10 @@ export function parsePreviousEmailsResponse(value: unknown): PreviousEmailsRespo
 
 export function parseConfirmEmailChangeResponse(value: unknown): ConfirmEmailChangeResponse {
   if (!isRecord(value)) {
-    throw new MalformedResponseError('user')
+    throw new MalformedResponseError('confirmEmailChangeResponse')
   }
   return {
     ...parseUser(value),
-    email: readString(value, 'email', 'user'),
+    email: readString(value, 'email', 'confirmEmailChangeResponse'),
   }
 }
